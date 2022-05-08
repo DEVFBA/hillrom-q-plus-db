@@ -67,6 +67,9 @@ Example:
 											@pvIdCountryComercialRealease = 'CL',
 											@pvIdCountryPackage = ''
 
+			EXEC spCat_Item_CRUD_Records @pvOptionCRUD='R',@pvIdItemClass='COMP',@pvIdItemSubClass='',@pvIdItem='M8',@pvShortDesc='',@pvIdFamily='',@pvIdCategory='',@pvIdLine=''
+			EXEC spCat_Item_CRUD_Records @pvOptionCRUD='R',@pvIdItemClass='COMP',@pvIdItemSubClass='',@pvIdItemDetalle='M8',@pvShortDesc='',@pvIdFamily='',@pvIdCategory='',@pvIdLine=''
+			
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'U', 
 									@pvIdItem			= 'ACCELLA', 
 									@pvIdCountry		= 'FR' , 
@@ -95,6 +98,7 @@ CREATE PROCEDURE [dbo].[spCat_Item_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10)		= 'ANG',
 @pvIdItem						Varchar(50)		= '',
+@pvIdItemDetalle				Varchar(50)		= '',
 @pvIdCountry					Varchar(10)		= 'All',
 @pvIdItemClass					Varchar(10)		= 'All',
 @pvIdItemSubClass				Varchar(10)		= 'All',
@@ -341,6 +345,9 @@ BEGIN TRY
 
 		IF @pvIdItem <> ''
 		SET @vSQL += "AND I.Id_Item LIKE '%" + @pvIdItem + "%'"
+
+		IF @pvIdItemDetalle <> ''
+		SET @vSQL += "AND I.Id_Item = '" + @pvIdItemDetalle + "'"
 
 		IF @pvShortDesc <> ''
 		SET @vSQL += "AND I.Short_Desc LIKE '%" + @pvShortDesc + "%'"
