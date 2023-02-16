@@ -35,16 +35,20 @@ Example:
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvItemTemplate = 'X3' 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG', @pudtItemsTemplates = @udtItemsTemplates, @pvUser = 'AZEPEDA', @pvIP = '10.230.0.0'
 
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate ='CENTURISX3',@pvIdCurrency ='USD', @pvIdCountryComercialRealease='BR'
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate ='ACCELA',@pvIdCurrency ='USD', @pvIdCountryComercialRealease='BR'
 
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = '21113001', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'T', @pvItemTemplate = '21113001', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
+			
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'RC', @pvItemTemplate = 'CENTURISX3', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'MX', 
+			@piFolioOrig = 688, @piVersionOrig = 1, @piFolioClon = 689, @piVersionClon = 1
+
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'T', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = '21113001', @pvIdFamily = 'STR',  @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 
 */
 CREATE PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
-@pvOptionCRUD					Varchar(1),
+@pvOptionCRUD					Varchar(2),
 @pvIdLanguageUser				Varchar(10) = 'ANG',
 @pvItemTemplate					Varchar(50) = '',
 @pudtItemsTemplates				UDT_Items_Templates Readonly ,
@@ -52,7 +56,11 @@ CREATE PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
 @pvIdFamily						Varchar(10) = '',
 @pvUser							Varchar(50) = '',
 @pvIP							Varchar(20) = '',
-@pvIdCountryComercialRealease	Varchar(10)	= ''
+@pvIdCountryComercialRealease	Varchar(10)	= '',
+@piFolioOrig					Int			= 0,
+@piVersionOrig					Int			= 0,
+@piFolioClon					Int			= 0,
+@piVersionClon					Int			= 0
 AS
 
 SET NOCOUNT ON
@@ -182,7 +190,7 @@ BEGIN TRY
 
 		INNER JOIN Cat_Item I  WITH(NOLOCK) ON		
 		T.Id_Item = I.Id_Item
-		AND I.Status = 1
+		--AND I.Status = 1 AZR 20221003 Se omite ya que cuando se trata de activar no se muestra 
 
 		INNER JOIN Cat_Prices_Lists P WITH(NOLOCK) ON 
 		T.Id_Price_List = P.Id_Price_List AND 
@@ -205,8 +213,147 @@ BEGIN TRY
 		
 	END
 
+	--------------------------------------------------------------------
+	--Reads Records
+	--------------------------------------------------------------------
+	IF @pvOptionCRUD = 'RC'
+	BEGIN
+		DECLARE @vIdVoltageOrig		Varchar(10) = (SELECT Id_Voltage  FROM Quotation WHERE Folio = @piFolioOrig AND Version = @piVersionOrig)
+		DECLARE @vIdPlugOrig		Varchar(10) = (SELECT Id_Plug	  FROM Quotation WHERE Folio = @piFolioOrig AND Version = @piVersionOrig)
+		DECLARE @vIdLanguageOrig	Varchar(10) = (SELECT Id_Language FROM Quotation WHERE Folio = @piFolioOrig AND Version = @piVersionOrig)
 
---------------------------------------------------------------------
+		DECLARE @vIdVoltageClon		Varchar(10) = (SELECT Id_Voltage  FROM Quotation WHERE Folio = @piFolioClon AND Version = @piVersionClon) 
+		DECLARE @vIdPlugClon		Varchar(10) = (SELECT Id_Plug	  FROM Quotation WHERE Folio = @piFolioClon AND Version = @piVersionClon)
+		DECLARE @vIdLanguageClon	Varchar(10) = (SELECT Id_Language FROM Quotation WHERE Folio = @piFolioClon AND Version = @piVersionClon)
+
+		SELECT
+			T.Item_Template,
+			Item_Desc =I.Short_Desc,
+			I.Id_Item_Class, 
+			Item_Class_Desc = ICL.Short_Desc,
+			I.Id_Item_SubClass, 
+			Item_SubClass_Desc = ISCL.Short_Desc,
+			FCL.Id_Family,
+			Family_Desc = F.Short_Desc,
+			FCL.Id_Category,
+			Category_Desc = C.Short_Desc,
+			FCL.Id_Line,
+			Line_Desc = L.Short_Desc,
+			T.Id_Price_List,
+			Price_List_Desc = P.Short_Desc,
+			T.Id_Item,		
+			QD.Id_Item,	
+			I.Image_Path,
+			[Required],
+			[Default],
+			Price = ( CASE WHEN QD.Id_Item IS NULL THEN T.Price * @fExchange_Rate
+						   ELSE QD.Price
+					  END),
+			Standard_Cost =  ( CASE WHEN QD.Id_Item IS NULL THEN T.Standard_Cost *@fExchange_Rate
+									ELSE QD.Standard_Cost
+								END),
+
+			Quantity =  (CASE
+							------------------------------------------------------------------------------------------------------------------------------
+							WHEN  I.Id_Item_SubClass  = 'VOLTAGE' AND T.Id_Item = @vIdVoltageClon THEN  (	SELECT Quantity FROM Quotation_Detail 
+																											WHERE Folio = @piFolioOrig 
+																											AND Version = @piVersionOrig 
+																											AND Item_Template = @pvItemTemplate 
+																											AND Id_Item = @vIdVoltageOrig 
+																											AND Id_Detail = QD.Id_Detail)
+							WHEN  I.Id_Item_SubClass  = 'VOLTAGE' AND T.Id_Item = QD.Id_Item THEN T.Quantity
+							------------------------------------------------------------------------------------------------------------------------------
+							
+							WHEN  I.Id_Item_SubClass  = 'PLUG' AND T.Id_Item = @vIdPlugClon THEN (	SELECT Quantity FROM Quotation_Detail 
+																											WHERE Folio = @piFolioOrig 
+																											AND Version = @piVersionOrig 
+																											AND Item_Template = @pvItemTemplate 
+																											AND Id_Item = @vIdPlugOrig 
+																											AND Id_Detail = QD.Id_Detail)
+							WHEN  I.Id_Item_SubClass  = 'PLUG' AND T.Id_Item = QD.Id_Item THEN T.Quantity
+
+							------------------------------------------------------------------------------------------------------------------------------
+							WHEN  I.Id_Item_SubClass  = 'LANGUAGE' AND T.Id_Item = @vIdLanguageClon THEN (	SELECT Quantity FROM Quotation_Detail 
+																											WHERE Folio = @piFolioOrig 
+																											AND Version = @piVersionOrig 
+																											AND Item_Template = @pvItemTemplate 
+																											AND Id_Item = @vIdLanguageOrig 
+																											AND Id_Detail = QD.Id_Detail)
+							WHEN  I.Id_Item_SubClass  = 'LANGUAGE' AND T.Id_Item = QD.Id_Item THEN T.Quantity
+							------------------------------------------------------------------------------------------------------------------------------
+							ELSE
+								(CASE WHEN QD.Id_Item IS NULL THEN T.Quantity
+										ELSE QD.Quantity
+								END)
+						 END
+						),
+			FCL.Modify_By,
+			FCL.Modify_Date,
+			FCL.Modify_IP,
+			Status_Commercial_Release = ISNULL((SELECT SCR.Short_Desc 
+												FROM Commercial_Release CR
+												INNER JOIN Cat_Status_Commercial_Release SCR ON
+												CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release AND
+												SCR.Id_Language = @pvIdLanguageUser
+												WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable )
+			
+		FROM Items_Templates T WITH(NOLOCK) 
+
+		LEFT OUTER JOIN Quotation_Detail QD WITH(NOLOCK) ON
+		T.Item_Template = QD.Item_Template AND
+		T.Id_Item = QD.Id_Item AND
+		QD.Folio = @piFolioOrig AND QD.Version = @piVersionOrig
+		
+		INNER JOIN Items_Configuration IC WITH(NOLOCK) ON
+		T.Id_Family = IC.Id_Family AND 
+		T.Id_Category = IC.Id_Category AND 
+		T.Id_Line = IC.Id_Line AND
+		T.Item_Template = IC.Id_Item
+		
+		INNER JOIN Cat_Families_Categories FCL WITH(NOLOCK) ON
+		IC.Id_Family = FCL.Id_Family AND 
+		IC.Id_Category = FCL.Id_Category AND 
+		IC.Id_Line = FCL.Id_Line
+		AND FCL.Status = 1
+
+		
+		INNER JOIN Cat_Families F WITH(NOLOCK) ON 
+		FCL.Id_Family = F.Id_Family
+		AND F.Status = 1
+
+		INNER JOIN Cat_Categories C WITH(NOLOCK) ON 
+		FCL.Id_Category = C.Id_Category
+		AND C.Status = 1
+
+		INNER JOIN Cat_Lines L WITH(NOLOCK) ON 
+		FCL.Id_Line = L.Id_Line
+		AND L.Status = 1
+
+		INNER JOIN Cat_Item I  WITH(NOLOCK) ON		
+		T.Id_Item = I.Id_Item
+		AND I.Status = 1
+
+		INNER JOIN Cat_Prices_Lists P WITH(NOLOCK) ON 
+		T.Id_Price_List = P.Id_Price_List AND 
+		P.Id_Language = @pvIdLanguageUser
+
+		INNER JOIN Cat_Item_Classes ICL WITH(NOLOCK) ON 
+		I.Id_Item_Class = ICL.Id_Item_Class
+		AND ICL.Status = 1
+
+		INNER JOIN Cat_Item_SubClasses ISCL WITH(NOLOCK) ON 
+		I.Id_Item_Class = ISCL.Id_Item_Class AND
+		I.Id_Item_SubClass = ISCL.Id_Item_SubClass
+		AND ISCL.Status = 1
+			
+		WHERE 
+		(@pvItemTemplate = ''   OR T.Item_Template = @pvItemTemplate ) AND 
+		(@pvIdFamily = ''		OR T.Id_Family = @pvIdFamily )		
+
+		ORDER BY I.Id_Item_Class, I.Id_Item_SubClass, T.Id_Family , T.Id_Category , T.Id_Line , T.[Required] ASC ,T.[Default] DESC, T.Id_Item ASC
+	END
+
+	--------------------------------------------------------------------
 	--Reads Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'T'
@@ -377,7 +524,7 @@ BEGIN TRY
 												@pnIdTransacLog	= @nIdTransacLog OUTPUT
 	SET NOCOUNT OFF
 
-	IF @pvOptionCRUD <> 'R' AND @pvOptionCRUD <> 'T'
+	IF @pvOptionCRUD <> 'R' AND @pvOptionCRUD <> 'T' AND @pvOptionCRUD <> 'RC'
 	SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
 
 END TRY

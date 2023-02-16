@@ -192,3 +192,22 @@ SELECT DISTINCT
 	 AND Id_Item_Class = 'COMP'
 	 AND Id_Item_SubClass IN ('HANDLES')
  ORDER BY Id_Item
+
+ /*****************************************************************************/
+-- QUERY 10 -  SUBCLASS = Handles
+/*****************************************************************************/
+SELECT DISTINCT
+	 Item_SubClass,
+	 Id_Item,
+	 Item_Long_Desc,
+	 Id_Item_Template,
+	 Price,
+	 Print_Character = (CASE WHEN Required = 1 AND [Default] = 1 THEN '*'
+							 ELSE NULL
+						END)
+ FROM vwItems_Templates
+ WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
+	 AND Id_Line in ('CH700B3')
+	 AND Id_Item_Class = 'COMP'
+	 AND Id_Item_SubClass IN ('LOCKADRAWE')
+ ORDER BY Id_Item

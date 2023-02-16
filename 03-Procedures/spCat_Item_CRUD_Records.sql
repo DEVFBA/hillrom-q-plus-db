@@ -20,7 +20,7 @@ Desc:		Cat_Item | Create - Read - Upadate - Delete
 Date:		01/17/2021
 Example:
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'C',
-									@pvIdLanguageUser = 'ANG', 
+									@pvIdLanguageUser	= 'ANG', 
 									@pvIdItem			= 'ACCELLAX', 
 									@pvIdCountry		= 'FR' , 
 									@pvIdItemClass		= 'PROD', 
@@ -61,7 +61,7 @@ Example:
 									@pvIdCountryComercialRealease = 'BR'
 
 			EXEC spCat_Item_CRUD_Records	@pvOptionCRUD		= 'R', 
-											@pvIdLanguageUser = 'BRA', 
+											@pvIdLanguageUser	= 'BRA', 
 											@pvIdItemClass		= 'PROD', 
 											@pvIdItemSubClass	= 'PROD',
 											@pvIdCountryComercialRealease = 'CL',
@@ -91,8 +91,6 @@ Example:
 									@pvUser				= 'AZEPEDA', 
 									@pvIP				='192.168.1.254'
 
-
-SELECT * FROM 		Cat_Item	
 */
 CREATE PROCEDURE [dbo].[spCat_Item_CRUD_Records]
 @pvOptionCRUD					Varchar(1),

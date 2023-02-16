@@ -54,7 +54,7 @@ SELECT DISTINCT
  WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
 	 AND Id_Line in ('HIRO900')
 	 AND Id_Item_Class = 'COMP'
-	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA', 'ACCEBARHOL','FOOTBOPEND')
+	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA','FOOTBOPEND') -- AZR Se quita el 'ACCEBARHOL' a solicitud de Alexis
  AND Id_Item NOT IN ('220K', 'MHS')
  
  UNION
@@ -78,17 +78,6 @@ SELECT DISTINCT
 				 FROM Items_Template_Kits
 				 WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 2),
 	Print_Character = NULL
-
- UNION
- 
- SELECT
-	 Item_SubClass = 'KIT',
-	 Id_Item = 'BEA + WCO + NL',
-	 Item_Long_Desc = '3 Mode Bed Exit Alarm + 37 pin Wired connection + Intelligent night light (requires SHS)',
-	 Price = (	SELECT Price
-				FROM Items_Template_Kits
-				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 3),
-	 Print_Character = NULL
 
 
 /*****************************************************************************/
@@ -176,4 +165,34 @@ SELECT DISTINCT
 	 AND Id_Item_Class = 'COMP'
 	 AND Id_Item_SubClass IN ('PLUG', 'VOLTAGE')
 	 AND Id_Item NOT IN ('110v', '115V', '127V', '220V', '240V','Bi120230V', 'BIVOLT 120 230V', 'CA', 'NZ')
+ ORDER BY Id_Item
+
+
+ /*****************************************************************************/
+-- QUERY 8 -  SUBCLASS = BEDEXITALR
+/*****************************************************************************/
+SELECT DISTINCT
+	 Item_SubClass,
+	 Id_Item,
+	 Item_Long_Desc,
+	 Price,
+	 Print_Character = NULL
+ FROM vwItems_Templates
+ WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
+	 AND Id_Line in ('HIRO900')
+	 AND Id_Item_Class = 'COMP'
+	 AND Id_Item_SubClass IN ('BEDEXITALR')
+
+
+ UNION
+ 
+ SELECT
+	 Item_SubClass = 'KIT',
+	 Id_Item = 'BEA + WCO + NL + BOA',
+	 Item_Long_Desc = '3 Mode Bed Exit Alarm + 37 pin Wired connection + Intelligent night light (requires SHS)',
+	 Price = (	SELECT Price
+				FROM Items_Template_Kits
+				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 3),
+	 Print_Character = NULL
+
  ORDER BY Id_Item

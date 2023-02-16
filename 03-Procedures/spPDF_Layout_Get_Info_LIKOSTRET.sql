@@ -1,16 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spPDF_Layout_Get_Info_LIKOSTRET]    Script Date: 10/06/2022 01:12:33 p. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spPDF_Layout_Get_Info_LIKOSTRET
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spPDF_Layout_Get_Info_LIKOSTRET'
-IF OBJECT_ID('[dbo].[spPDF_Layout_Get_Info_LIKOSTRET]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spPDF_Layout_Get_Info_LIKOSTRET
 GO
 /*
 Autor:		Alejandro Zepeda
@@ -18,11 +11,11 @@ Desc:		Get spPDF_Layout_Get_Info_LIKOSTRET
 Date:		12/01/2022
 Example:
 
-	EXEC spPDF_Layout_Get_Info_LIKOSTRET @pvIdZone = 'LIKMEX'
+	EXEC spPDF_Layout_Get_Info_LIKOSTRET @pvIdZone = 'LIKALL'
 
 
 */
-CREATE PROCEDURE [dbo].spPDF_Layout_Get_Info_LIKOSTRET
+ALTER PROCEDURE [dbo].[spPDF_Layout_Get_Info_LIKOSTRET]
 @pvIdZone	Varchar(10)
 AS
 
@@ -36,7 +29,7 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_ItemTemplate_Class = 'ACCE'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
 	AND Item_Long_Desc LIKE 'Octo Stretch W Leveller%'
@@ -53,7 +46,7 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_ItemTemplate_Class = 'ACCE'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
 	AND Item_Long_Desc LIKE 'LiftSheet Octo%'
@@ -70,7 +63,7 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_ItemTemplate_Class = 'ACCE'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
 	AND Item_Long_Desc LIKE 'Solo Octo LiftSheet%'
@@ -87,7 +80,7 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_ItemTemplate_Class = 'ACCE'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
 	AND Item_Long_Desc LIKE 'EXTRA PLASTIC REINFORCEM%'
@@ -104,10 +97,12 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	--AND Id_ItemTemplate_Class = 'PROD' 
+	AND Id_ItemTemplate_Class = 'ACCE' --AZR 20220920 - Ajuste a solicitud de Alexis
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
-	AND Item_Long_Desc LIKE 'LIKOSTRETCH 600 IC%'
+	--AND Item_Long_Desc LIKE 'LIKOSTRETCH 600 IC%' 
+	AND Item_Long_Desc LIKE 'LIKOSTRETCH mod 600 IC%' --AZR 20220920 - Ajuste a solicitud de Alexis
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC
 
@@ -124,7 +119,8 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Id_ItemTemplate_Class = 'PROD'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
-	AND Item_Long_Desc LIKE 'STRAP MOD 600 IC 8PCS%'
+	--AND Item_Long_Desc LIKE 'STRAP MOD 600 IC 8PCS%' 
+	AND Item_Long_Desc LIKE 'STRAP MOD 600 IC, 8 PCS%' --AZR 20220920 - Ajuste a solicitud de Alexis
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC;
 
@@ -141,7 +137,8 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Id_ItemTemplate_Class = 'PROD'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
-	AND Item_Long_Desc LIKE 'SPATULA (MOD 600IC)%'
+	--AND Item_Long_Desc LIKE 'SPATULA (MOD 600IC)%'
+	AND Item_Long_Desc LIKE 'Spatula mod 600 IC%' --AZR 20220920 - Ajuste a solicitud de Alexis
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC
 
@@ -155,7 +152,7 @@ SELECT DISTINCT
 	Price = Price
 FROM vwItems_Templates_Commercial_Release
 WHERE Id_Item_Class = 'ACCE'
-	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_ItemTemplate_Class = 'ACCE'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
 	AND Item_Long_Desc LIKE 'SIDERAILS 600%'
@@ -175,7 +172,8 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Id_ItemTemplate_Class = 'PROD'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
-	AND Item_Long_Desc LIKE 'LIKO FLEXO STRETCH%'
+	--AND Item_Long_Desc LIKE 'LIKO FLEXO STRETCH%'
+	AND Item_Long_Desc LIKE 'FLEXOSTRETCH%' -- 20220922 Ajuste a solicitud de Alexis
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC;
 
@@ -192,7 +190,7 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Id_ItemTemplate_Class = 'PROD'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass IN ('LIKOSTEACC')
-	AND Item_Long_Desc LIKE 'LIKO ULTRA STRETCH%'
+	AND Item_Long_Desc LIKE 'ULTRASTRETCH%'
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC
 
