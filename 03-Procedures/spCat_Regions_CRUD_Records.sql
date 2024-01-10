@@ -18,13 +18,15 @@ Autor:		Alejandro Zepeda
 Desc:		Cat_Regions | Create - Read - Upadate - Delete 
 Date:		02/01/2021
 Example:
-			spCat_Regions_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION1' , @pvShortDesc = 'Region Record 1', @pvLongDesc = 'Region Record 1 Long Desd', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Regions_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION1' , @pvShortDesc = 'Region Record 1', @pvLongDesc = 'Region Record 1 Long Desd', @pvIdBusinessLine = 'PSS_LIKO', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Regions_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION1' 
+			spCat_Regions_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdBusinessLine = 'PSS_LIKO'
+			spCat_Regions_CRUD_Records @pvOptionCRUD = 'R'
 			spCat_Regions_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvShortDesc = 'BRAZIL', @pvLongDesc = 'BRAZIL', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Regions_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION1' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Regions_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION1' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 
-			spCat_Regions_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION2' , @pvShortDesc = 'Region Record 2', @pvLongDesc = 'Region Record 2 Long Desc', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Regions_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'REGION2' , @pvShortDesc = 'Region Record 2', @pvLongDesc = 'Region Record 2 Long Desc', @pvIdBusinessLine = 'PSS_LIKO', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Regions_CRUD_Records @pvOptionCRUD = 'R'
 */
 CREATE PROCEDURE [dbo].spCat_Regions_CRUD_Records
@@ -33,6 +35,7 @@ CREATE PROCEDURE [dbo].spCat_Regions_CRUD_Records
 @pvIdRegion			Varchar(10) = '',
 @pvShortDesc		Varchar(50) = '',
 @pvLongDesc			Varchar(255)= '',
+@pvIdBusinessLine	Varchar(10) = '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
@@ -52,7 +55,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Regions_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRegion = '" + ISNULL(@pvIdRegion,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Regions_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRegion = '" + ISNULL(@pvIdRegion,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -71,6 +74,7 @@ BEGIN TRY
 				Id_Region,
 				Short_Desc,
 				Long_Desc,
+				Id_Business_Line,
 				[Status],
 				Modify_Date,
 				Modify_By,
@@ -79,6 +83,7 @@ BEGIN TRY
 				@pvIdRegion,
 				@pvShortDesc,
 				@pvLongDesc,
+				@pvIdBusinessLine,
 				@pbStatus,
 				GETDATE(),
 				@pvUser,
@@ -94,12 +99,14 @@ BEGIN TRY
 		Id_Catalog = Id_Region,
 		Short_Desc,
 		Long_Desc,
+		Id_Business_Line,
 		[Status],
 		Modify_Date,
 		Modify_By,
 		Modify_IP
 		FROM Cat_Regions 
-		WHERE @pvIdRegion = '' OR Id_Region = @pvIdRegion
+		WHERE (@pvIdRegion = '' OR Id_Region = @pvIdRegion)
+		AND   (@pvIdBusinessLine = '' OR Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY Id_Catalog
 		
 	END
@@ -112,6 +119,7 @@ BEGIN TRY
 		UPDATE Cat_Regions 
 		SET Short_Desc	= @pvShortDesc,
 			Long_Desc	= @pvLongDesc,
+			Id_Business_Line = @pvIdBusinessLine,
 			[Status]	= @pbStatus,
 			Modify_Date	= GETDATE(),
 			Modify_By	= @pvUser,

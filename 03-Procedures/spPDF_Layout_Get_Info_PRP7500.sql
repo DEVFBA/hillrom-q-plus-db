@@ -168,6 +168,7 @@ ORDER BY Id_Item
 /*****************************************************************************/
 SELECT DISTINCT
 	KitName			= (CASE WHEN Id_Item_SubClass = 'MISCACCESO' THEN 'MISCACCESSORIES'
+							WHEN Id_Item_SubClass = 'ICUACC' THEN 'ICUACC' 
 							ELSE 'PROGRESSAACC'
 					   END),
 	Item_Long_Desc	= Item_Long_Desc,
@@ -177,6 +178,6 @@ FROM vwItems_Templates
 WHERE 
 	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
 	Id_Line in ('PRP7500') AND
-	Id_Item_SubClass IN ('PROGRACCES', 'MISCACCESO', 'BEDACCESOR') AND 
+	Id_Item_SubClass IN ('PROGRACCES', 'MISCACCESO', 'BEDACCESOR','ICUACC') AND 
 	Id_Item_Class = 'ACCE'
 ORDER BY Id_Item

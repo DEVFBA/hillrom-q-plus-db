@@ -132,6 +132,11 @@ AS
 		Q.Id_Quotation_Status = CQS.Id_Quotation_Status AND
 		CQS.Id_Language = @pvIdLanguageUser
 
+		INNER JOIN Approvers_Sales_Executive ASE ON 
+		Q.Id_Sales_Executive = ASE.Sales_Executive 
+		AND ASE.[Status] = 1
+		AND ASE.[User] = @pvUser
+
 		WHERE USR.[User] IN (SELECT User_Approver FROM @tblApprovers) 	 AND
 		(@pvUserSaleExecutive = '' OR Q.Id_Sales_Executive = @pvUserSaleExecutive) AND
 		(@pvUserSaleExecutiveName = '' OR Q.Sales_Executive LIKE '%' + @pvUserSaleExecutiveName + '%') AND

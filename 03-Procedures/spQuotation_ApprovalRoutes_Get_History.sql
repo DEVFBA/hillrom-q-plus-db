@@ -121,6 +121,12 @@ AS
 	INNER JOIN Cat_Quotation_Status CQS ON 
 	Q.Id_Quotation_Status = CQS.Id_Quotation_Status AND
 	CQS.Id_Language = @pvIdLanguageUser
+
+	INNER JOIN Approvers_Sales_Executive ASE ON 
+	Q.Id_Sales_Executive = ASE.Sales_Executive 
+	AND ASE.[Status] = 1
+	AND ASE.[User] = @pvUser
+
 	WHERE 
 	Q.Id_Quotation_Status = 'ROUT' AND 
 	USR.[User] = @pvUser AND

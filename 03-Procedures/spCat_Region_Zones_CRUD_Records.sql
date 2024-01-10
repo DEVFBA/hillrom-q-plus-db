@@ -20,7 +20,9 @@ Desc:		Cat_Region_Zones | Create - Read - Upadate - Delete
 Date:		07/01/2021
 Example:
 			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvIdZone = 'MEX', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'R'
 			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvIdZone = 'MEX' 
+			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdBusinessLine = 'PSS_LIKO'
 			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvIdZone = 'MEX', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvIdZone = 'MEX', @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Region_Zones_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdRegion = 'BRAZIL' , @pvIdZone = 'MEX', @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -33,6 +35,7 @@ CREATE PROCEDURE [dbo].spCat_Region_Zones_CRUD_Records
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdRegion			Varchar(10) = '',
 @pvIdZone			Varchar(10) = '',
+@pvIdBusinessLine	Varchar(10) = '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
@@ -53,7 +56,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Region_Zones_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRegion = '" + ISNULL(@pvIdRegion,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Region_Zones_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRegion = '" + ISNULL(@pvIdRegion,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -95,6 +98,7 @@ BEGIN TRY
 		RZ.Id_Zone,
 		Zone_Desc = Z.Short_Desc,
 		RZ.[Status],
+		R.Id_Business_Line,
 		RZ.Modify_Date,
 		RZ.Modify_By,
 		RZ.Modify_IP
@@ -108,7 +112,8 @@ BEGIN TRY
 		
 		WHERE 
 		(@pvIdRegion = '' OR RZ.Id_Region = @pvIdRegion) AND 
-		(@pvIdZone = '' OR RZ.Id_Zone = @pvIdZone)
+		(@pvIdZone = '' OR RZ.Id_Zone = @pvIdZone) AND   
+		(@pvIdBusinessLine = '' OR R.Id_Business_Line = @pvIdBusinessLine)
 
 		ORDER BY RZ.Id_Region, RZ.Id_Zone
 		

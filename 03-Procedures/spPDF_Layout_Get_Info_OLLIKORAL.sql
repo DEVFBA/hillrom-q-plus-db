@@ -18,7 +18,7 @@ Desc:		Get spPDF_Layout_Get_Info_OLLIKORAL
 Date:		12/01/2022
 Example:
 
-	EXEC spPDF_Layout_Get_Info_OLLIKORAL @pvIdZone = 'LIKMEX'
+	EXEC spPDF_Layout_Get_Info_OLLIKORAL @pvIdZone = 'LIKALL'
 
 
 */
@@ -694,7 +694,7 @@ WHERE Id_Item_Class = 'ACCE'
 ORDER BY Id_Item ASC
 
 /*****************************************************************************/
--- QUERY 39 - Accesorios ‘Carriage Adapter LR for S65’.
+-- QUERY 40 - Accesorios ‘Carriage Adapter LR for S65’.
 /*****************************************************************************/
 SELECT DISTINCT
 	Part = Id_Item,
@@ -709,3 +709,21 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Item_Long_Desc LIKE 'Carriage Adapter LR for S65%'
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC;
+
+
+/*****************************************************************************/
+-- QUERY 41 - Accesorios ‘Universal Sling Bar™ 350’.
+/*****************************************************************************/
+SELECT DISTINCT
+	Part = Id_Item,
+	Item_Long_Desc = Item_Long_Desc,
+	Specifications = Specifications,
+	Price = Price
+FROM vwItems_Templates_Commercial_Release
+WHERE Id_Item_Class = 'ACCE'
+	AND Id_ItemTemplate_Class = 'PROD'
+	AND Id_Line IN ('OVERLFT')
+	AND Id_Item_SubClass = 'LIFTINACCE'
+	AND Id_Item = '3156094'
+	AND Id_Zone = @pvIdZone
+ORDER BY Id_Item ASC

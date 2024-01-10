@@ -21,6 +21,7 @@ Date:		12/01/2021
 Example:
 			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'C', @pvIdRole = 'ADMIN' , @pvShortDesc = 'System Administrator', @pvLongDesc = 'System Administrator', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdRole = 'ADMIN' 
+			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
 			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R'
 			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'U', @pvIdRole = 'ADMIN' , @pvShortDesc = 'System Administrator', @pvLongDesc = 'System Administrator', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'D', @pvIdRole = 'ADMIN' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -31,6 +32,7 @@ CREATE PROCEDURE [dbo].spSecurity_Roles_CRUD_Records
 @pvOptionCRUD		Varchar(1),
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdRole			Varchar(10) = 'All',
+@pvIdBusinessLine	Varchar(10) = '',
 @pvShortDesc		Varchar(50) = '',
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
@@ -53,7 +55,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Roles_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Roles_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "',  @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -72,13 +74,15 @@ BEGIN TRY
 		Id_Role,
 		Short_Desc,
 		Long_Desc,
-		[Status],
 		Approval_Flow_Sequence,
+		Id_Business_Line,
+		[Status],
 		Modify_Date,
 		Modify_By,
 		Modify_IP
 		FROM Security_Roles 
-		WHERE 'All' = @pvIdRole OR Id_Role = @pvIdRole
+		WHERE (@pvIdRole = 'All' OR Id_Role = @pvIdRole) 
+		AND   (@pvIdBusinessLine = '' OR Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY  Id_Role
 		
 	END

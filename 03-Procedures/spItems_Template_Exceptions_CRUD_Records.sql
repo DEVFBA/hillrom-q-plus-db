@@ -58,7 +58,7 @@ Example:
 CREATE PROCEDURE [dbo].spItems_Template_Exceptions_CRUD_Records
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
-@pvItemTemplate					Varchar(10) = '',
+@pvItemTemplate					Varchar(50) = '',
 @pudtItemsTemplateExceptions	UDT_Items_Template_Exceptions Readonly ,
 @pvUser							Varchar(50) = '',
 @pvIP							Varchar(20) = ''

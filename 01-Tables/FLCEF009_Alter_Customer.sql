@@ -1,0 +1,6 @@
+USE DBQS
+GO
+
+ALTER TABLE FLC_Cat_Customers
+ADD Account_Number VARCHAR(100)
+GO

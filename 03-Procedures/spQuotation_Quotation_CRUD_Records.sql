@@ -270,14 +270,18 @@ BEGIN TRY
 			Purchase_Order,
 			Comments,
 
-			Next_Approver =ISNULL((	SELECT DISTINCT Role_Desc 
+			Next_Approver = (CASE WHEN Id_Quotation_Status = 'DIRE' THEN ''
+            ELSE
+            (ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
 									WHERE AWF.Folio = vwQuotation.Folio  AND AWF.[Version] = vwQuotation.[Version] AND Id_Approval_Status = 'PTA' 
 									AND AWF.Approval_Flow_Sequence = (	SELECT MIN(Approval_Flow_Sequence)	
 																		FROM vwWorkflows 
 																		WHERE  Folio = vwQuotation.Folio AND [Version] = vwQuotation.[Version]  AND Id_Approval_Status = 'PTA' 
 																	 )
-							     ), ''),
+							     ), ''))
+            END
+                            ),
 
 			Rejected_Approver =ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
@@ -321,7 +325,7 @@ BEGIN TRY
 				(@pvCreationDateIni			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) >= @pvCreationDateIni) AND
 				(@pvCreationDateFin			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) <= @pvCreationDateFin)  
 
-		ORDER BY  Folio, [Version]
+		ORDER BY  Folio DESC, [Version] 
 		
 	END
 

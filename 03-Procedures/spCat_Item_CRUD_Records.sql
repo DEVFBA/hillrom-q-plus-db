@@ -20,8 +20,8 @@ Desc:		Cat_Item | Create - Read - Upadate - Delete
 Date:		01/17/2021
 Example:
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'C',
-									@pvIdLanguageUser = 'ANG', 
-									@pvIdItem			= 'ACCELLAX', 
+									@pvIdLanguageUser	= 'ANG', 
+									@pvIdItem			= 'BR_ACCELLA_STD3', 
 									@pvIdCountry		= 'FR' , 
 									@pvIdItemClass		= 'PROD', 
 									@pvIdItemSubClass	= 'PROD', 
@@ -57,11 +57,11 @@ Example:
 
 			EXEC spCat_Item_CRUD_Records 
 									@pvOptionCRUD		= 'R', 
-									@pvIdItem			= 'ACCELLA',
+									@pvIdItem			= 'BR_ACCELLA_STD3',
 									@pvIdCountryComercialRealease = 'BR'
 
 			EXEC spCat_Item_CRUD_Records	@pvOptionCRUD		= 'R', 
-											@pvIdLanguageUser = 'BRA', 
+											@pvIdLanguageUser	= 'BRA', 
 											@pvIdItemClass		= 'PROD', 
 											@pvIdItemSubClass	= 'PROD',
 											@pvIdCountryComercialRealease = 'CL',
@@ -69,30 +69,29 @@ Example:
 
 			EXEC spCat_Item_CRUD_Records @pvOptionCRUD='R',@pvIdItemClass='COMP',@pvIdItemSubClass='',@pvIdItem='M8',@pvShortDesc='',@pvIdFamily='',@pvIdCategory='',@pvIdLine=''
 			EXEC spCat_Item_CRUD_Records @pvOptionCRUD='R',@pvIdItemClass='COMP',@pvIdItemSubClass='',@pvIdItemDetalle='M8',@pvShortDesc='',@pvIdFamily='',@pvIdCategory='',@pvIdLine=''
-			
+			 SELECT * FROM Cat_Item WHERE Id_Item ='BR_ACCELLA_STD3'
+ 
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'U', 
-									@pvIdItem			= 'ACCELLA', 
+									@pvIdItem			= 'BR_ACCELLA_STD3', 
 									@pvIdCountry		= 'FR' , 
-									@pvIdItemClass		= 'PROD', 
-									@pvIdItemSubClass	= 'PROD', 
-									@pvIdDiscountCategory = 'HR900', 
-									@pvIdCountryPackage = '',
-									@pvIdItemRelated    = '',
-									@pvShortDesc		= 'Hill-Rom® 900 Accella', 
-									@pvLongDesc			= 'Hill-Rom® 900 Accella', 
-									@pvModel			= 'Bed Exit Alarm',
-									@pvSpecifications	= 'especs XX',
-									@pvWeight			= '80cm',
-									@pvMeasurements		= 'XXX',
-									@pvImagePath		= 'c:\XX',
+									@pvIdItemClass		= 'PACKD', 
+									@pvIdItemSubClass	= 'PACKD', 
+									@pvIdDiscountCategory = 'HRACC', 
+									@pvIdCountryPackage = 'BR',
+									@pvIdItemRelated    = 'ACCELLA',
+									@pvShortDesc		= 'ACC3_CONN_THERAPY', 
+									@pvLongDesc			= 'ACCELLA3_CONN_THERAPY', 
+									@pvModel			= 'ACCELLA',
+									@pvSpecifications	= '',
+									@pvWeight			= '166 KG',
+									@pvMeasurements		= '100 x 55 x 235',
+									@pvImagePath		= '',
 									@pbStatus			= 1, 
-									@pvItemSPR			= '0',
-									@pvAccesoryMessage	= 'AccesoryMessag',
+									@pvItemSPR			= '',
+									@pvAccessoryMessage	= '',
 									@pvUser				= 'AZEPEDA', 
 									@pvIP				='192.168.1.254'
 
-
-SELECT * FROM 		Cat_Item	
 */
 CREATE PROCEDURE [dbo].[spCat_Item_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
@@ -205,6 +204,14 @@ BEGIN TRY
 				@pvUser,
 				GETDATE(),
 				@pvIP)
+
+
+			IF( (@pvIdItemClass IN ('PACK','PACKD')) AND  NOT EXISTS (SELECT * FROM Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
+			BEGIN
+				INSERT INTO Commercial_Release (Id_Item,Id_Country,Id_Status_Commercial_Release,Final_Effective_Date,Modify_By,Modify_Date,Modify_IP)
+				VALUES (@pvIdItem, @pvIdCountryPackage, 1,NULL, @pvUser, GETDATE(), @pvIP)
+			END
+
 		END
 	END
 	--------------------------------------------------------------------
@@ -399,6 +406,12 @@ BEGIN TRY
 				Modify_Date			= GETDATE(),		
 				Modify_IP			= @pvIP
 			WHERE Id_Item = @pvIdItem
+
+			IF( (@pvIdItemClass IN ('PACK','PACKD')) AND  NOT EXISTS (SELECT * FROM Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
+			BEGIN
+				INSERT INTO Commercial_Release (Id_Item,Id_Country,Id_Status_Commercial_Release,Final_Effective_Date,Modify_By,Modify_Date,Modify_IP)
+				VALUES (@pvIdItem, @pvIdCountryPackage, 1,NULL, @pvUser, GETDATE(), @pvIP)
+			END
 	END
 
 	--------------------------------------------------------------------

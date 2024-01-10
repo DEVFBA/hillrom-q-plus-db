@@ -31,7 +31,7 @@ Example:
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG'
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 80, @piVersion = 1											
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 80, @piVersion = 1, @pvIdCountry = 'CR'		
-			
+	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 1413, @piVersion = 1, @pvIdCountry = 'BR'				
 
 */
 CREATE PROCEDURE [dbo].spQuotation_Header_CRUD_Records
@@ -306,13 +306,10 @@ BEGIN TRY
 		INNER JOIN Commercial_Release CR ON
 		QH.Item_Template = CR.Id_Item
 		AND Id_Status_Commercial_Release <> 0
-		AND CR.Id_Country = @pvIdCountry
-
+		AND (CR.Id_Country = @pvIdCountry )
 
 		WHERE	(@piFolio	= 0	OR QH.Folio	 = @piFolio) AND 
 				(@piVersion	= 0	OR QH.[Version] = @piVersion) 
-	
-		ORDER BY  QH.Folio, QH.[Version], QH.Item_Template
 		
 	END
 

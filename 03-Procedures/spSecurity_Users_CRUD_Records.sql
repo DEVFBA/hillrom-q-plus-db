@@ -30,9 +30,10 @@ Example:
 																@pbStatus = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
 
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ADVEGA', @pvIdRole = 'SALES', @pvIdZone = 'CEN' 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'KELBEROZ'
+			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA'
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdZone = 'MEX' 
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdRole = 'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'  
+			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R'
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'U',	@pvIdUser = 'ALZEPEDA', 
 																@pvIdRole = 'ADMIN', 
@@ -55,6 +56,7 @@ CREATE PROCEDURE [dbo].spSecurity_Users_CRUD_Records
 @pvIdRole			Varchar(100) = '', --'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'
 @pvIdZone			Varchar(10)	= '',
 @pvIdLanguage		Varchar(10)	= '',
+@pvIdBusinessLine	Varchar(10) = '',
 @pvPassword			Varchar(255)= '',
 @pvName				Varchar(255)= '',
 @pvEmail			Varchar(50)	= '',
@@ -80,7 +82,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Users_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "', @pvPassword = '" + ISNULL(@pvPassword,'NULL') + "', @pvName = '" + ISNULL(@pvName,'NULL') + "', @pvEmail = '" + ISNULL(@pvEmail,'NULL') + "', @pbTempPassword = '" + ISNULL(CAST(@pbTempPassword AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Users_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "',  @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pvPassword = '" + ISNULL(@pvPassword,'NULL') + "', @pvName = '" + ISNULL(@pvName,'NULL') + "', @pvEmail = '" + ISNULL(@pvEmail,'NULL') + "', @pbTempPassword = '" + ISNULL(CAST(@pbTempPassword AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -147,6 +149,7 @@ BEGIN TRY
 		U.Email,
 		Temporal_Password,
 		Final_Effective_Date,
+		R.Id_Business_Line,
 		U.[Status],
 		U.Modify_Date,
 		U.Modify_By,
@@ -174,7 +177,8 @@ BEGIN TRY
 		(@pvIdUser		 = ''	OR U.[User] = @pvIdUser) AND
 		(@pvIdRole		= ''	OR U.Id_Role IN(SELECT VALOR FROM fnSplit(@pvIdRole,'|'))) AND
 		(@pvIdZone		= ''	OR U.Id_Zone = @pvIdZone) AND
-		(@pvIdLanguage	= ''	OR U.Id_Language = @pvIdLanguage)
+		(@pvIdLanguage	= ''	OR U.Id_Language = @pvIdLanguage) AND
+		(@pvIdBusinessLine = '' OR R.Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY  [User]
 		RETURN
 	END

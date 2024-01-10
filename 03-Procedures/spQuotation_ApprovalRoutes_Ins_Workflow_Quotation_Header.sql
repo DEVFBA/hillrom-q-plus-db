@@ -41,7 +41,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	DECLARE @vDescOperationCRUD		Varchar(50) = dbo.fnGetOperationCRUD('C')
 	DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)
-	DECLARE @tblDscountTypes		TABLE (Item_Template Varchar(50),Total Float, Id_Discount_Type Varchar(10), Approval_Group Varchar(20))
+	DECLARE @tblDscountTypes		TABLE (Id_Header Smallint, Item_Template Varchar(50),Total Float, Id_Discount_Type Varchar(10), Approval_Group Varchar(20))
 	DECLARE @fMinimumRouteAmount	FLOAT = (SELECT [Value] FROM Cat_General_Parameters WHERE Id_Parameter = 21)
 	DECLARE @fExchangeRate			FLOAT = (SELECT ER.Exchange_Rate FROM Cat_Exchange_Rates ER
 											INNER JOIN Quotation Q ON 
@@ -84,7 +84,8 @@ BEGIN TRY
 			--RUTA POR DISCOUNT
 			/*********************************************************************/
 			INSERT INTO @tblDscountTypes
-			SELECT	QH.Item_Template, 
+			SELECT	QH.Id_Header,
+					QH.Item_Template, 
 					Total = (SELECT SUM(Total) Quotation_Header from Quotation_Header where  Folio = QH.Folio  AND [Version] = QH.[Version]),
 					Id_Discount_Type = (CASE AD.Apply_Amount
 										WHEN 1 THEN --Si el item aplica por monto
@@ -168,6 +169,7 @@ BEGIN TRY
 
 			INNER JOIN @tblDscountTypes TMP ON
 			QH.Item_Template	= TMP.Item_Template AND 
+			QH.Id_Header = 			TMP.Id_Header AND
 			AD.Id_Discount_Type = TMP.Id_Discount_Type AND 
 			AD.Approval_Group = TMP.Approval_Group
 
@@ -226,6 +228,7 @@ BEGIN TRY
 
 			INNER JOIN @tblDscountTypes TMP ON
 			QH.Item_Template = TMP.Item_Template AND
+			QH.Id_Header = 			TMP.Id_Header AND
 			AD.Id_Discount_Type = TMP.Id_Discount_Type AND 
 			AD.Approval_Group = TMP.Approval_Group
 
