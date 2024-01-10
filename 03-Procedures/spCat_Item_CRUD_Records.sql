@@ -21,7 +21,11 @@ Date:		01/17/2021
 Example:
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'C',
 									@pvIdLanguageUser	= 'ANG', 
+<<<<<<< HEAD
 									@pvIdItem			= 'BR_ACCELLA_STD3', 
+=======
+									@pvIdItem			= 'ACCELLAX', 
+>>>>>>> d593e1c92917e85ce2c99ba4c328b374fcc2ee65
 									@pvIdCountry		= 'FR' , 
 									@pvIdItemClass		= 'PROD', 
 									@pvIdItemSubClass	= 'PROD', 

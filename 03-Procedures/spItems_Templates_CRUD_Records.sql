@@ -36,6 +36,7 @@ Example:
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG', @pudtItemsTemplates = @udtItemsTemplates, @pvUser = 'AZEPEDA', @pvIP = '10.230.0.0'
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate ='ACCELA',@pvIdCurrency ='USD', @pvIdCountryComercialRealease='BR'
+<<<<<<< HEAD
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 			
@@ -49,6 +50,15 @@ Example:
 
 			EXEC spItems_Templates_CRUD_Records @pvoptioncrud = 'T', @pvidlanguageuser = 'ANG', @pvitemtemplate = 'BR_ACCELLA_STD1', @pvidcurrency = 'USD'
 
+=======
+
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
+			
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'RC', @pvItemTemplate = 'CENTURISX3', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'MX', 
+			@piFolioOrig = 688, @piVersionOrig = 1, @piFolioClon = 689, @piVersionClon = 1
+
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'T', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
+>>>>>>> d593e1c92917e85ce2c99ba4c328b374fcc2ee65
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = '21113001', @pvIdFamily = 'STR',  @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 
