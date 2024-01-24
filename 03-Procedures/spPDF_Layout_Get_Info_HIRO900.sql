@@ -1,16 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spPDF_Layout_Get_Info_HIRO900]    Script Date: 24/01/2024 03:16:35 p. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spPDF_Layout_Get_Info_HIRO900
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spPDF_Layout_Get_Info_HIRO900'
-IF OBJECT_ID('[dbo].[spPDF_Layout_Get_Info_HIRO900]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spPDF_Layout_Get_Info_HIRO900
 GO
 /*
 Autor:		Alejandro Zepeda
@@ -22,7 +15,7 @@ Example:
 
 
 */
-CREATE PROCEDURE [dbo].spPDF_Layout_Get_Info_HIRO900
+ALTER PROCEDURE [dbo].[spPDF_Layout_Get_Info_HIRO900]
 AS
 
 /*****************************************************************************/
@@ -40,7 +33,7 @@ SELECT
 
 
 /*****************************************************************************/
--- QUERY 2 -  SUBCLASS = Sin Secci�n
+-- QUERY 2 -  SUBCLASS = Sin Sección
 /*****************************************************************************/
 SELECT DISTINCT
 	 Item_SubClass,
@@ -67,9 +60,9 @@ SELECT DISTINCT
 				FROM Items_Template_Kits
 				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 4),
 	Print_Character = NULL
-
+ /*
  UNION
- 
+
  SELECT
 	 Item_SubClass = 'KIT',
 	 Id_Item = 'SHO + NL + BOA',
@@ -78,6 +71,7 @@ SELECT DISTINCT
 				 FROM Items_Template_Kits
 				 WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 2),
 	Print_Character = NULL
+	*/ -- Se comenta esta sección para que ya no aparezca en el PDF (Angel Gutiérrez -- 24/01/23) 
 
 
 /*****************************************************************************/
