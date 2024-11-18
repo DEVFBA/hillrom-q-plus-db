@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spFLC_Generate_Price_List]    Script Date: 31/01/2024 11:53:16 a. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spFLC_Generate_Price_List
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spFLC_Generate_Price_List'
-
-IF OBJECT_ID('[dbo].[spFLC_Generate_Price_List]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spFLC_Generate_Price_List
 GO
 
 /*
@@ -43,7 +35,7 @@ Example:
 
 */
 
-CREATE PROCEDURE [dbo].[spFLC_Generate_Price_List]
+ALTER PROCEDURE [dbo].[spFLC_Generate_Price_List]
 @pvModality				Varchar(20) ,
 @pvIdCluster			Varchar(10) = '',
 @pvIdDistributor		Int			= 0,
@@ -76,17 +68,17 @@ BEGIN TRY
 	IF @pvModality = 'Master'
 	BEGIN	
 			------------------------------------
-			--Los descuentos m醩ter
+			--Los descuentos m谩ster
 			------------------------------------
 			SELECT
 				Product_Category	= CC.Short_Desc,
 				Discount			= CC.Master_Discount 
 			FROM FLC_Cat_Categories AS CC
 			WHERE CC.[Status] = 1
-			ORDER BY [Order],Product_Category -- Modificaci髇 羘gel Guti閞rez 23/11/23
+			ORDER BY [Order],Product_Category -- Modificaci贸n 脕ngel Guti茅rrez 23/11/23
 
 			------------------------------------
-			--La informaci髇 de los art韈ulos
+			--La informaci贸n de los art铆culos
 			------------------------------------
 			SELECT
 				Category				= CC.Long_Desc,
@@ -102,7 +94,7 @@ BEGIN TRY
 																				 ELSE   ''
 																			END) 
 												ELSE ''
-											END) + REPLACE(I.Comment,'||',' \n '),
+											END) + I.Comment, --+ REPLACE(I.Comment,'||',' \n '), /// Angel Guti茅rrez 29/01/24
 				[Order]					= CC.[Order],
 				Order_Group				= CG.[Order],
 				Order_Family			= CF.[Order]
@@ -121,8 +113,8 @@ BEGIN TRY
 			INNER JOIN FLC_Cat_Families AS CF ON 
 			IC.Id_FLC_Family = CF.Id_FLC_Family
 			
-			WHERE IC.[Status] = 1 AND CC.[Status] = 1 AND I.[Status] = 1 -- Modificaci髇 羘gel Guti閞rez 06/12/23
-			ORDER BY CC.[Order], CG.[Order], CF.[Order], Category, [Group], Family -- Modificaci髇 羘gel Guti閞rez 23/11/23
+			WHERE IC.[Status] = 1 AND CC.[Status] = 1 AND I.[Status] = 1 -- Modificaci贸n 脕ngel Guti茅rrez 06/12/23
+			ORDER BY CC.[Order], CG.[Order], CF.[Order], Category, [Group], Family -- Modificaci贸n 脕ngel Guti茅rrez 23/11/23
 
 	END
 
@@ -140,10 +132,15 @@ BEGIN TRY
 			Family					= CF.Long_Desc,
 			Material				= FIC.Id_Item,
 			[Description]			= I.Long_Desc,
-			Suggested_Retail_Price	= I.Price, -- Angel Gutierrez a petici髇 de Alexis
+			Suggested_Retail_Price	= I.Price, -- Angel Gutierrez a petici贸n de Alexis
 			Obsolescence			= I.Obsolescence,
 			Substitute_Item			= I.Substitute_Item ,
-			Comment					= I.Comment,
+			Comment					=  (CASE WHEN Obsolescence = 1 THEN(--'Discontinued' + ' \n ' +   /// Angel Gutierrez
+																			CASE WHEN I.Substitute_Item <> '' THEN  +  I.Substitute_Item + ' \n '
+																				 ELSE   ''
+																			END) 
+												ELSE ''
+											END) + I.Comment, --+ REPLACE(I.Comment,'||',' \n '), /// Angel Guti茅rrez 29/01/24
 			[Order]					= Cat.[Order],
 			Order_Group				= CG.[Order],
 			Order_Family			= CF.[Order],
@@ -198,7 +195,7 @@ BEGIN TRY
 		C.[Status] = 1
 		
 		ORDER BY
-		C.[Name], Cat.[Order],  CG.[Order], CF.[Order], Cat.Long_Desc,CG.Long_Desc,CF.Long_Desc -- Modificaci髇 羘gel Guti閞rez 23/11/23
+		C.[Name], Cat.[Order],  CG.[Order], CF.[Order], Cat.Long_Desc,CG.Long_Desc,CF.Long_Desc -- Modificaci贸n 脕ngel Guti茅rrez 23/11/23
 
 	END
 
