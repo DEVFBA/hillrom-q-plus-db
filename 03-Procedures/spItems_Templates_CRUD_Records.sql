@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spItems_Templates_CRUD_Records]    Script Date: 23/04/2024 09:01:28 p. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spItems_Templates_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spItems_Templates_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spItems_Templates_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spItems_Templates_CRUD_Records
 GO
 /*
 Autor:		Alejandro Zepeda
@@ -34,6 +26,11 @@ Example:
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvItemTemplate = 'X3', @pudtItemsTemplates = @udtItemsTemplates , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvItemTemplate = 'X3' 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG', @pudtItemsTemplates = @udtItemsTemplates, @pvUser = 'AZEPEDA', @pvIP = '10.230.0.0'
+			
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvItemTemplate = 'P7501-Tplus'
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvItemTemplate = 'P7501-Tplus', @pvIdItem = 'P7540A0121000.'
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pbDynamicFieldIsDynamic = 0
+			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pbDynamicFieldIsDynamic = 1
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate ='ACCELA',@pvIdCurrency ='USD', @pvIdCountryComercialRealease='BR'
 <<<<<<< HEAD
@@ -63,7 +60,7 @@ Example:
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = '21113001', @pvIdFamily = 'STR',  @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 
 */
-CREATE PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
+ALTER PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
 @pvOptionCRUD					Varchar(2),
 @pvIdLanguageUser				Varchar(10) = 'ANG',
 @pvItemTemplate					Varchar(50) = '',
@@ -76,7 +73,10 @@ CREATE PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
 @piFolioOrig					Int			= 0,
 @piVersionOrig					Int			= 0,
 @piFolioClon					Int			= 0,
-@piVersionClon					Int			= 0
+@piVersionClon					Int			= 0,
+@pbDynamicFieldIsDynamic		Bit			= 0,
+@pvIdItem						Varchar(50) = ''								
+
 AS
 
 SET NOCOUNT ON
@@ -97,7 +97,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spItems_Templates_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvItemTemplate = '" + ISNULL(@pvItemTemplate,'NULL') + "', @pudtItemsTemplates = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected',  @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL') + "',  @pvIdFamily = '" + ISNULL(@pvIdFamily,'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spItems_Templates_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvItemTemplate = '" + ISNULL(@pvItemTemplate,'NULL') + "', @pudtItemsTemplates = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected',  @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL') + "',  @pvIdFamily = '" + ISNULL(@pvIdFamily,'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "', @pbDynamicFieldIsDynamic = '" + ISNULL(CAST(@pbDynamicFieldIsDynamic AS VARCHAR),'NULL') + ""
 	
 	--------------------------------------------------------------------
 	--Create Records
@@ -118,6 +118,11 @@ BEGIN TRY
 			Price,
 			Standard_Cost,
 			Quantity,
+			DynamicField_DefaultValue,
+			DynamicField_AssignedValue,
+			DynamicField_ReplaceCharacter,
+			DynamicField_IsDynamic,
+			DynamicField_IdItem,
 			Modify_By,
 			Modify_Date,
 			Modify_IP)
@@ -134,6 +139,11 @@ BEGIN TRY
 			Price,
 			Standard_Cost,
 			Quantity,
+			DynamicField_DefaultValue		= NULL,
+			DynamicField_AssignedValue		= NULL,
+			DynamicField_ReplaceCharacter	= NULL,
+			DynamicField_IsDynamic			= 0, -- Modification 23/04/24 (Vic, Angel)
+			DynamicField_IdItem				= NULL,
 			@pvUser,
 			GETDATE(),
 			@pvIP
@@ -176,7 +186,12 @@ BEGIN TRY
 											INNER JOIN Cat_Status_Commercial_Release SCR ON
 											CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release AND
 											SCR.Id_Language = @pvIdLanguageUser
-											WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable )
+											WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable ),
+		DynamicField_DefaultValue,
+		DynamicField_AssignedValue,
+		DynamicField_ReplaceCharacter,
+		DynamicField_IsDynamic,
+		DynamicField_IdItem
 			
 		FROM Items_Templates T WITH(NOLOCK) 
 		
@@ -224,8 +239,10 @@ BEGIN TRY
 			
 		WHERE 
 		(@pvItemTemplate = ''   OR T.Item_Template = @pvItemTemplate ) AND 
-		(@pvIdFamily = ''		OR T.Id_Family = @pvIdFamily )		
-
+		(@pvIdFamily = ''		OR T.Id_Family = @pvIdFamily ) AND 
+		(@pvIdItem = ''			OR T.Id_Item = @pvIdItem ) AND  -- 20240310 -- DynamicFields
+		(T.DynamicField_IsDynamic = @pbDynamicFieldIsDynamic) -- 20240310 -- DynamicFields
+		--***AQUI SE COMENTO*** OR T.DynamicField_IsDynamic IS NULL
 		ORDER BY I.Id_Item_Class, I.Id_Item_SubClass, T.Id_Family , T.Id_Category , T.Id_Line , T.[Required] ASC ,T.[Default] DESC, T.Id_Item ASC
 		
 	END
@@ -312,7 +329,12 @@ BEGIN TRY
 												INNER JOIN Cat_Status_Commercial_Release SCR ON
 												CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release AND
 												SCR.Id_Language = @pvIdLanguageUser
-												WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable )
+												WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable ),
+			DynamicField_DefaultValue,
+			DynamicField_AssignedValue,
+			DynamicField_ReplaceCharacter,
+			DynamicField_IsDynamic,
+			DynamicField_IdItem
 			
 		FROM Items_Templates T WITH(NOLOCK) 
 
@@ -365,7 +387,10 @@ BEGIN TRY
 			
 		WHERE 
 		(@pvItemTemplate = ''   OR T.Item_Template = @pvItemTemplate ) AND 
-		(@pvIdFamily = ''		OR T.Id_Family = @pvIdFamily )		
+		(@pvIdFamily = ''		OR T.Id_Family = @pvIdFamily ) AND		
+		(@pvIdItem = ''			OR T.Id_Item = @pvIdItem ) AND  -- 20240310 -- DynamicFields
+		(T.DynamicField_IsDynamic = @pbDynamicFieldIsDynamic OR T.DynamicField_IsDynamic IS NULL) -- 20240310 -- DynamicFields
+
 
 		ORDER BY I.Id_Item_Class, I.Id_Item_SubClass, T.Id_Family , T.Id_Category , T.Id_Line , T.[Required] ASC ,T.[Default] DESC, T.Id_Item ASC
 	END
@@ -403,7 +428,12 @@ BEGIN TRY
 											INNER JOIN Cat_Status_Commercial_Release SCR ON
 											CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release AND
 											SCR.Id_Language = @pvIdLanguageUser
-											WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable )
+											WHERE Id_Item = T.Id_Item AND Id_Country = @pvIdCountryComercialRealease ), @vStsAvailable ),
+		DynamicField_DefaultValue,
+		DynamicField_AssignedValue,
+		DynamicField_ReplaceCharacter,
+		DynamicField_IsDynamic,
+		DynamicField_IdItem
 			
 		FROM Items_Templates T WITH(NOLOCK) 
 		
@@ -450,7 +480,10 @@ BEGIN TRY
 		AND ISCL.Status = 1
 			
 		WHERE 
-		(@pvItemTemplate = ''   OR T.Item_Template = @pvItemTemplate ) 
+		(@pvItemTemplate = ''   OR T.Item_Template = @pvItemTemplate ) AND 
+		(@pvIdItem = ''			OR T.Id_Item = @pvIdItem ) 
+		--***AQUI SE COMENTO*** AND  -- 20240310 -- DynamicFields  
+		--***AQUI SE COMENTO*** (T.DynamicField_IsDynamic = @pbDynamicFieldIsDynamic OR T.DynamicField_IsDynamic IS NULL) -- 20240310 -- DynamicFields
 
 		ORDER BY I.Id_Item_Class, I.Id_Item_SubClass, FCL.Id_Category, FCL.Id_Line, T.[Required] ASC ,T.[Default] DESC, T.Id_Item ASC
 	
@@ -475,6 +508,11 @@ BEGIN TRY
 			Price,
 			Standard_Cost,
 			Quantity,
+			DynamicField_DefaultValue,
+			DynamicField_AssignedValue,
+			DynamicField_ReplaceCharacter,
+			DynamicField_IsDynamic,
+			DynamicField_IdItem,
 			Modify_By,
 			Modify_Date,
 			Modify_IP)
@@ -491,6 +529,11 @@ BEGIN TRY
 			Price,
 			Standard_Cost,
 			Quantity,
+			DynamicField_DefaultValue		= NULL,
+			DynamicField_AssignedValue		= NULL,
+			DynamicField_ReplaceCharacter	= NULL,
+			DynamicField_IsDynamic			= 0, -- Modification 23/04/24 (Vic, Angel)
+			DynamicField_IdItem				= NULL,
 			@pvUser,
 			GETDATE(),
 			@pvIP

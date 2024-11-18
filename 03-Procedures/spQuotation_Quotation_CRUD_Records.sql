@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spQuotation_Quotation_CRUD_Records]    Script Date: 02/05/2024 10:04:23 a. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spQuotation_Quotation_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spQuotation_Quotation_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spQuotation_Quotation_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spQuotation_Quotation_CRUD_Records
 GO
 
 /*
@@ -47,7 +39,7 @@ Example:
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R'
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R',
 													@pvIdLanguageUser = 'ANG',
-													@piFolio = 554, 
+													@piFolio = 1820, 
 													@piVersion = 1,
 													@pvIdCustomerBillTo = 5, 
 													@pvIdCustomerTypeBillTo = 'BILL', 
@@ -87,7 +79,7 @@ Example:
 
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R', @pvIdSalesExecutive = 'VIROJAS';
 */
-CREATE PROCEDURE [dbo].spQuotation_Quotation_CRUD_Records
+ALTER PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
 @pvOptionCRUD				Varchar(1),
 @pvIdLanguageUser			Varchar(10) = 'ANG',
 @piFolio					Int			= 0,
@@ -261,8 +253,8 @@ BEGIN TRY
 			Quotation_Status_Desc,
 			Id_Language_Translation, 
 			Language_Translation_Desc, 
-			Id_Payment_Terms,
-			Payment_Terms_Desc,
+			--Id_Payment_Terms, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
+			--Payment_Terms_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			Id_Sales_Executive,
 			Sales_Executive,
 			Creation_Date,
@@ -315,7 +307,7 @@ BEGIN TRY
 				(@pvIdValidityPrice			= ''	OR Id_Validity_Price			= @pvIdValidityPrice) AND   
 				(@pvIdQuotationStatus		= ''	OR Id_Quotation_Status			= @pvIdQuotationStatus) AND   
 				(@pvIdLanguageTranslation	= ''	OR Id_Language_Translation		= @pvIdLanguageTranslation) AND   
-				(@pvIdPaymentTerm			= ''	OR Id_Payment_Terms				= @pvIdPaymentTerm) AND   
+				--(@pvIdPaymentTerm			= ''	OR Id_Payment_Terms				= @pvIdPaymentTerm) AND   --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 				(@pvIdSalesExecutive		= ''	OR @pvIdSalesExecutive			= 'ADMIN'		OR Id_Sales_Executive			= @pvIdSalesExecutive) AND  
 				(@pvSPRNumber				= '0'	OR SPR_Number					LIKE '%' +  CAST(@pvSPRNumber AS VARCHAR) + '%') AND   
 				(@piPurchaseOrder			= 0		OR Purchase_Order				LIKE '%' +  CAST(@piPurchaseOrder AS VARCHAR) + '%') AND 

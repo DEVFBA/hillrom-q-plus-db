@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spPDF_Layout_Get_Info_HIRO900]    Script Date: 24/01/2024 03:16:35 p. m. ******/
+/****** Object:  StoredProcedure [dbo].[spPDF_Layout_Get_Info_HIRO900]    Script Date: 26/04/2024 03:21:25 p. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -47,7 +47,7 @@ SELECT DISTINCT
  WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
 	 AND Id_Line in ('HIRO900')
 	 AND Id_Item_Class = 'COMP'
-	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA','FOOTBOPEND') -- AZR Se quita el 'ACCEBARHOL' a solicitud de Alexis
+	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA','FOOTBOPEND', 'ACCEBARHOL') -- AZR Se quita el 'ACCEBARHOL' a solicitud de Alexis || AEGH 26/04 Claudia confirma que se debe regresar el ABF
  AND Id_Item NOT IN ('220K', 'MHS')
  
  UNION

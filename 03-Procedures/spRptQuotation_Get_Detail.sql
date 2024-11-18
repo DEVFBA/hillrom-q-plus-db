@@ -1,17 +1,9 @@
-
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spRptQuotation_Get_Detail]    Script Date: 7/2/2024 8:51:06 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spRptQuotation_Get_Detail
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spRptQuotation_Get_Detail'
-IF OBJECT_ID('[dbo].[spRptQuotation_Get_Detail]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spRptQuotation_Get_Detail
 GO
 /*
 Autor:		Alejandro Zepeda
@@ -19,20 +11,20 @@ Desc:		Report Quotation Detail
 Date:		12/02/2021
 Example:
 
-	EXEC spRptQuotation_Get_Detail @pvIdLanguageUser = 'ANG', @piFolio = 472, @piVersion = 1 
+	EXEC spRptQuotation_Get_Detail @pvIdLanguageUser = 'ANG', @piFolio = 1816, @piVersion = 1 
 	select * from Quotation_Detail where Folio = 295
 
 	SELECT * FROM Quotation_Header WHERE Folio = 2 AND [Version] = 1 ORDER BY Id_Item
 	SELECT * FROM Quotation_Detail WHERE Folio = 2 AND [Version] = 1 order by Item_Template
 */
-CREATE PROCEDURE [dbo].spRptQuotation_Get_Detail
+ALTER PROCEDURE [dbo].[spRptQuotation_Get_Detail]
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @piFolio					Int,
 @piVersion					Int
 AS
 
 	SELECT
-			Quotation_Payment_Terms		= Q.Payment_Terms_Desc,
+			--Quotation_Payment_Terms		= Q.Payment_Terms_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			Header_Model				= IH.Model,
 			Header_Country				= C.Short_Desc,
 			Header_Weight				= IH.[Weight],
@@ -52,6 +44,7 @@ AS
 													WHERE Id_Year_Warranty =  QH.Id_Year_Warranty ),''), --Validar
 			Header_Taxes_Total			= QH.General_Taxes_Total,
 			Header_General_Taxes_Warranty= QH.General_Taxes_Warranty,
+			Header_Total				= QH.Total, -- AEGH 23/06/24 Q+SO021 Adición de este dato para el PDF
 		    Header_Grand_Total			= QH.Grand_Total,
 			Detail_Id_Header			= QD.Id_Header,
 			Detail_Id_Item				= ID.Id_Item,

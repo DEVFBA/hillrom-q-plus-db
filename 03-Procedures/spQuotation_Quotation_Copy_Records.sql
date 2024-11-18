@@ -276,7 +276,8 @@ BEGIN TRY
 		INNER JOIN Items_Templates IT ON
 		QD.Item_Template = IT.Item_Template AND
 		QD.Id_Item		 = IT.Id_Item AND
-		Q.Id_Price_List  = IT.Id_Price_List
+		Q.Id_Price_List  = IT.Id_Price_List AND 
+		IT.DynamicField_IsDynamic = 0	-- 20240310 -- DynamicFields
 	
 		WHERE Q.Folio	 = @piFolio AND Q.[Version] = @piVersion	
 

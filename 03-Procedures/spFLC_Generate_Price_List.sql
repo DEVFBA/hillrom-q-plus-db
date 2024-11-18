@@ -154,6 +154,7 @@ BEGIN TRY
 		
 		INNER JOIN FLC_Customer_Categories AS CC
 		ON C.Id_Customer = CC.Id_Customer
+		AND CC.[Status] = 1
 
 		INNER JOIN FLC_Cat_Categories AS Cat
 		ON CC.Id_FLC_Category = Cat.Id_FLC_Category

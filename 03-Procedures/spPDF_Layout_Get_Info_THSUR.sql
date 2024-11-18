@@ -22,7 +22,7 @@ Example:
 
 
 */
-CREATE PROCEDURE [dbo].spPDF_Layout_Get_Info_THSUR
+CREATE PROCEDURE [dbo].[spPDF_Layout_Get_Info_THSUR]
 AS
 
 /*****************************************************************************/
@@ -214,6 +214,7 @@ SELECT DISTINCT
 	 AND Id_Item_Class = 'ACCE'
 	 AND Id_Item_SubClass IN ('USSURFACES', 'NP50SUR')
 	 AND Item_Long_Desc LIKE 'NP50%'
+	 AND Id_Item <> 'N5-P50A4F.'  -- Modificación AEGH 18/12/23
  ORDER BY Id_Item
 
  /*****************************************************************************/
