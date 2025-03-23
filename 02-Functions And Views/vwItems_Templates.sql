@@ -89,3 +89,5 @@ Item.Id_Item_Class = SubClass.Id_Item_Class AND
 Item.Id_Item_SubClass = SubClass.Id_Item_SubClass AND
 SubClass.[Status] = 1
 
+WHERE (Template.DynamicField_IsDynamic = 0 OR Template.DynamicField_IsDynamic IS NULL) -- 20240310 -- DynamicFields
+

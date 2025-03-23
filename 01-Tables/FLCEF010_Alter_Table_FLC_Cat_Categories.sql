@@ -15,21 +15,25 @@ ADD [Order] Smallint NULL
 GO
 
 
-SELECT* FROM FLC_Cat_Categories
-GO
+SELECT* FROM FLC_Cat_Categories 
 
-SELECT* FROM FLC_Cat_Categories
+SELECT* FROM FLC_Cat_Groups
 GO
 
 SELECT* FROM FLC_Cat_Families
 GO
 
-ALTER TABLE FLC_Cat_Categories
-ALTER COLUMN [Order]   varchar(10)   NOT NULL;
+/*==============================================================*/
+/* Alter Tables: NOT NULL			                             */
+/*==============================================================*/
 
+/*
+ALTER TABLE FLC_Cat_Categories
+ALTER COLUMN [Order] Smallint NOT NULL;
 
 ALTER TABLE FLC_Cat_Groups
-ALTER COLUMN [Order]   varchar(10)   NOT NULL;
+ALTER COLUMN [Order] Smallint NOT NULL;
 
 ALTER TABLE FLC_Cat_Families
-ALTER COLUMN [Order]   varchar(10)   NOT NULL;
+ALTER COLUMN [Order] Smallint NOT NULL;
+*/

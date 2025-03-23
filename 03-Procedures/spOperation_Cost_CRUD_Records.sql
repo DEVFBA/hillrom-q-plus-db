@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spOperation_Cost_CRUD_Records]    Script Date: 01/05/2024 10:12:12 a. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spOperation_Cost_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spOperation_Cost_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spOperation_Cost_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spOperation_Cost_CRUD_Records
 GO
 
 /*
@@ -34,10 +26,10 @@ Example:
 			EXEC spOperation_Cost_CRUD_Records @pvOptionCRUD = 'W'
  
 */
-CREATE PROCEDURE [dbo].spOperation_Cost_CRUD_Records
+ALTER PROCEDURE [dbo].[spOperation_Cost_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
-@pvIdItem						Varchar(10) = '',
+@pvIdItem						Varchar(50) = '', -- 01/05/24 AEGH, VRC -- Correction from 10 to 50
 @pudtOperationCost				UDT_Operation_Cost Readonly,
 @pvUser							Varchar(50) = '',
 @pvIP							Varchar(20) = ''
