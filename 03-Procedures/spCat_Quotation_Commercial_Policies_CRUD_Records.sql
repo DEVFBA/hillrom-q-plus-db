@@ -20,21 +20,25 @@ Desc:		Cat_Quotation_Commercial_Policies | Create - Read - Upadate - Delete
 Date:		05/01/2021
 Example:
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX' , @pvIdSalesType = 'DIRSA', @pvIdIncoterm = 'EXW', @pvIdCurrency = 'USD', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG'
+			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'SPA'
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX'
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX', @pvIdSalesType = 'DISSA' 
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX', @pvIdSalesType = 'DISSA', @pvIdIncoterm = 'EXW'
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX', @pvIdSalesType = 'DIRSA', @pvIdIncoterm = 'EXW', @pvIdCurrency = 'USD'
 
+			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA'
+			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ANGUTIERRE'
+
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX' , @pvIdSalesType = 'DIRSA', @pvIdIncoterm = 'EXW', @pvIdCurrency = 'USD', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			
 			spCat_Quotation_Commercial_Policies_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX', @pvIdSalesType = 'DIRSA', @pvIdIncoterm = 'EXW', @pvIdCurrency = 'USD'
 
-			
+SELECT * FROM Cat_Quotation_Commercial_Policies			
 			
 */
 CREATE PROCEDURE [dbo].spCat_Quotation_Commercial_Policies_CRUD_Records
 @pvOptionCRUD		Varchar(1),
+@pvIdUser			Varchar(10) = '',
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @pvIdCountry		Varchar(10) = '',
 @pvIdSalesType		Varchar(10) = '',
@@ -98,7 +102,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	--Reads Records
 	--------------------------------------------------------------------
-	IF @pvOptionCRUD = 'R'
+	IF @pvOptionCRUD = 'R' AND @pvIdUser = ''
 	BEGIN
 		SELECT 
 		ST.Id_Language,
@@ -143,6 +147,58 @@ BEGIN TRY
 		ORDER BY CST.Id_Country, CST.Id_Sales_Type, CST.Id_Incoterm, CST.Id_Currency		
 	END
 
+	--------------------------------------------------------------------
+	--Reads Records By User
+	--------------------------------------------------------------------
+	IF @pvOptionCRUD = 'R' AND @pvIdUser <> ''
+	BEGIN
+		SELECT 
+		ST.Id_Language,
+
+		CST.Id_Country,
+		Country_Desc = C.Short_Desc,
+
+		CST.Id_Sales_Type,
+		Sales_Type_Desc = ST.Short_Desc,
+
+		CST.Id_Incoterm,
+		Incoterm_Desc = I.Short_Desc,
+
+		CST.Id_Currency,
+		Currency_Desc = CR.Short_Desc,
+
+		CST.[Status],
+		CST.Modify_Date,
+		CST.Modify_By,
+		CST.Modify_IP
+		FROM Cat_Quotation_Commercial_Policies CST WITH(NOLOCK)
+		
+		INNER JOIN Cat_Countries C WITH(NOLOCK) ON 
+		CST.Id_Country = C.Id_Country
+		
+		INNER JOIN Cat_Sales_Types ST WITH(NOLOCK) ON 
+		CST.Id_Sales_Type = ST.Id_Sales_Type AND
+		ST.Id_Language = @pvIdLanguageUser
+
+		INNER JOIN Users_Sale_Types UST WITH(NOLOCK) ON 
+		UST.Id_Sales_Type = ST.Id_Sales_Type AND
+		UST.Id_Language = ST.Id_Language AND
+		UST.[User] = @pvIdUser
+
+		INNER JOIN Cat_Incoterm  I WITH(NOLOCK) ON 
+		CST.Id_Incoterm = I.Id_Incoterm AND
+		I.Id_Language = @pvIdLanguageUser
+		
+		INNER JOIN Cat_Currencies CR WITH(NOLOCK) ON 
+		CST.Id_Currency = CR.Id_Currency AND
+		CR.Id_Language = @pvIdLanguageUser
+
+		WHERE (@pvIdCountry = '' OR CST.Id_Country = @pvIdCountry) AND
+			  (@pvIdSalesType = '' OR CST.Id_Sales_Type = @pvIdSalesType) AND
+			  (@pvIdIncoterm = '' OR CST.Id_Incoterm = @pvIdIncoterm) AND
+			  (@pvIdCurrency = '' OR CST.Id_Currency = @pvIdCurrency)
+		ORDER BY CST.Id_Country, CST.Id_Sales_Type, CST.Id_Incoterm, CST.Id_Currency		
+	END
 	--------------------------------------------------------------------
 	--Update Records
 	--------------------------------------------------------------------
