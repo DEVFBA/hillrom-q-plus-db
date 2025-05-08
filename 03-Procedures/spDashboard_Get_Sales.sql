@@ -22,14 +22,15 @@ Periods
 			CY = Acumulado Anual Actual <Year To Date>
 
 Example:
-	EXEC spDashboard_Get_Sales @pvIdLanguageUser = 'ANG', @pvPeriod = 'CY', @pvUser = 'ANGUTIERRE', @pvIdZone = ''
-	EXEC spDashboard_Get_Sales @pvIdLanguageUser = 'ANG', @pvPeriod = 'LY', @pvUser = 'ANGUTIERRE', @pvIdZone = ''
+	EXEC spDashboard_Get_Sales @pvIdLanguageUser = 'ANG', @pvPeriod = 'CY', @pvUser = 'ANGUTIERRE', @pvIdZone = '', @pvRole = 'ADMIN'
+	EXEC spDashboard_Get_Sales @pvIdLanguageUser = 'ANG', @pvPeriod = 'LY', @pvUser = 'ANGUTIERRE', @pvIdZone = '', @pvRole = 'ADMIN'
 */
 CREATE PROCEDURE [dbo].spDashboard_Get_Sales
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @pvPeriod			Varchar(20) = 'CY',
 @pvUser				Varchar(20) = '',
-@pvIdZone			Varchar(10) = '' 
+@pvIdZone			Varchar(10) = '',
+@pvRole				Varchar(10) = '' -- AEGH 05/08/25 -- Multiline Users Project
 
 AS
 
@@ -38,7 +39,7 @@ AS
 	/*============================================================*/
 	DECLARE @vInitialDate			Varchar(8)  = (SELECT InitialDate FROM fnGetPeriodDates(@pvPeriod))
 	DECLARE @vFinalDate				Varchar(8)	= (SELECT FinalDate FROM fnGetPeriodDates(@pvPeriod))
-	DECLARE @vUserRol				Varchar(10)  = ISNULL((SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser), '')
+	--DECLARE @vUserRol				Varchar(10)  = ISNULL((SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser), '') -- AEGH 05/08/25 -- Multiline Users Project
 	DECLARE @vIdSalesExecutive		Varchar(10) = (CASE WHEN @vUserRol = 'ADMIN' THEN '' ELSE @pvUser END)
 
 	/*============================================================*/
@@ -59,9 +60,12 @@ AS
 	INNER JOIN Security_Users U ON 
 	Q.Id_Sales_Executive = U.[User]
 	
+	INNER JOIN Security_User_Roles SUR ON -- AEGH 05/08/25 -- Multiline Users Project
+	U.[User] = SUR.[User]				  -- AEGH 05/08/25 -- Multiline Users Project
+	
 	WHERE Q.Id_Quotation_Status = 'ACCE'
 	AND (@vIdSalesExecutive = '' OR Q.Id_Sales_Executive = @vIdSalesExecutive)
-	AND (@pvIdZone = '' OR U.Id_Zone = @pvIdZone)
+	AND (@pvIdZone = '' OR SUR.Id_Zone = @pvIdZone) -- AEGH 05/08/25 -- Multiline Users Project
 	AND CONVERT(varchar(8), Q.Creation_Date, 112) BETWEEN @vInitialDate AND @vFinalDate
 	GROUP BY	 MONTH(Q.Creation_Date),  
 				DATENAME(MONTH, Q.Creation_Date)
