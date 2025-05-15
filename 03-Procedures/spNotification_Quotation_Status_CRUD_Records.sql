@@ -35,7 +35,8 @@ create PROCEDURE [dbo].spNotification_Quotation_Status_CRUD_Records
 @piFolio				Int			 = 0,
 @piVersion				Int			 = 0,
 @pbNotificationSend		Bit			 = NULL,-- 0 = Not Sent | 1 = Sent 
-@pvUser					Varchar(50)  = 'sa'
+@pvUser					Varchar(50)  = 'sa',
+@pvZone				    Varchar(10) --- AEGH 25/05/14 Project Multiline Users
 
 AS
 
@@ -88,7 +89,7 @@ BEGIN TRY
 		Q.Id_Sales_Executive = U.[User]
 
 		INNER JOIN Cat_Region_Zones RZ ON 
-		U.Id_Zone = RZ.Id_Zone 
+		@pvZone = RZ.Id_Zone 
 	
 		INNER JOIN Cat_Regions RE ON
 		RZ.Id_Region =  RE.Id_Region

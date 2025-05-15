@@ -34,7 +34,9 @@ ALTER PROCEDURE [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Rec
 @piIdNotification		Int			= 0,
 @piFolio				Int			= 0,
 @piVersion				Int			= 0,
-@pvUser					Varchar(50) = 'sa'
+@pvUser					Varchar(50) = 'sa',
+@pvZone					Varchar(10),
+@pvRole					Varchar(10)
 
 AS
 
@@ -125,8 +127,8 @@ BEGIN TRY
 		Zones.[Status] = 1
 
 		INNER JOIN Security_Users AS Users
-		ON USERS.Id_Zone = Zones.Id_Zone
-		AND Users.Id_Role = Workflow.Id_Role AND 
+		ON @pvZone = Zones.Id_Zone
+		AND @pvRole = Workflow.Id_Role AND 
 		Users.[Status] = 1
 		
 		WHERE (@piFolio		= 0	OR Workflow.Folio	  = @piFolio) AND 

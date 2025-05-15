@@ -70,7 +70,9 @@ CREATE PROCEDURE [dbo].[spQuotation_Integration_INS_Records]
 @pudtQuotationCommissions		UDT_Quotation_Commissions Readonly,
 @pvIdQuotationStatus			Varchar(10),
 @pvUser							Varchar(50)	= '',
-@pvIP							Varchar(20)	= ''
+@pvIP							Varchar(20)	= '',
+@pvZone							Varchar(10), --- AEGH 25/05/14 Project Multiline Users
+@pvRole							Varchar(10)
 AS
 
 
@@ -131,7 +133,7 @@ BEGIN TRY
 		--Update Status QuotationS
 		------------------------
 		INSERT INTO @TableResponseQ
-		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP			
+		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP, @pvZone = @pvZone
 								
 
 		INSERT INTO @TableResponse
@@ -148,7 +150,7 @@ BEGIN TRY
 		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation  @piFolio = @piFolio, @piVersion = @piVersion, @pvUser = @pvUser, @pvIP = @pvIP
 
 		IF @pvIdQuotationStatus = 'ROUT'
-		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvRole = @pvRole, @pvZone = @pvZone
 			
 
 

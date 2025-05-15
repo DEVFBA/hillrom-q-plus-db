@@ -40,7 +40,7 @@ BEGIN TRY
 	--Work Variables
 	--------------------------------------------------------------------
 	DECLARE @vDescOperationCRUD		Varchar(50) = dbo.fnGetOperationCRUD('C')
-	DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)
+	--DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)  --- AEGH 25/05/14 Project Multiline Users
 	DECLARE @tblDscountTypes		TABLE (Id_Header Smallint, Item_Template Varchar(50),Total Float, Id_Discount_Type Varchar(10), Approval_Group Varchar(20))
 	DECLARE @fMinimumRouteAmount	FLOAT = (SELECT [Value] FROM Cat_General_Parameters WHERE Id_Parameter = 21)
 	DECLARE @fExchangeRate			FLOAT = (SELECT ER.Exchange_Rate FROM Cat_Exchange_Rates ER
@@ -322,6 +322,12 @@ BEGIN TRY
 			-------------------------------------------------------------------
 			-- Update Flow PRAPP Rol
 			-------------------------------------------------------------------
+			/* AEGH 25/05/14 Project Multiline Users 
+			   This part has been disabled since now we do not have Preapprovers in Q+,
+			   in case the feature requires to be enabled again it is important to consider that
+			   Id_Role is now in Security_User_Roles Table
+			*/
+			/*
 			IF @pvIdRol = 'PRAPP'
 			BEGIN 
 				 UPDATE Approval_Workflow
@@ -329,6 +335,7 @@ BEGIN TRY
 				 WHERE Folio = @piFolio AND [Version] = @piVersion 
 				 AND Id_Role = @pvIdRol
 			END 
+			*/
 		END	
 
 	END
