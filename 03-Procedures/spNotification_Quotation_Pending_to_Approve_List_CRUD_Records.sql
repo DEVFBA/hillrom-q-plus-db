@@ -70,7 +70,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + " "
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + ", @pvZone = " + ISNULL(CAST(@pvZone AS VARCHAR),'NULL') + ", @pvRole = " + ISNULL(CAST(@pvRole AS VARCHAR),'NULL') + " "
 	
 
 	--------------------------------------------------------------------
@@ -108,7 +108,7 @@ BEGIN TRY
 		Approval_Roles.[Version],
 		Quotation.Customer_Bill_To,
 		Quotation.Country_Bill_To,
-		Users.[User],
+		Users_Roles.[User], -- AEGH Multiline Users Project 05/20/25
 		Users.Name,
 		Users.Email
 		FROM @tblWF_CurrentFolios AS Approval_Roles 
@@ -125,16 +125,26 @@ BEGIN TRY
 		INNER JOIN Cat_Zones_Countries AS Zones
 		ON Quotation.Id_Country_Bill_To = Zones.Id_Country AND
 		Zones.[Status] = 1
+		/** AEGH 05/20/25 Multiline Users Project **/
+		INNER JOIN Security_User_Roles AS Users_Roles
+		--ON Zones.Id_Zone = 'LAN'
+		--AND Workflow.Id_Role = 'SAAPP' AND
+		ON Users_Roles.Id_Zone = Zones.Id_Zone
+		AND Users_Roles.Id_Role = Workflow.Id_Role AND 
+		Users_Roles.[Status] = 1
 
 		INNER JOIN Security_Users AS Users
-		ON @pvZone = Zones.Id_Zone
-		AND @pvRole = Workflow.Id_Role AND 
-		Users.[Status] = 1
+		ON Users_Roles.[User] = Users.[User]
+		AND Users.[Status] =1
+		/*INNER JOIN Security_Users AS Users
+		ON Users.Id_Zone = Zones.Id_Zone
+		AND Users.Id_Role = Workflow.Id_Role AND 
+		Users.[Status] = 1*/
 		
 		WHERE (@piFolio		= 0	OR Workflow.Folio	  = @piFolio) AND 
 			  (@piVersion	= 0	OR Workflow.[Version] = @piVersion)  
 		
-		ORDER BY Users.[User], Approval_Roles.Folio, Approval_Roles.[Version]
+		ORDER BY Users_Roles.[User], Approval_Roles.Folio, Approval_Roles.[Version]
 
 		------------------------------------------------------------
 

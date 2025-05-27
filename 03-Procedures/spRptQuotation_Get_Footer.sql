@@ -41,12 +41,19 @@ AS
 			Symbol
 		
 	FROM [fnQuotation](@pvIdLanguageUser) Q
+	/** AEGH 25/05/22 Project Multiline Users **/
+	--INNER JOIN Security_Users U ON 
+	--Q.Id_Sales_Executive = U.[User]
+
+	INNER JOIN Security_User_Roles UR ON 
+	Q.Id_Sales_Executive = UR.[User]
 
 	INNER JOIN Security_Users U ON 
-	Q.Id_Sales_Executive = U.[User]
+	UR.[User] = U.[User]
+	/** Finish AEGH 25/05/22 Project Multiline Users **/
 
 	INNER JOIN Cat_Region_Zones RZ ON 
-	U.Id_Zone = RZ.Id_Zone 
+	UR.Id_Zone = RZ.Id_Zone 
 	
 	INNER JOIN Cat_Regions RE ON
 	RZ.Id_Region =  RE.Id_Region

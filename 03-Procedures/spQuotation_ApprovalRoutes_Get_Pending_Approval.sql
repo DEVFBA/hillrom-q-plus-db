@@ -20,14 +20,13 @@ Example:
 
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'BRLIMA'
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'DICASADO', @piFolio = 437
-	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'LUMUÑOZ', @pvUserSaleExecutive = 'ADVEGA'
-	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'LUMUÑOZ', @piFolio = 2, @pvUserSaleExecutive = 'ADVEGA'
+	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'LUMUï¿½OZ', @pvUserSaleExecutive = 'ADVEGA'
+	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'LUMUï¿½OZ', @piFolio = 2, @pvUserSaleExecutive = 'ADVEGA'
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'DICASADO', @piFolio = 568
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'DICASADO', @piFolio = 571
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'MAQUINTERO', @pvUserSaleExecutiveName = 'Rojas'
 */
-CREATE PROCEDURE [dbo].spQuotation_ApprovalRoutes_Get_Pending_Approval
-@pvIdLanguageUser			Varchar(10) = 'ANG',
+CREATE PROCEDURE [dbo].@pvIdLanguageUser			Varchar(10) = 'ANG',
 @pvUser						Varchar(50),
 @piFolio					Int = 0,
 @pvUserSaleExecutive		Varchar(50) = '' ,
@@ -104,8 +103,11 @@ AS
 		AW.[Version] = CF.[Version] AND 
 		AW.Approval_Flow_Sequence = CF.Approval_Flow_Sequence
 
-		INNER JOIN Security_Users USR ON
+		/** AEGH Project Multiline Users 05/19/25 **/
+		INNER JOIN Security_User_Roles USR ON
 		AW.Id_Role = USR.Id_Role
+		/*INNER JOIN Security_Users USR ON
+		AW.Id_Role = USR.Id_Role*/
 
 		INNER JOIN Cat_Zones_Countries ZC ON 
 		USR.Id_Zone = ZC.Id_Zone AND 
