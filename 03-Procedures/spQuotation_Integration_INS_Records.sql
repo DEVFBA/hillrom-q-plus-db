@@ -87,6 +87,11 @@ BEGIN TRY
 	DECLARE @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
 	DECLARE @TableResponse TABLE([Successful] bit, MessageType varchar(30), [Message] varchar(max), IdTransacLog numeric(18,0))
 	DECLARE @TableResponseQ TABLE([Successful] bit, MessageType varchar(30), [Message] varchar(max), IdTransacLog numeric(18,0), Folio Numeric, [Version] INT)
+	/** AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
+	DECLARE @pvIdSalesType	VARCHAR(10)	
+
+	SET @pvIdSalesType = (SELECT Id_Sales_Type FROM Quotation WHERE Folio = @piFolio)
+	/** End AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
 
 
 	--------------------------------------------------------------------
@@ -144,7 +149,7 @@ BEGIN TRY
 		------------------------
 
 		INSERT @TableResponse
-		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = @piFolio, @piVersion = @piVersion, @pvUser = @pvUser, @pvIP = @pvIP
+		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = @piFolio, @piVersion = @piVersion, @pvIdSalesType = @pvIdSalesType, @pvIdLanguage = 'ANG', @pvUser = @pvUser, @pvIP = @pvIP -- AEGH 25/05/30 Project Approval Routes Direct & Indirect Sales || Add pvIdSalesType and pvIdLanguage
 	
 		INSERT INTO @TableResponse
 		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation  @piFolio = @piFolio, @piVersion = @piVersion, @pvUser = @pvUser, @pvIP = @pvIP
