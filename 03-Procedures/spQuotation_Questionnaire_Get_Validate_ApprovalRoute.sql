@@ -25,7 +25,7 @@ Example:
 			DECLARE  @udtQuotation_Discounts	UDT_Quotation_Discounts 
 
 			INSERT INTO @udtQuotation_Discounts
-			SELECT 'ACCELLA', 52.0, 'CR' 
+			SELECT 'ACCELLA', 100.0, 'FR','ANG','DISSA' 
 
 			EXEC spQuotation_Questionnaire_Get_Validate_ApprovalRoute  @pudtQuotation_Discounts = @udtQuotation_Discounts
 
@@ -88,7 +88,9 @@ AS
 		Z.[Status] = 1
 
 		INNER JOIN @pudtQuotation_Discounts udt ON
-		I.Id_Item = udt.Id_Item
+		I.Id_Item = udt.Id_Item AND 
+		AD.Id_Language = udt.Id_Language AND
+		AD.Id_Sales_Type = udt.Id_Sales_Type
 
 		INNER JOIN Cat_Zones_Countries ZC ON
 		ZC.Id_Zone = Z.Id_Zone AND
