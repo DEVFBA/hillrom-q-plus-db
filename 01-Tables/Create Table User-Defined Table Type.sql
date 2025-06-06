@@ -310,7 +310,7 @@ CREATE TYPE [dbo].[UDT_Approval_Workflow]AS TABLE
 GO
 
 /* ==================================================================================*/
--- 13 UDT_Approved_Discounts
+-- 13 UDT_Approved_Discounts -- EFPSLI008
 /* ==================================================================================*/
 PRINT 'Crea 13  UDT_Approved_Discounts' 
 IF type_id('[dbo].[UDT_Approved_Discounts]') IS NOT NULL
@@ -323,8 +323,8 @@ CREATE TYPE [dbo].[UDT_Approved_Discounts]AS TABLE
    Id_Discount_Category         Varchar(10)          not null,
    Id_Discount_Type             Varchar(10)          not null,
    Id_Zone                      Varchar(10)          not null,
-   Id_Approval                  smallint             not null,
-   Botton_Limit                 float                not null,
+   Id_Approval_Flow             smallint             not null,
+   Bottom_Limit                 float                not null,
    Upper_Limit                  float                not null,
    Apply_Amount                 bit                  not null,
    Approval_Group               Varchar(20)          null,
