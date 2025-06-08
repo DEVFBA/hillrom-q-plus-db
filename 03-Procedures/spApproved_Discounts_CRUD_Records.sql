@@ -55,8 +55,7 @@ BEGIN TRY
 	--Work Variables
 	--------------------------------------------------------------------
 	DECLARE @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
-	DECLARE @tableApprovedDiscounts TABLE (Id_Discount Smallint, Id_Discount_Category Varchar(10), Id_Discount_Type Varchar(10), Id_Zone Varchar(10), Id_Approval Smallint, Bottom_Limit Float, Upper_Limit Float, Apply_Amount Bit, Approval_Group Varchar(20), Id_Language Varchar(10), Id_Sales_Type Varchar(10))
-	--DECLARE @maxIdDiscount Smallint
+
 	--------------------------------------------------------------------
 	--Variables for log control
 	--------------------------------------------------------------------

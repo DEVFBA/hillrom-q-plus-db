@@ -28,7 +28,11 @@ CREATE PROCEDURE [dbo].spApproval_Tracker_CRUD_Records
 @pvIdLanguageUser		Varchar(10)		= '',
 @pvUser					Varchar(50)		= '',
 @pvIdApprovalFlow		Smallint		= 0,
-@pvIdRole				Varchar(10)		= ''
+@pvIdRole				Varchar(10)		= '',
+@pvIP					Varchar(20)		= '',
+@pvShortDesc			Varchar(50)		= '',
+@pudtApprovalTracker	UDT_Approval_Tracker READONLY,
+@pvLongDesc				Varchar(255)	= ''
 AS
 SET NOCOUNT ON
 BEGIN TRY
@@ -36,6 +40,7 @@ BEGIN TRY
 	--Work Variables
 	--------------------------------------------------------------------
 	Declare @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
+	DECLARE @nextIdApprovalFlow Smallint = (SELECT MAX(Id_Approval_Flow) FROM Cat_Approvals_Flows) + 1
 
 	--------------------------------------------------------------------
 	--Variables for log control
@@ -51,6 +56,36 @@ BEGIN TRY
 	--Create Records
 	--------------------------------------------------------------------
 	
+	IF @pvOptionCRUD = 'C'
+	BEGIN
+		EXEC spCat_Approvals_Flows_CRUD_Records 
+				@pvOptionCRUD = 'C', 
+				@pvIdLanguageUser = 'ANG', 
+				@piIdApprovalFlow = @nextIdApprovalFlow, 
+				@pvShortDesc = @pvShortDesc, 
+				@pvLongDesc = @pvLongDesc, 
+				@pvUser = @pvUser, 
+				@pvIP = @pvIP
+
+		INSERT INTO Approval_Tracker (
+			Id_Role,
+			Id_Approval_Flow,
+			Modify_By,
+			Modify_Date,
+			Modify_IP,
+			Apply_File
+		)
+		SELECT
+			UDT.Id_Role,
+			@nextIdApprovalFlow,
+			@pvUser,
+			GETDATE(),
+			@pvIP,
+			0
+		FROM @pudtApprovalTracker AS UDT
+
+
+	END
 
 
 
@@ -84,8 +119,12 @@ BEGIN TRY
 	--Update Records
 	--------------------------------------------------------------------
 	
-
-
+	IF @pvOptionCRUD = 'U'
+	BEGIN
+		SET @bSuccessful	= 0
+		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
+		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+	END
 
 	--------------------------------------------------------------------
 	--Delete Records
