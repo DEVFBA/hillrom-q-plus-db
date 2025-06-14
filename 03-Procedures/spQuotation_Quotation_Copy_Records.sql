@@ -63,13 +63,13 @@ BEGIN TRY
 		--------------------------------
 		--Validations
 		--------------------------------
-		IF @vIdQuotationStatus IN ('SENT', 'ACCE', 'CURE', 'OUDA', 'CANC')
+		IF @vIdQuotationStatus IN ('SENT', 'ACCE', 'OUDA', 'CANC')
 		BEGIN  -- New Folio & Version
 			SET @iFolioNew		= (SELECT ISNULL(MAX(Folio) + 1 ,1) FROM Quotation)
 			SET @iVersionNew	= 1
 	
 		END
-		ELSE IF @vIdQuotationStatus = 'DIRE'
+		ELSE IF @vIdQuotationStatus IN ('DIRE', 'CURE') -- AEGH 06/13/25 Q+SO048 Se agrega Customer Rejected
 		BEGIN  -- Only New Version
 			SET @iFolioNew		= @piFolio
 			SET @iVersionNew	= (SELECT MAX([Version]) + 1 FROM Quotation WHERE Folio = @piFolio)

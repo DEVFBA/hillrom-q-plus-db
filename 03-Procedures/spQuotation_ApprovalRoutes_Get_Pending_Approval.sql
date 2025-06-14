@@ -27,6 +27,7 @@ Example:
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'MAQUINTERO', @pvUserSaleExecutiveName = 'Rojas'
 */
 CREATE PROCEDURE [dbo].@pvIdLanguageUser			Varchar(10) = 'ANG',
+@pvIdLanguageUser			Varchar(10) = 'ANG',
 @pvUser						Varchar(50),
 @piFolio					Int = 0,
 @pvUserSaleExecutive		Varchar(50) = '' ,
@@ -134,10 +135,19 @@ AS
 		Q.Id_Quotation_Status = CQS.Id_Quotation_Status AND
 		CQS.Id_Language = @pvIdLanguageUser
 
+		/** AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale
 		INNER JOIN Approvers_Sales_Executive ASE ON 
 		Q.Id_Sales_Executive = ASE.Sales_Executive 
 		AND ASE.[Status] = 1
 		AND ASE.[User] = @pvUser
+		**/
+
+		/** AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale **/
+		INNER JOIN Users_Sale_Types UST ON
+		Q.Id_Sales_Type = UST.Id_Sales_Type
+		AND UST.Id_Language = @pvIdLanguageUser
+		AND UST.[User] =  @pvUser
+		/** End AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale **/
 
 		WHERE USR.[User] IN (SELECT User_Approver FROM @tblApprovers) 	 AND
 		(@pvUserSaleExecutive = '' OR Q.Id_Sales_Executive = @pvUserSaleExecutive) AND

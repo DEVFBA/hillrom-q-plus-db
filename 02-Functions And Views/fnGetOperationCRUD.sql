@@ -40,6 +40,7 @@ BEGIN
 								WHEN 'W'	THEN 'Download Records'
 								WHEN 'J'	THEN 'Job Execution'
 								WHEN 'V'	THEN 'Validate Existence'
+								WHEN 'E'	THEN 'Execute'
 								ELSE 'N/A'
 							 END
 	

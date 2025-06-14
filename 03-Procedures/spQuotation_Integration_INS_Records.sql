@@ -90,7 +90,7 @@ BEGIN TRY
 	/** AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
 	DECLARE @pvIdSalesType	VARCHAR(10)	
 
-	SET @pvIdSalesType = (SELECT Id_Sales_Type FROM Quotation WHERE Folio = @piFolio)
+	SET @pvIdSalesType = (SELECT Id_Sales_Type FROM Quotation WHERE Folio = @piFolio AND [Version] = @piVersion)
 	/** End AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
 
 
