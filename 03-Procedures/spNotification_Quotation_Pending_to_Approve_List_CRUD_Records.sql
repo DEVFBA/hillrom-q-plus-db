@@ -35,8 +35,8 @@ ALTER PROCEDURE [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Rec
 @piFolio				Int			= 0,
 @piVersion				Int			= 0,
 @pvUser					Varchar(50) = 'sa',
-@pvZone					Varchar(10),
-@pvRole					Varchar(10)
+@pvZone					Varchar(10) = '',
+@pvRole					Varchar(10) = ''
 
 AS
 
@@ -140,6 +140,12 @@ BEGIN TRY
 		ON Users.Id_Zone = Zones.Id_Zone
 		AND Users.Id_Role = Workflow.Id_Role AND 
 		Users.[Status] = 1*/
+
+		/** AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
+		INNER JOIN Users_Sale_Types AS UST ON
+		UST.Id_Sales_Type = Quotation.Id_Sales_Type
+		AND Users_Roles.[User] = UST.[User]
+		/** End AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
 		
 		WHERE (@piFolio		= 0	OR Workflow.Folio	  = @piFolio) AND 
 			  (@piVersion	= 0	OR Workflow.[Version] = @piVersion)  
