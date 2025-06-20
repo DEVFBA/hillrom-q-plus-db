@@ -38,6 +38,7 @@ CREATE PROCEDURE [dbo].spCat_Zones_Countries_CRUD_Records
 @pvIdZone			Varchar(10) = '',
 @pvIdCountry		Varchar(10) = '',
 @pvIdBusinessLine	Varchar(10) = '',
+@pvIdZoneType		Varchar(10) = '', -- AEGH 06/04/25 Project Approval Routes Administration
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
@@ -71,7 +72,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO Cat_Zones_Countries(
 				Id_Zone,
@@ -94,7 +95,14 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-		SELECT 
+		SELECT
+		/*** AEGH 06/04/25 Project Approval Routes Administration ***/
+		--------------------------------------------------------------
+		--------------------------------------------------------------
+		Z.Id_Zone_Type,
+		Zone_Type_Desc = ZT.Short_Desc,
+		--------------------------------------------------------------
+		--------------------------------------------------------------
 		ZC.Id_Zone,
 		Zone_Desc = Z.Short_Desc,
 		ZC.Id_Country,
@@ -113,12 +121,18 @@ BEGIN TRY
 		ZC.Id_Country = C.Id_Country
 
 		INNER JOIN Cat_Zone_Types ZT WITH(NOLOCK) ON 
-		Z.Id_Zone_Type = ZT.Id_Zone_Type	
+		Z.Id_Zone_Type = ZT.Id_Zone_Type
 			
 		WHERE 
 		(@pvIdZone = '' OR ZC.Id_Zone = @pvIdZone  ) AND
 		(@pvIdCountry = '' OR ZC.Id_Country = @pvIdCountry) AND   
-		(@pvIdBusinessLine = '' OR ZT.Id_Business_Line = @pvIdBusinessLine)
+		(@pvIdBusinessLine = '' OR ZT.Id_Business_Line = @pvIdBusinessLine) AND
+		/*** AEGH 06/04/25 Project Approval Routes Administration ***/
+		--------------------------------------------------------------
+		--------------------------------------------------------------
+		(@pvIdZoneType = '' OR ZT.Id_Zone_Type = @pvIdZoneType)
+		--------------------------------------------------------------
+		--------------------------------------------------------------
 	
 		ORDER BY ZC.Id_Zone, ZC.Id_Country
 		

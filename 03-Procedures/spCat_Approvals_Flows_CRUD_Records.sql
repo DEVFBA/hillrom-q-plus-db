@@ -58,9 +58,23 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
-		SET @bSuccessful	= 0
-		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)		
+			INSERT INTO Cat_Approvals_Flows (
+				Id_Approval_Flow,
+				Short_Desc,
+				Long_Desc,
+				[Status],
+				Modify_By,
+				Modify_Date,
+				Modify_IP
+			) VALUES (
+				@piIdApprovalFlow,
+				@pvShortDesc,
+				@pvLongDesc,
+				1,
+				@pvUser,
+				GETDATE(),
+				@pvIP
+			)
 	END
 	--------------------------------------------------------------------
 	--Reads Records
@@ -86,9 +100,9 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		SET @bSuccessful	= 0
-		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)		
+		UPDATE Cat_Approvals_Flows
+		SET [Status] = @pbStatus
+		WHERE Id_Approval_Flow = @piIdApprovalFlow		
 	END
 
 	--------------------------------------------------------------------
