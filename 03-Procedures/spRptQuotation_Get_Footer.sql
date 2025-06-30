@@ -19,10 +19,10 @@ Desc:		Report Quotation Footer
 Date:		12/02/2021
 Example:
 
-	EXEC spRptQuotation_Get_Footer @pvIdLanguageUser = 'ANG', @piFolio = 343, @piVersion = 1 
+	EXEC spRptQuotation_Get_Footer @pvIdLanguageUser = 'ANG', @piFolio = 2802, @piVersion = 1 
 
 
-*/SS
+*/
 CREATE PROCEDURE [dbo].spRptQuotation_Get_Footer
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @piFolio			Int,
@@ -32,7 +32,7 @@ AS
 	SELECT 
 			Folio,
 			[Version],
-			Total					= (SELECT SUM(Grand_Total) FROM Quotation_Header WHERE Folio = @piFolio AND [Version] = @piVersion),
+			Total					= (SELECT SUM(Grand_Total) + SUM(Installation_Charges_Price) FROM Quotation_Header WHERE Folio = @piFolio AND [Version] = @piVersion),
 			Id_Incoterm,
 			Incoterm_Desc,
 			Sales_Executive,
