@@ -57,7 +57,12 @@ AS
 			Detail_Factory_Desc			= ISNULL((CASE WHEN  ID.Id_Item_SubClass = 'PLUG' THEN 
 											(SELECT Factory_Desc  FROM Cat_Factory_Plugs WHERE Id_Plug = ID.Id_Item AND Id_Country = IH.Id_Country) 
 											ELSE '' 
-										   END),'')
+										   END),''),
+			Installation_Charges_Id		= QH.Id_Installation_Charge,
+			Installation_Charges		= (SELECT Short_Desc FROM Items_Installation_Charges WHERE Id_Installation_Charge = QH.Id_Installation_Charge),
+			Installation_Charges_Price	= Installation_Charges_Price
+
+
 
 	FROM [fnQuotation](@pvIdLanguageUser) Q
 	
