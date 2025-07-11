@@ -22,15 +22,19 @@ Example:
 
 	DECLARE  @udtQuotationHeader  UDT_Quotation_Header 
 
-	select * from @udtQuotationHeader
 	INSERT @udtQuotationHeader
 	SELECT * FROM Quotation_Header
 	WHERE Folio = 9 AND Version = 1		
 
+	UPDATE @udtQuotationHeader SET Id_Installation_Charge='PRAF750', Installation_Charges_Price= 145.60
+
+	SELECT * from @udtQuotationHeader
+	SELECT * FROM Quotation_Header WHERE Folio = 9 AND Version = 1		
+
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @piFolio = 9, @piVersion = 1, @pudtQuotationHeader = @udtQuotationHeader, @pvUser = 'RUGOMEZ', @pvIP ='192.168.1.254'
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG'
-	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 80, @piVersion = 1											
-	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 80, @piVersion = 1, @pvIdCountry = 'CR'		
+	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 9, @piVersion = 1											
+	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 9, @piVersion = 1, @pvIdCountry = 'CR'		
 	EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piFolio = 1413, @piVersion = 1, @pvIdCountry = 'BR'				
 
 */
@@ -116,6 +120,8 @@ BEGIN TRY
 			General_Taxes_Warranty,
 			Grand_Total,
 			Item_SPR,
+			Id_Installation_Charge,
+			Installation_Charges_Price,
 			Modify_By,
 			Modify_Date,
 			Modify_IP)
@@ -146,6 +152,8 @@ BEGIN TRY
 			General_Taxes_Warranty,
 			Grand_Total,
 			Item_SPR,
+			Id_Installation_Charge,
+			Installation_Charges_Price,
 			@pvUser,
 			GETDATE(),
 			@pvIP
@@ -199,6 +207,8 @@ BEGIN TRY
 			Accessory_Message_Family =  ISNULL(F.Accessory_Message,''),
 			Accessory_Message_Item	=  ISNULL(I.Accessory_Message,''),
 			Line_Percentage_Taxes =  ISNULL((SELECT Percentage FROM Cat_Line_Taxes WHERE Id_Line = IC.Id_Line  AND Id_Country = @pvIdCountry AND Status = 1),0),
+			QH.Id_Installation_Charge,
+			QH.Installation_Charges_Price,
 			QH.Modify_By,
 			QH.Modify_Date,
 			QH.Modify_IP
@@ -276,6 +286,8 @@ BEGIN TRY
 			Accessory_Message_Family =  ISNULL(F.Accessory_Message,''),
 			Accessory_Message_Item	=  ISNULL(I.Accessory_Message,''),
 			Line_Percentage_Taxes =  ISNULL((SELECT Percentage FROM Cat_Line_Taxes WHERE Id_Line = IC.Id_Line  AND Id_Country = @pvIdCountry AND Status = 1),0),
+			QH.Id_Installation_Charge,
+			QH.Installation_Charges_Price,
 			QH.Modify_By,
 			QH.Modify_Date,
 			QH.Modify_IP
