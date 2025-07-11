@@ -19,9 +19,11 @@ Desc:		Cat_Zones | Create - Read - Upadate - Delete
 Date:		02/01/2021
 Example:
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdZone = 'ZONE1' ,  @pvIdZoneType = 'DISC',  @pvShortDesc = 'Zone Record 1', @pvLongDesc = 'Zone Record 1 Long Desd', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Zones_CRUD_Records @pvOptionCRUD = 'R'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdZone = 'ZONE1'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdZoneType = 'SALE'
+			spCat_Zones_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdBusinessLine = 'PSS_LIKO'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdZone = 'ZONE1' , @pvIdZoneType = 'DISC', @pvShortDesc = 'Zone Record 1', @pvLongDesc = 'Zone Record 1 Long Desc', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdZone = 'ZONE1' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Zones_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdZone = 'ZONE1' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -31,6 +33,7 @@ CREATE PROCEDURE [dbo].spCat_Zones_CRUD_Records
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdZone			Varchar(10) = '',
 @pvIdZoneType		Varchar(10) = '',
+@pvIdBusinessLine	Varchar(10) = '',
 @pvShortDesc		Varchar(50) = '',
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
@@ -52,7 +55,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	=  dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Zones_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdZoneType = '" + ISNULL(@pvIdZoneType,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Zones_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdZoneType = '" + ISNULL(@pvIdZoneType,'NULL') + "', @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -99,14 +102,18 @@ BEGIN TRY
 		Z.Short_Desc,
 		Z.Long_Desc,
 		Z.[Status],
+		ZT.Id_Business_Line,
 		Z.Modify_Date,
 		Z.Modify_By,
 		Z.Modify_IP
 		FROM Cat_Zones Z
+		
 		INNER JOIN Cat_Zone_Types ZT ON 
 		Z.Id_Zone_Type = ZT.Id_Zone_Type
+		
 		WHERE (@pvIdZone = '' OR Z.Id_Zone = @pvIdZone)
-		AND (@pvIdZoneType = '' OR Z.Id_Zone_Type = @pvIdZoneType)
+		AND	  (@pvIdZoneType = '' OR Z.Id_Zone_Type = @pvIdZoneType)
+		AND   (@pvIdBusinessLine = '' OR ZT.Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY Id_Catalog
 		
 	END

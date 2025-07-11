@@ -32,17 +32,17 @@ BEGIN
 	Declare @vDescOperationCRUD Varchar(50)
 	
 	SET @vDescOperationCRUD = CASE @pvOperationCRUD
-								WHEN 'C' THEN 'Create Records'
-								WHEN 'R' THEN 'Read Records'
-								WHEN 'U' THEN 'Update Records'
-								WHEN 'D' THEN 'Delete Records'
-								WHEN 'L' THEN 'Load Records'
-								WHEN 'W' THEN 'Download Records'
-								WHEN 'J' THEN 'Job Execution'
+								WHEN 'C'	THEN 'Create Records'
+								WHEN 'R'	THEN 'Read Records'
+								WHEN 'U'	THEN 'Update Records'
+								WHEN 'D'	THEN 'Delete Records'
+								WHEN 'L'	THEN 'Load Records'
+								WHEN 'W'	THEN 'Download Records'
+								WHEN 'J'	THEN 'Job Execution'
+								WHEN 'V'	THEN 'Validate Existence'
+								WHEN 'E'	THEN 'Execute'
 								ELSE 'N/A'
 							 END
 	
 	RETURN @vDescOperationCRUD
 END
-GO
-

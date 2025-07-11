@@ -179,3 +179,22 @@ SELECT DISTINCT
 	 AND Id_Item_Class = 'COMP'
 	 AND Id_Item_SubClass IN ('HANDLES')
  ORDER BY Id_Item
+
+ /*****************************************************************************/
+-- QUERY 8 -  SUBCLASS = CASTORS AZR 20220926 -  Ajuste Alexis
+/*****************************************************************************/
+SELECT DISTINCT
+	 Item_SubClass,
+	 Id_Item,
+	 Item_Long_Desc,
+	 Id_Item_Template,
+	 Price,
+	 Print_Character = (CASE WHEN Id_Item = 'P7' THEN '*'
+							 ELSE NULL
+						END)
+ FROM vwItems_Templates
+ WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
+	 AND Id_Line in ('SCH770A')
+	 AND Id_Item_Class = 'COMP'
+	 AND Id_Item_SubClass IN ('Castors')
+ ORDER BY Id_Item

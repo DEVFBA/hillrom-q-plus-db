@@ -82,9 +82,10 @@ ORDER BY Id_Item
 -- QUERY 4 -  SUBCLASS = Support Accessories’
 /*****************************************************************************/
 SELECT DISTINCT
-	KitName = (CASE Id_Item WHEN 'AC968A' THEN 'FURNACC'
-				ELSE 'SUPPORTACC'
-				END),
+/*	KitName = (CASE Id_Item WHEN 'AC968A' THEN 'FURNACC'
+			ELSE 'SUPPORTACC'
+			END),*/ 
+	KitName = 'SUPPORTACC',--20220913 Ajuste Alexis
 	Part = Id_Item,
 	Item_Long_Desc = Item_Long_Desc,
 	Item_Template = Id_Item_Template,
@@ -94,7 +95,24 @@ WHERE Id_ItemTemplate_Class IN ('PROD')
 	AND Id_Item_Class = 'ACCE'
 	AND Id_Item_Template IN ('HR900 X3', 'ACCELLA', 'CENTURISX3')
 	AND Id_Item_SubClass IN ('FURNISUPPO')
+	AND Id_Item NOT IN ('AC968A','AD325A' ) --20220913 Ajuste Alexis
+
+UNION ALL --AZR 20220920 - Ajuste a solicitud de Alexis
+
+SELECT DISTINCT
+	KitName = 'SUPPORTACC',
+	Part = Id_Item,
+	Item_Long_Desc = Item_Long_Desc,
+	Item_Template = Id_Item_Template,
+	Price = Price
+FROM vwItems_Templates
+WHERE Id_ItemTemplate_Class IN ('PROD')
+	AND Id_Item_Class = 'ACCE'
+	AND Id_Item_Template IN ('HR900 X3', 'ACCELLA', 'CENTURISX3')
+	and Id_Item  IN ('AD286A') --AZR 20220920 - Ajuste a solicitud de Alexis
+	AND Id_Item_SubClass IN ('MEDSURACCE')
 ORDER BY Id_Item
+
 
 /*****************************************************************************/
 -- QUERY 5 -  SUBCLASS = Tank Holder
@@ -205,5 +223,25 @@ FROM vwItems_Templates
 WHERE Id_ItemTemplate_Class IN ('PROD')
 	AND Id_Item_Class = 'ACCE'
 	AND Id_Item_Template IN ('HR900 X3', 'ACCELLA', 'CENTURISX3')
+	and Id_Item NOT IN ('AD286A') --AZR 20220920 - Ajuste a solicitud de Alexis
 	AND Id_Item_SubClass IN ('MEDSURACCE')
 ORDER BY Id_Item
+
+
+/*****************************************************************************/
+-- QUERY 12 -  SUBCLASS = Furniture & Support Accessories’ -- 20220913 Ajuste Alexis
+/*****************************************************************************/
+SELECT DISTINCT
+	KitName = (CASE Id_Item WHEN 'AC968A' THEN 'FURNACC'
+				ELSE 'SUPPORTACC'
+				END),
+	Part = Id_Item,
+	Item_Long_Desc = Item_Long_Desc,
+	Item_Template = Id_Item_Template,
+	Price = Price
+FROM vwItems_Templates
+WHERE Id_ItemTemplate_Class IN ('PROD')
+	AND Id_Item_Class = 'ACCE'
+	AND Id_Item_Template IN ('HR900 X3', 'ACCELLA', 'CENTURISX3')
+	AND Id_Item_SubClass IN ('FURNISUPPO')
+	AND Id_Item IN ('AC968A','AD325A' )

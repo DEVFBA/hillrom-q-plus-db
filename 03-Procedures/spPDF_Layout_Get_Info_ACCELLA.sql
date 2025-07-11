@@ -55,8 +55,9 @@ FROM vwItems_Templates
 WHERE 
 	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
 	Id_Line in ('ACCELLA') AND
-	Id_Item_SubClass IN ('BEDCONTROL','HILOPEDAL','BRAKE','BEDEXITALE','WIREDCONNE','NURSECALL','POWSURFA','OPTIUPGRAD') AND 
-	Id_Item NOT IN ('AD242A','P005987A','P006052A','P006172A') AND
+		Id_Item_SubClass IN ('POWSURFA') AND 
+	--Id_Item_SubClass IN ('BEDCONTROL','HILOPEDAL','BRAKE','BEDEXITALE','WIREDCONNE','NURSECALL','POWSURFA','OPTIUPGRAD') AND -- 20220912 -Ajuste solicitado por Alexis
+	--Id_Item NOT IN ('AD242A','P005987A','P006052A','P006172A') AND -- 20220912 -Ajuste solicitado por Alexis	
 	[Default] = 0
 ORDER BY Id_Item
 
@@ -149,4 +150,46 @@ ORDER BY Id_Item
 
 
 
+/*****************************************************************************/
+-- QUERY 7 -  NEW SECCTION CONTROLS
+/*****************************************************************************/
 
+SELECT DISTINCT
+	--Id_Item_SubClass,
+	Item_SubClass,
+	Id_Item,
+	Item_Long_Desc,
+	Id_Item_Template,
+	Price,
+	Print_Character = NULL
+FROM vwItems_Templates
+WHERE 
+	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
+	Id_Line in ('ACCELLA') AND
+	Id_Item_SubClass IN ('BEDCONTROL') AND 
+	
+	[Default] = 0
+ORDER BY Id_Item
+
+
+/*****************************************************************************/
+-- QUERY 8 -  NEW SECCTION ADDITIONAL OPTIONS
+/*****************************************************************************/
+
+SELECT DISTINCT
+	--Id_Item_SubClass,
+	Item_SubClass,
+	Id_Item,
+	Item_Long_Desc,
+	Id_Item_Template,
+	Price,
+	Print_Character = NULL
+FROM vwItems_Templates
+WHERE 
+	Id_Item_Template in ('ACCELLA') AND -- 2022-09-20 Asolicitud de Alexis
+	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
+	Id_Line in ('ACCELLA') AND
+	Id_Item_SubClass IN ('HILOPEDAL','BRAKE','BEDEXITALE','WIREDCONNE','NURSECALL','OPTIUPGRAD', 'BEDEXITALR','WIFI') AND 
+	Id_Item NOT IN ('AD242A','P005987A','P006052A','P006172A') AND 
+	[Default] = 0
+ORDER BY Id_Item

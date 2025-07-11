@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Records]    Script Date: 3/23/2025 12:38:21 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spNotification_Quotation_Status_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spNotification_Quotation_Pending_to_Approve_List_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spNotification_Quotation_Pending_to_Approve_List_CRUD_Records
 GO
 
 /*
@@ -35,14 +27,16 @@ Id_Notification | Short_Desc
 			DELETE Notification_Quotation_Pending_Approvals where notification_send =0
 		
 */
-create PROCEDURE [dbo].spNotification_Quotation_Pending_to_Approve_List_CRUD_Records
+ALTER PROCEDURE [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Records]
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10) = 'ANG',
 @pnIdMailNotification	Numeric		= 0,
 @piIdNotification		Int			= 0,
 @piFolio				Int			= 0,
 @piVersion				Int			= 0,
-@pvUser					Varchar(50) = 'sa'
+@pvUser					Varchar(50) = 'sa',
+@pvZone					Varchar(10) = '',
+@pvRole					Varchar(10) = ''
 
 AS
 
@@ -61,9 +55,11 @@ BEGIN TRY
 	DECLARE @vCustomer				Varchar(255)
 	DECLARE @vCountry				Varchar(255)
 	DECLARE @vApproverUser			Varchar(50)
+	DECLARE @vApproverNamePrevious	Varchar(50)
 	DECLARE @vApproverUserPrevious	Varchar(255) = ''
 	DECLARE @vApproverName			Varchar(255)
 	DECLARE @vApproverEmail			Varchar(50)
+	DECLARE @vApproverEmailPrevious	Varchar(50)
 	DECLARE @htmlList				Varchar(MAX) = ''
 	
 	--------------------------------------------------------------------
@@ -74,7 +70,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + " "
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + ", @pvZone = " + ISNULL(CAST(@pvZone AS VARCHAR),'NULL') + ", @pvRole = " + ISNULL(CAST(@pvRole AS VARCHAR),'NULL') + " "
 	
 
 	--------------------------------------------------------------------
@@ -87,11 +83,22 @@ BEGIN TRY
 		--Insert Quotation Pending to Approve
 		------------------------------------------------------------
 		INSERT INTO @tblWF_CurrentFolios
-		SELECT Folio,  [Version], MIN(Approval_Flow_Sequence)
-		FROM vwWorkflows
-		WHERE Id_Approval_Status = @vIdApprovalStatus
-		GROUP BY Folio,  [Version]
-		ORDER BY Folio,  [Version]
+		--SELECT Folio,  [Version], MIN(Approval_Flow_Sequence)
+		--FROM vwWorkflows 
+		--WHERE Id_Approval_Status = @vIdApprovalStatus
+		--GROUP BY Folio,  [Version]
+		--ORDER BY Folio,  [Version]
+		/** AEGH 02/21/25 Correction for Notofication Mail, only retrieve what is actually in Approval Roue **/
+
+		SELECT VW.Folio,  VW.[Version], MIN(VW.Approval_Flow_Sequence)
+		FROM vwWorkflows AS VW INNER JOIN Quotation AS Q
+							ON VW.Folio = Q.Folio
+								AND VW.[Version] = Q.[Version]
+								AND Q.Id_Quotation_Status = 'ROUT'
+		WHERE VW.Id_Approval_Status = @vIdApprovalStatus
+		GROUP BY VW.Folio,  VW.[Version]
+		ORDER BY VW.Folio,  VW.[Version]
+		/**/
 
 		------------------------------------------------------------
 		DECLARE ITEM_CURSOR CURSOR 
@@ -101,7 +108,7 @@ BEGIN TRY
 		Approval_Roles.[Version],
 		Quotation.Customer_Bill_To,
 		Quotation.Country_Bill_To,
-		Users.[User],
+		Users_Roles.[User], -- AEGH Multiline Users Project 05/20/25
 		Users.Name,
 		Users.Email
 		FROM @tblWF_CurrentFolios AS Approval_Roles 
@@ -118,16 +125,32 @@ BEGIN TRY
 		INNER JOIN Cat_Zones_Countries AS Zones
 		ON Quotation.Id_Country_Bill_To = Zones.Id_Country AND
 		Zones.[Status] = 1
+		/** AEGH 05/20/25 Multiline Users Project **/
+		INNER JOIN Security_User_Roles AS Users_Roles
+		--ON Zones.Id_Zone = 'LAN'
+		--AND Workflow.Id_Role = 'SAAPP' AND
+		ON Users_Roles.Id_Zone = Zones.Id_Zone
+		AND Users_Roles.Id_Role = Workflow.Id_Role AND 
+		Users_Roles.[Status] = 1
 
 		INNER JOIN Security_Users AS Users
-		ON USERS.Id_Zone = Zones.Id_Zone
+		ON Users_Roles.[User] = Users.[User]
+		AND Users.[Status] =1
+		/*INNER JOIN Security_Users AS Users
+		ON Users.Id_Zone = Zones.Id_Zone
 		AND Users.Id_Role = Workflow.Id_Role AND 
-		Users.[Status] = 1
+		Users.[Status] = 1*/
+
+		/** AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
+		INNER JOIN Users_Sale_Types AS UST ON
+		UST.Id_Sales_Type = Quotation.Id_Sales_Type
+		AND Users_Roles.[User] = UST.[User]
+		/** End AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
 		
 		WHERE (@piFolio		= 0	OR Workflow.Folio	  = @piFolio) AND 
 			  (@piVersion	= 0	OR Workflow.[Version] = @piVersion)  
 		
-		ORDER BY Users.[User], Approval_Roles.Folio, Approval_Roles.[Version]
+		ORDER BY Users_Roles.[User], Approval_Roles.Folio, Approval_Roles.[Version]
 
 		------------------------------------------------------------
 
@@ -135,11 +158,19 @@ BEGIN TRY
 		FETCH NEXT FROM ITEM_CURSOR INTO @iFolio, @iVersion, @vCustomer, @vCountry, @vApproverUser, @vApproverName, @vApproverEmail 
  
 		WHILE @@FETCH_STATUS = 0 
+		/* mgj 02/21/25 Se corrigió la lógica para el resolver correctamente la asignación del @htmlList a su aprobador correspondiente*/
 		BEGIN
- 
-			--SELECT @vApproverUserPrevious,@vApproverUser, @iFolio, @iVersion, @vCustomer, @vCountry, @vApproverUser, @vApproverName, @vApproverEmail 
+			PRINT 'Procesando fila:';
+			PRINT 'Usuario: ' + ISNULL(@vApproverUser, 'N/A');
+			PRINT 'Folio: ' + CAST(@iFolio AS VARCHAR);
+			PRINT 'Versión: ' + CAST(@iVersion AS VARCHAR);
+			PRINT 'País: ' + ISNULL(@vCountry, 'N/A');
+			PRINT 'Cliente: ' + ISNULL(@vCustomer, 'N/A');
+			PRINT '';
+			PRINT '';
 
 
+			/*mgj 21/03/25 Se corrigió la lógica para el resolver correctamente la asignación en el pidntification = 4 */
 			IF @piIdNotification = 4 
 			BEGIN 
 				SET @htmlList += '<li style = "margin-top: 10px;">									
@@ -168,41 +199,71 @@ BEGIN TRY
 					@htmlList,
 					GETDATE(),
 					@bNotificationSend)
+
+			SET @htmlList = '' 
+
 			END
-			ELSE
+
+			/**/
+			
+			-- Verificar si cambia el usuario
+			IF @piIdNotification <> 4 
 			BEGIN
-				IF @vApproverUserPrevious <> @vApproverUser AND @vApproverUserPrevious <> ''
-				BEGIN 
-					INSERT INTO Notification_Quotation_Pending_Approvals(
-							Id_Notification,
-							Approver,
-							Approver_Email,
-							Pending_Approvals,
-							Register_Date,
-							Notification_Send)
-					VALUES(
-							@piIdNotification,
-							@vApproverName,
-							@vApproverEmail,
-							@htmlList,
-							GETDATE(),
-							@bNotificationSend)
+			IF @vApproverUserPrevious <> @vApproverUser AND @vApproverUserPrevious <> ''
+			BEGIN 
+				-- Insertar datos acumulados para el usuario anterior
+				INSERT INTO Notification_Quotation_Pending_Approvals(
+					Id_Notification,
+					Approver,
+					Approver_Email,
+					Pending_Approvals,
+					Register_Date,
+					Notification_Send)
+				VALUES(
+					@piIdNotification,
+					@vApproverNamePrevious, -- Usar el nombre y correo del usuario anterior
+					@vApproverEmailPrevious,
+					@htmlList,
+					GETDATE(),
+					@bNotificationSend);
 
-					SET @htmlList = '' 
-
-					--PRINT @vApproverUserPrevious
-					--PRINT @htmlList
-				END
-
-				SET @vApproverUserPrevious =  @vApproverUser
-				SET @htmlList += '<li style = "margin-top: 10px;">									
-										QN ' + CAST(@iFolio AS VARCHAR) + ' / ' + @vCountry + ' / ' + @vCustomer + '
-									</li>'
+				-- Reiniciar el htmlList
+				SET @htmlList = ''; 
 			END
 
-		FETCH NEXT FROM ITEM_CURSOR INTO @iFolio, @iVersion, @vCustomer, @vCountry, @vApproverUser, @vApproverName, @vApproverEmail 
-		END
-		
+				-- Actualizar el usuario anterior
+				SET @vApproverUserPrevious = @vApproverUser;
+				SET @vApproverNamePrevious = @vApproverName; -- Guardar el nombre del usuario actual
+				SET @vApproverEmailPrevious = @vApproverEmail; -- Guardar el correo del usuario actual
+			END
+
+				-- Concatenar el nuevo registro al htmlList
+				SET @htmlList += '<li style="margin-top: 10px;">QN ' + CAST(@iFolio AS VARCHAR) + ' / ' + @vCountry + ' / ' + @vCustomer + '</li>';
+
+				FETCH NEXT FROM ITEM_CURSOR INTO @iFolio, @iVersion, @vCustomer, @vCountry, @vApproverUser, @vApproverName, @vApproverEmail 
+			END
+
+			-- Insertar datos restantes al final del bucle
+			IF @htmlList <> '' AND @piIdNotification <> 4
+			BEGIN
+				INSERT INTO Notification_Quotation_Pending_Approvals(
+					Id_Notification,
+					Approver,
+					Approver_Email,
+					Pending_Approvals,
+					Register_Date,
+					Notification_Send)
+				VALUES(
+					@piIdNotification,
+					@vApproverNamePrevious, -- Usar el nombre y correo del último usuario
+					@vApproverEmailPrevious,
+					@htmlList,
+					GETDATE(),
+					@bNotificationSend);
+			END
+
+		/* CIERRA CAMBIO */
+
 		CLOSE ITEM_CURSOR  
 		DEALLOCATE ITEM_CURSOR 
 

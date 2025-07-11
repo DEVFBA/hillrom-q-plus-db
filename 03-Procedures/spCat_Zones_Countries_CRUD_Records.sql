@@ -20,7 +20,9 @@ Desc:		Cat_Zones_Countries | Create - Read - Upadate - Delete
 Date:		07/01/2021
 Example:
 			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdZone = 'A' , @pvIdCountry = 'MX', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG'
 			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdZone = 'A' , @pvIdCountry = 'MX' 
+			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdBusinessLine = 'PSS_LIKO'
 			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdZone = 'A' , @pvIdCountry = 'MX', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdZone = 'A' , @pvIdCountry = 'MX', @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Zones_Countries_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdZone = 'A' , @pvIdCountry = 'MX', @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -35,6 +37,8 @@ CREATE PROCEDURE [dbo].spCat_Zones_Countries_CRUD_Records
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdZone			Varchar(10) = '',
 @pvIdCountry		Varchar(10) = '',
+@pvIdBusinessLine	Varchar(10) = '',
+@pvIdZoneType		Varchar(10) = '', -- AEGH 06/04/25 Project Approval Routes Administration
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
@@ -55,7 +59,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Zones_Countries_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdCountry = '" + ISNULL(@pvIdCountry,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Zones_Countries_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdCountry = '" + ISNULL(@pvIdCountry,'NULL') + "', @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -68,7 +72,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO Cat_Zones_Countries(
 				Id_Zone,
@@ -91,12 +95,20 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-		SELECT 
+		SELECT
+		/*** AEGH 06/04/25 Project Approval Routes Administration ***/
+		--------------------------------------------------------------
+		--------------------------------------------------------------
+		Z.Id_Zone_Type,
+		Zone_Type_Desc = ZT.Short_Desc,
+		--------------------------------------------------------------
+		--------------------------------------------------------------
 		ZC.Id_Zone,
 		Zone_Desc = Z.Short_Desc,
 		ZC.Id_Country,
 		Country_Desc = C.Short_Desc,
 		ZC.[Status],
+		ZT.Id_Business_Line,
 		ZC.Modify_Date,
 		ZC.Modify_By,
 		ZC.Modify_IP
@@ -107,10 +119,20 @@ BEGIN TRY
 
 		INNER JOIN Cat_Countries C WITH(NOLOCK) ON 
 		ZC.Id_Country = C.Id_Country
+
+		INNER JOIN Cat_Zone_Types ZT WITH(NOLOCK) ON 
+		Z.Id_Zone_Type = ZT.Id_Zone_Type
 			
 		WHERE 
 		(@pvIdZone = '' OR ZC.Id_Zone = @pvIdZone  ) AND
-		(@pvIdCountry = '' OR ZC.Id_Country = @pvIdCountry)
+		(@pvIdCountry = '' OR ZC.Id_Country = @pvIdCountry) AND   
+		(@pvIdBusinessLine = '' OR ZT.Id_Business_Line = @pvIdBusinessLine) AND
+		/*** AEGH 06/04/25 Project Approval Routes Administration ***/
+		--------------------------------------------------------------
+		--------------------------------------------------------------
+		(@pvIdZoneType = '' OR ZT.Id_Zone_Type = @pvIdZoneType)
+		--------------------------------------------------------------
+		--------------------------------------------------------------
 	
 		ORDER BY ZC.Id_Zone, ZC.Id_Country
 		

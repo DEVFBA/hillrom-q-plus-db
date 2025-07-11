@@ -18,10 +18,32 @@ GO
 Autor:		Alejandro Zepeda
 Desc:		Security_Users | Create - Read - Upadate - Delete 
 Date:		12/01/2021
+----------------------------------
+Modifications:
+Date:		01/05/2025
+Comments:	
+1.- The following parameters were removed:
+	@pvIdRole			Varchar(100) = '', --'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'
+	@pvIdZone			Varchar(10)	= '',
+	@pvIdBusinessLine	Varchar(10) = '',
+2.- 
+	The following fields return no data in the current SELECT statement:
+	U.Id_Role,
+	Role_Desc = R.Short_Desc,
+	RZ.Id_Region,
+	Region_Desc = RE.Short_Desc,
+	U.Id_Zone,
+	Zone_Desc = Z.Short_Desc,
+
+	The WHERE clause no longer includes the following fields:
+	(@pvIdUser		 = ''	OR U.[User] = @pvIdUser) AND
+	(@pvIdRole		= ''	OR U.Id_Role IN(SELECT VALOR FROM fnSplit(@pvIdRole,'|'))) AND
+	(@pvIdZone		= ''	OR U.Id_Zone = @pvIdZone) AND
+	(@pvIdBusinessLine = '' OR R.Id_Business_Line = @pvIdBusinessLine)
+
+----------------------------------
 Example:
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'C',@pvIdUser = 'ALZEPEDA' , 
-																@pvIdRole = 'ADMIN', 
-																@pvIdZone = 'ALLZ', 
 																@pvIdLanguage ='SPA', 
 																@pvPassword = '6c690c09caf5abbab6178e980881cbf5568481e48cd344e4b726c34c6e81be57', 
 																@pvName = 'Alejandro Zepeda', 
@@ -29,14 +51,11 @@ Example:
 																@pbTempPassword = 0, 
 																@pbStatus = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ADVEGA', @pvIdRole = 'SALES', @pvIdZone = 'CEN' 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'KELBEROZ'
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdZone = 'MEX' 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdRole = 'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'  
+			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ADVEGA'
+			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA'
+			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R'
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'U',	@pvIdUser = 'ALZEPEDA', 
-																@pvIdRole = 'ADMIN', 
-																@pvIdZone = 'ALLZ', 
 																@pvIdLanguage ='SPA', 
 																@pvPassword = '6c690c09caf5abbab6178e980881cbf5568481e48cd344e4b726c34c6e81be57', 
 																@pvName = 'Alejandro Zepeda', 
@@ -46,14 +65,15 @@ Example:
 
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'D', @pvIdUser = 'KELBEROZ' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'X', @pvIdUser = 'KELBEROZ' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+
+
+
 			
 */
 CREATE PROCEDURE [dbo].spSecurity_Users_CRUD_Records
 @pvOptionCRUD		Varchar(1),
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdUser			Varchar(20) = '',
-@pvIdRole			Varchar(100) = '', --'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'
-@pvIdZone			Varchar(10)	= '',
 @pvIdLanguage		Varchar(10)	= '',
 @pvPassword			Varchar(255)= '',
 @pvName				Varchar(255)= '',
@@ -80,7 +100,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Users_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "', @pvPassword = '" + ISNULL(@pvPassword,'NULL') + "', @pvName = '" + ISNULL(@pvName,'NULL') + "', @pvEmail = '" + ISNULL(@pvEmail,'NULL') + "', @pbTempPassword = '" + ISNULL(CAST(@pbTempPassword AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Users_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "', @pvPassword = '" + ISNULL(@pvPassword,'NULL') + "', @pvName = '" + ISNULL(@pvName,'NULL') + "', @pvEmail = '" + ISNULL(@pvEmail,'NULL') + "', @pbTempPassword = '" + ISNULL(CAST(@pbTempPassword AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -97,8 +117,6 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO Security_Users (
 				[User],
-				Id_Role,
-				Id_Zone,
 				Id_Language,
 				[Password],
 				[Name],
@@ -111,8 +129,6 @@ BEGIN TRY
 				Modify_IP)
 			VALUES (
 				@pvIdUser,
-				@pvIdRole,
-				@pvIdZone,
 				@pvIdLanguage,
 				@pvPassword,
 				@pvName,
@@ -134,12 +150,6 @@ BEGIN TRY
 	BEGIN
 		SELECT 
 		U.[User],
-		U.Id_Role,
-		Role_Desc = R.Short_Desc,
-		RZ.Id_Region,
-		Region_Desc = RE.Short_Desc,
-		U.Id_Zone,
-		Zone_Desc = Z.Short_Desc,
 		U.Id_Language,
 		Language_Desc = L.Short_Desc,
 		U.[Password],
@@ -153,18 +163,6 @@ BEGIN TRY
 		U.Modify_IP
 		FROM Security_Users U
 
-		INNER JOIN Security_Roles R ON 
-		U.Id_Role = R.Id_Role
-
-		INNER JOIN Cat_Zones Z ON
-		U.Id_Zone = Z.Id_Zone
-
-		INNER JOIN Cat_Region_Zones RZ ON 
-		Z.Id_Zone = RZ.Id_Zone
-
-		INNER JOIN Cat_Regions RE ON
-		RZ.Id_Region = RE.Id_Region
-
 		LEFT OUTER JOIN Cat_Languages L ON 
 		U.Id_Language = L.Id_Language AND
 		U.Id_Language = L.Id_Language_Translation
@@ -172,8 +170,6 @@ BEGIN TRY
 		WHERE 
 		(@pvIdLanguageUser = ''  OR L.Id_Language = @pvIdLanguageUser) AND
 		(@pvIdUser		 = ''	OR U.[User] = @pvIdUser) AND
-		(@pvIdRole		= ''	OR U.Id_Role IN(SELECT VALOR FROM fnSplit(@pvIdRole,'|'))) AND
-		(@pvIdZone		= ''	OR U.Id_Zone = @pvIdZone) AND
 		(@pvIdLanguage	= ''	OR U.Id_Language = @pvIdLanguage)
 		ORDER BY  [User]
 		RETURN
@@ -185,9 +181,7 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'U'
 	BEGIN
 		UPDATE Security_Users 
-		SET Id_Role				= @pvIdRole,
-			Id_Zone				= @pvIdZone,
-			Id_Language			= @pvIdLanguage,
+		SET Id_Language			= @pvIdLanguage,
 			[Password]			= @pvPassword,
 			[Name]				= @pvName,
 			Email				= @pvEmail,

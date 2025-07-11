@@ -1,16 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spPDF_Layout_Get_Info_HIRO900]    Script Date: 26/04/2024 03:21:25 p. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spPDF_Layout_Get_Info_HIRO900
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spPDF_Layout_Get_Info_HIRO900'
-IF OBJECT_ID('[dbo].[spPDF_Layout_Get_Info_HIRO900]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spPDF_Layout_Get_Info_HIRO900
 GO
 /*
 Autor:		Alejandro Zepeda
@@ -22,7 +15,7 @@ Example:
 
 
 */
-CREATE PROCEDURE [dbo].spPDF_Layout_Get_Info_HIRO900
+ALTER PROCEDURE [dbo].[spPDF_Layout_Get_Info_HIRO900]
 AS
 
 /*****************************************************************************/
@@ -40,7 +33,7 @@ SELECT
 
 
 /*****************************************************************************/
--- QUERY 2 -  SUBCLASS = Sin Secci�n
+-- QUERY 2 -  SUBCLASS = Sin Sección
 /*****************************************************************************/
 SELECT DISTINCT
 	 Item_SubClass,
@@ -54,7 +47,7 @@ SELECT DISTINCT
  WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
 	 AND Id_Line in ('HIRO900')
 	 AND Id_Item_Class = 'COMP'
-	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA', 'ACCEBARHOL','FOOTBOPEND')
+	 AND Id_Item_SubClass IN ('BEDEXTENDE', 'HEADSECTIO', 'NURSECALL','NIGHTLIGHT','EACHAFLAPO', 'BRAOFFALAR','HILOPEDAL', 'SAFWORKLOA','FOOTBOPEND', 'ACCEBARHOL') -- AZR Se quita el 'ACCEBARHOL' a solicitud de Alexis || AEGH 26/04 Claudia confirma que se debe regresar el ABF
  AND Id_Item NOT IN ('220K', 'MHS')
  
  UNION
@@ -67,9 +60,9 @@ SELECT DISTINCT
 				FROM Items_Template_Kits
 				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 4),
 	Print_Character = NULL
-
+ /*
  UNION
- 
+
  SELECT
 	 Item_SubClass = 'KIT',
 	 Id_Item = 'SHO + NL + BOA',
@@ -78,17 +71,7 @@ SELECT DISTINCT
 				 FROM Items_Template_Kits
 				 WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 2),
 	Print_Character = NULL
-
- UNION
- 
- SELECT
-	 Item_SubClass = 'KIT',
-	 Id_Item = 'BEA + WCO + NL',
-	 Item_Long_Desc = '3 Mode Bed Exit Alarm + 37 pin Wired connection + Intelligent night light (requires SHS)',
-	 Price = (	SELECT Price
-				FROM Items_Template_Kits
-				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 3),
-	 Print_Character = NULL
+	*/ -- Se comenta esta sección para que ya no aparezca en el PDF (Angel Gutiérrez -- 24/01/23) 
 
 
 /*****************************************************************************/
@@ -176,4 +159,34 @@ SELECT DISTINCT
 	 AND Id_Item_Class = 'COMP'
 	 AND Id_Item_SubClass IN ('PLUG', 'VOLTAGE')
 	 AND Id_Item NOT IN ('110v', '115V', '127V', '220V', '240V','Bi120230V', 'BIVOLT 120 230V', 'CA', 'NZ')
+ ORDER BY Id_Item
+
+
+ /*****************************************************************************/
+-- QUERY 8 -  SUBCLASS = BEDEXITALR
+/*****************************************************************************/
+SELECT DISTINCT
+	 Item_SubClass,
+	 Id_Item,
+	 Item_Long_Desc,
+	 Price,
+	 Print_Character = NULL
+ FROM vwItems_Templates
+ WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
+	 AND Id_Line in ('HIRO900')
+	 AND Id_Item_Class = 'COMP'
+	 AND Id_Item_SubClass IN ('BEDEXITALR')
+
+
+ UNION
+ 
+ SELECT
+	 Item_SubClass = 'KIT',
+	 Id_Item = 'BEA + WCO + NL + BOA',
+	 Item_Long_Desc = '3 Mode Bed Exit Alarm + 37 pin Wired connection + Intelligent night light (requires SHS)',
+	 Price = (	SELECT Price
+				FROM Items_Template_Kits
+				WHERE Item_Template = 'HR900 X3' AND Id_Template_Kit = 3),
+	 Print_Character = NULL
+
  ORDER BY Id_Item

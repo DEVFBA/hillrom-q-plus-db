@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spCat_Countries_Languages_CRUD_Records]    Script Date: 3/23/2025 12:41:07 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spCat_Countries_Languages_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spCat_Countries_Languages_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spCat_Countries_Languages_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spCat_Countries_Languages_CRUD_Records
 GO
 
 /*
@@ -30,7 +22,7 @@ Example:
 			spCat_Countries_Languages_CRUD_Records @pvOptionCRUD = 'R'
 			SELECT * FROM Cat_Countries_Languages
 */
-CREATE PROCEDURE [dbo].spCat_Countries_Languages_CRUD_Records
+ALTER PROCEDURE [dbo].[spCat_Countries_Languages_CRUD_Records]
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10) = 'ANG',
 @pvIdCountry			Varchar(10) = '',
@@ -69,7 +61,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END		
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			-- Validate there is a Defaulf record
 			IF @pbDefaultTranslation = 1 and EXISTS(SELECT * FROM Cat_Countries_Languages WHERE Id_Country = @pvIdCountry and Default_Translation = 1)
@@ -78,7 +70,7 @@ BEGIN TRY
 				SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 				SET @vMessage		= 'There is already a record with the default value set to true'
 			END
-			ELSE -- Don´t 
+			ELSE -- DonÂ´t 
 			BEGIN
 				INSERT INTO Cat_Countries_Languages(
 					Id_Country,
@@ -125,7 +117,7 @@ BEGIN TRY
 		
 		WHERE (@pvIdCountry = ''  OR CL.Id_Country = @pvIdCountry ) AND
 		(@pvIdLanguage = '' OR CL.Id_Language = @pvIdLanguage) 
-		ORDER BY CL.Id_Country, CL.Id_Language
+		ORDER BY CL.Id_Country, CL.Id_Language DESC -- Q+SO029 Reordenar Language (AEG 9/4/24)
 		
 	END
 

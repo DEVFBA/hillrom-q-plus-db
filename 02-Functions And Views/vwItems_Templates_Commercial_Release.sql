@@ -117,3 +117,4 @@ ItemTemplate.Id_Item = Commercial_Release.Id_Item AND
 ZonesCountries.Id_Country = Commercial_Release.Id_Country AND
 Id_Status_Commercial_Release <> 0
 
+WHERE (Template.DynamicField_IsDynamic = 0 OR Template.DynamicField_IsDynamic IS NULL) -- 20240310 -- DynamicFields

@@ -25,7 +25,8 @@ Example:
 CREATE PROCEDURE [dbo].spQuotation_ApprovalRoutes_Get_Operation_Expenses
 @piFolio				Int,
 @piVersion				Int,
-@pvIdItem				Varchar(50) = ''
+@pvIdItem				Varchar(50) = '',
+@pIdHeader              SmallInt = 0
 AS
 
 	SELECT	Id_Header				= QH.Id_Header,
@@ -57,5 +58,6 @@ AS
 	WHERE QH.Folio = @piFolio 
 	AND	QH.[Version] = @piVersion
 	AND (@pvIdItem = '' OR QH.Item_Template = @pvIdItem)
+    AND (@pIdHeader = 0 OR QH.Id_Header = @pIdHeader)
 	GROUP BY QH.Id_Header, QH.Item_Template, QH.Allocation, QH.Transfer_Price, QH.Transport_Cost, QH.Taxes, QH.Landed_Cost, QH.Warehousing,QH.Local_Transport,QH.[Services],QH.Local_Cost
 

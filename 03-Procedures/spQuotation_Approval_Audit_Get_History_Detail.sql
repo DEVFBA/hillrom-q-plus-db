@@ -19,7 +19,7 @@ Desc:		Get spQuotation_Approval_Audit_Get_History_Detail
 Date:		04/07/2021
 Example:
 
-	EXEC spQuotation_Approval_Audit_Get_History_Detail @pvIdLanguageUser= 'ANG', @piFolio = 567, @piVersion = 1  
+	EXEC spQuotation_Approval_Audit_Get_History_Detail @pvIdLanguageUser= 'ANG', @piFolio = 716, @piVersion = 1  
 
 */
 CREATE PROCEDURE [dbo].spQuotation_Approval_Audit_Get_History_Detail
@@ -55,6 +55,7 @@ AS
 		AW.Approval_Flow_Sequence,	
 		QH.Id_Year_Warranty,
 		Year_Warranty_Desc = (SELECT Short_Desc FROM Cat_Years_Warranty WHERE Id_Year_Warranty = QH.Id_Year_Warranty AND Id_Language = @pvIdLanguageUser),
+		Item_SPR = QH.Item_SPR,
 		AW.Modify_IP
 
 

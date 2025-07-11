@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spQuotation_Quotation_CRUD_Records]    Script Date: 02/05/2024 10:04:23 a. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spQuotation_Quotation_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spQuotation_Quotation_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spQuotation_Quotation_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spQuotation_Quotation_CRUD_Records
 GO
 
 /*
@@ -47,7 +39,7 @@ Example:
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R'
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R',
 													@pvIdLanguageUser = 'ANG',
-													@piFolio = 554, 
+													@piFolio = 1820, 
 													@piVersion = 1,
 													@pvIdCustomerBillTo = 5, 
 													@pvIdCustomerTypeBillTo = 'BILL', 
@@ -87,7 +79,7 @@ Example:
 
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R', @pvIdSalesExecutive = 'VIROJAS';
 */
-CREATE PROCEDURE [dbo].spQuotation_Quotation_CRUD_Records
+ALTER PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
 @pvOptionCRUD				Varchar(1),
 @pvIdLanguageUser			Varchar(10) = 'ANG',
 @piFolio					Int			= 0,
@@ -116,6 +108,7 @@ CREATE PROCEDURE [dbo].spQuotation_Quotation_CRUD_Records
 @pvComments					Varchar(1000)= '',
 @pvUser						Varchar(50) = '',
 @pvIP						Varchar(20) = '',
+@pvZone						Varchar(10), --- AEGH 25/05/14 Project Multiline Users
 ----------------------------------------------
 --Additional search parameters
 ----------------------------------------------
@@ -261,8 +254,8 @@ BEGIN TRY
 			Quotation_Status_Desc,
 			Id_Language_Translation, 
 			Language_Translation_Desc, 
-			Id_Payment_Terms,
-			Payment_Terms_Desc,
+			--Id_Payment_Terms, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
+			--Payment_Terms_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			Id_Sales_Executive,
 			Sales_Executive,
 			Creation_Date,
@@ -270,14 +263,18 @@ BEGIN TRY
 			Purchase_Order,
 			Comments,
 
-			Next_Approver =ISNULL((	SELECT DISTINCT Role_Desc 
+			Next_Approver = (CASE WHEN Id_Quotation_Status = 'DIRE' THEN ''
+            ELSE
+            (ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
 									WHERE AWF.Folio = vwQuotation.Folio  AND AWF.[Version] = vwQuotation.[Version] AND Id_Approval_Status = 'PTA' 
 									AND AWF.Approval_Flow_Sequence = (	SELECT MIN(Approval_Flow_Sequence)	
 																		FROM vwWorkflows 
 																		WHERE  Folio = vwQuotation.Folio AND [Version] = vwQuotation.[Version]  AND Id_Approval_Status = 'PTA' 
 																	 )
-							     ), ''),
+							     ), ''))
+            END
+                            ),
 
 			Rejected_Approver =ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
@@ -311,7 +308,7 @@ BEGIN TRY
 				(@pvIdValidityPrice			= ''	OR Id_Validity_Price			= @pvIdValidityPrice) AND   
 				(@pvIdQuotationStatus		= ''	OR Id_Quotation_Status			= @pvIdQuotationStatus) AND   
 				(@pvIdLanguageTranslation	= ''	OR Id_Language_Translation		= @pvIdLanguageTranslation) AND   
-				(@pvIdPaymentTerm			= ''	OR Id_Payment_Terms				= @pvIdPaymentTerm) AND   
+				--(@pvIdPaymentTerm			= ''	OR Id_Payment_Terms				= @pvIdPaymentTerm) AND   --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 				(@pvIdSalesExecutive		= ''	OR @pvIdSalesExecutive			= 'ADMIN'		OR Id_Sales_Executive			= @pvIdSalesExecutive) AND  
 				(@pvSPRNumber				= '0'	OR SPR_Number					LIKE '%' +  CAST(@pvSPRNumber AS VARCHAR) + '%') AND   
 				(@piPurchaseOrder			= 0		OR Purchase_Order				LIKE '%' +  CAST(@piPurchaseOrder AS VARCHAR) + '%') AND 
@@ -321,7 +318,7 @@ BEGIN TRY
 				(@pvCreationDateIni			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) >= @pvCreationDateIni) AND
 				(@pvCreationDateFin			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) <= @pvCreationDateFin)  
 
-		ORDER BY  Folio, [Version]
+		ORDER BY  Folio DESC, [Version] 
 		
 	END
 
@@ -364,17 +361,17 @@ IF @pvOptionCRUD = 'U'
 
 			----1. Quotation Send to Client
 			IF @pvIdQuotationStatus = 'SENT' 
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 1, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 1, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 
 			----2. Quotation Approved 
 			IF @pvIdQuotationStatus = 'SENT' 
 			BEGIN
 				IF @pvIdQuotationStatusPrevious = 'ROUT'
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 2, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 2, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 			END
 			----3. Quotation Rejected
 			IF @pvIdQuotationStatus = 'DIRE' -- 
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 3, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 3, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 		
 		END
 

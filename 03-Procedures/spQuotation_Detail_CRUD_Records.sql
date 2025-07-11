@@ -43,6 +43,7 @@ CREATE PROCEDURE [dbo].spQuotation_Detail_CRUD_Records
 @pvIdLanguageUser		Varchar(10) = '',
 @piFolio				Int			= 0,
 @piVersion				Int			= 0,
+@piIdHeader             Int			= 0,
 @pvIdCountry			Varchar(10) = '',
 @pudtQuotationDetail	UDT_Quotation_Detail Readonly,
 @pvUser					Varchar(50) = '',
@@ -183,7 +184,8 @@ BEGIN TRY
 		I.Id_Item_SubClass = ISCL.Id_Item_SubClass
 
 		WHERE	(@piFolio	= 0	OR QD.Folio	 = @piFolio) AND 
-				(@piVersion	= 0	OR QD.[Version] = @piVersion) 
+				(@piVersion	= 0	OR QD.[Version] = @piVersion) AND
+                (@piIdHeader	= 0	OR QD.Id_Header = @piIdHeader) 
 	
 		ORDER BY QD.Folio, QD.[Version], QD.Item_Template,QD.Id_Item
 		

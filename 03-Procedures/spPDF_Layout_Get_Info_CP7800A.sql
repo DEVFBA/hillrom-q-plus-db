@@ -176,3 +176,39 @@ WHERE
 	Id_Item_SubClass IN ('TANKHOLDER', 'BOTTHOLDER', 'IVPOLE','TRAYS') AND
 	Id_Item_Class = 'ACCE'
 ORDER BY KitName, Id_Item
+
+
+/*****************************************************************************/
+-- QUERY 9 -  SUBCLASS = SOURFACES OPTION
+/*****************************************************************************/
+SELECT DISTINCT
+	KitName			= 'SURFACE OPTION',
+	Id_Item_Template,
+	Item_Long_Desc	= Item_Long_Desc,
+	Part			= Id_Item,
+	Price			= Price		
+FROM vwItems_Templates
+WHERE 
+	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
+	Id_Line in ('CP7800A') AND
+	Id_Item_SubClass IN ('SURFACEKIT') AND
+	Id_Item_Class = 'COMP'
+ORDER BY KitName, Id_Item
+
+
+/*****************************************************************************/
+-- QUERY 10 -  SUBCLASS = SOURFACES ADD-ONS
+/*****************************************************************************/
+SELECT DISTINCT
+	KitName			= 'SURFACE ADD-ONS',
+	Id_Item_Template,
+	Item_Long_Desc	= Item_Long_Desc,
+	Part			= Id_Item,
+	Price			= Price		
+FROM vwItems_Templates
+WHERE 
+	Id_ItemTemplate_Class IN ('PROD', 'ACCE') AND
+	Id_Line in ('CP7800A') AND
+	Id_Item_SubClass IN ('LAROTTHER') AND
+	Id_Item_Class = 'COMP'
+ORDER BY KitName, Id_Item

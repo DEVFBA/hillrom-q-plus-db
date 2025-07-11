@@ -18,18 +18,19 @@ Desc:		Get Approval Header and Detail
 Date:		01/02/2021
 Example:
 
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 1, @piVersion = 1 , @pvUser = 'MIHAMILTON'
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 457, @piVersion = 1 , @pvUser = 'MAQUINTERO'
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 457, @piVersion = 1 , @pvUser = 'LUMUNOZ'
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 658, @piVersion = 1, @pvUser='MAQUINTERO';
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 672, @piVersion = 1, @pvUser='MAQUINTERO';
-	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 679, @piVersion = 1, @pvUser='MAQUINTERO';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 710, @piVersion = 1 , @pvUser = 'JOMONTANER', @pvRole = 'SAAPP';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 457, @piVersion = 1 , @pvUser = 'MAQUINTERO', @pvRole = 'SAAPP';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 457, @piVersion = 1 , @pvUser = 'LUMUNOZ', @pvRole = 'SAAPP';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 658, @piVersion = 1, @pvUser='MAQUINTERO', @pvRole = 'SAAPP';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 672, @piVersion = 1, @pvUser='MAQUINTERO', @pvRole = 'SAAPP';
+	EXEC spQuotation_ApprovalRoutes_Get_Header_Detail @piFolio = 679, @piVersion = 1, @pvUser='MAQUINTERO', @pvRole = 'SAAPP';
 */
 CREATE PROCEDURE [dbo].[spQuotation_ApprovalRoutes_Get_Header_Detail]
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @piFolio			Int,
 @piVersion			Int,
-@pvUser				Varchar(50)
+@pvUser				Varchar(50),
+@pvRole				Varchar(10) -- AEGH 05/19/25 Project Multiline Users
 AS
 
 	--------------------------------------------------------------------
@@ -41,9 +42,11 @@ AS
 
 	DECLARE @iUserFlowSequence INT = (	SELECT Approval_Flow_Sequence 
 										FROM Security_Roles R
-										INNER JOIN Security_Users U ON 
+										WHERE R.Id_Role = @pvRole )
+										/** AEGH 05/19/25 Project Multiline Users **/
+										/*INNER JOIN Security_Users U ON 
 										R.Id_Role = U.Id_Role
-										WHERE  [USER] = @pvUser)
+										WHERE  [USER] = @pvUser)*/
 
 	--------------------------------------------------------------------
 	--Insert Approval Details
@@ -168,13 +171,15 @@ AS
 			Total, 
 			Margin,
 			Approval_Flag = (CASE WHEN AW.Approval_Flow_Sequence = @iUserFlowSequence THEN 1 ELSE 0 END),
-			Grand_Total			
+			Grand_Total,
+			Amount_Warranty
 
 	FROM @tblApprovalDetails D
 
 	LEFT OUTER JOIN Approval_Workflow AW ON 
 	D.Folio = AW.Folio AND
 	D.[Version] = AW.[Version]  AND
+	D.Id_Header = AW.Id_Header AND 
 	D.Item_Code = AW.Item_Template AND 
 	D.Flow_SequenceDiscount = AW.Approval_Flow_Sequence AND 
 	AW.Id_Approval_Section = 1 AND -- Quotation Header

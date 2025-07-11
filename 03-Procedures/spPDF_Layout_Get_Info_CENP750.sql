@@ -113,7 +113,10 @@ ORDER BY Id_Item
 
 --Country of Origin: USA
 SELECT DISTINCT
-	KitName			= Id_Item_SubClass,
+	KitName			= (CASE WHEN Id_Item_SubClass = 'NP50SUR' THEN 'NP50MAT'
+							WHEN Id_Item_SubClass = 'NP100SUR' THEN 'NP100MAT' 
+							ELSE Id_Item_SubClass
+					   END),
 	Item_Long_Desc	= Item_Long_Desc,
 	Part			= Id_Item,
 	Price			= Price
@@ -128,7 +131,9 @@ ORDER BY Id_Item
 
 --Country of Origin: China
 SELECT DISTINCT
-	KitName			= Id_Item_SubClass,
+	KitName			= (CASE WHEN Id_Item_SubClass = 'CHINASURFA' THEN 'ENTER AS END ITEM'
+							ELSE Id_Item_SubClass
+					   END),
 	Item_Long_Desc	= Item_Long_Desc,
 	Part			= Id_Item,
 	Price			= Price

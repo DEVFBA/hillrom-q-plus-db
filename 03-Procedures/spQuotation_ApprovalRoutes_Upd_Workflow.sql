@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spQuotation_ApprovalRoutes_Upd_Workflow]    Script Date: 3/23/2025 12:51:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spQuotation_ApprovalRoutes_Upd_Workflow
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spQuotation_ApprovalRoutes_Upd_Workflow'
-
-IF OBJECT_ID('[dbo].[spQuotation_ApprovalRoutes_Upd_Workflow]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spQuotation_ApprovalRoutes_Upd_Workflow
 GO
 
 /*
@@ -32,12 +24,14 @@ Example:
 			EXEC spQuotation_ApprovalRoutes_Upd_Workflow  @pvIdLanguageUser = 'ANG', @pvIdApprovalStatus = 'REJ', @pudtApprovalWorkflow = @udtApprovalWorkflow, @pvUser = 'RUGOMEZ', @pvIP ='192.168.1.254'
 
 */
-CREATE PROCEDURE [dbo].spQuotation_ApprovalRoutes_Upd_Workflow
+ALTER PROCEDURE [dbo].[spQuotation_ApprovalRoutes_Upd_Workflow]
 @pvIdLanguageUser		Varchar(10) = 'ANG',
 @pvIdApprovalStatus		Varchar(10),
 @pudtApprovalWorkflow	UDT_Approval_Workflow	 Readonly,
 @pvUser					Varchar(50),
-@pvIP					Varchar(20)
+@pvIP					Varchar(20),
+@pvZone					Varchar(10),
+@pvRole					Varchar(10)
 AS
 
 SET NOCOUNT ON
@@ -117,18 +111,18 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	--Update Actualizacion de ApprovalStatus
 	--------------------------------------------------------------------
-
-	IF @pvIdApprovalStatus = 'REJ'--REJECTED
-	BEGIN		
+	--VRC 26-DIC-2024 SE COMENTA PORQUE SE ESTA INSERTANDO DOBLE
+	--IF @pvIdApprovalStatus = 'REJ'--REJECTED
+	--BEGIN		
 		--Update Status Quotation
-		INSERT INTO @TableResponse
-		EXEC spQuotation_Quotation_CRUD_Records @pvIdLanguageUser = @pvIdLanguageUser, @pvOptionCRUD = 'U', @piFolio = @iFolio, @piVersion = @iVersion , @pvIdQuotationStatus = 'DIRE', @pvUser = @pvUser, @pvIP = @pvIP
-	END 
+		--INSERT INTO @TableResponse
+		--EXEC spQuotation_Quotation_CRUD_Records @pvIdLanguageUser = @pvIdLanguageUser, @pvOptionCRUD = 'U', @piFolio = @iFolio, @piVersion = @iVersion , @pvIdQuotationStatus = 'DIRE', @pvUser = @pvUser, @pvIP = @pvIP
+	--END 
 
 
 	----4. Quotation Pending to Approve
 	IF @pvIdApprovalStatus = 'APP' -- 
-		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = @pvIdLanguageUser, @piIdNotification = 4, @piFolio =  @iFolio , @piVersion = @iVersion, @pvUser = @pvUser
+		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = @pvIdLanguageUser, @piIdNotification = 4, @piFolio =  @iFolio , @piVersion = @iVersion, @pvUser = @pvUser, @pvRole = @pvRole, @pvZone = @pvZone
 
 	--------------------------------------------------------------------
 	--Register Transaction Log

@@ -1,15 +1,9 @@
+USE [DBQS]
+GO
+/****** Object:  UserDefinedFunction [dbo].[fnQuotation]    Script Date: 02/05/2024 10:09:09 a. m. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- fnSplit
-/* ==================================================================================*/	
-PRINT 'Crea fnQuotation'
-
-IF OBJECT_ID('[dbo].[fnQuotation]','IF') IS NOT NULL
-       DROP FUNCTION [dbo].[fnQuotation]
 GO
 
 
@@ -22,7 +16,7 @@ Example:
 		SELECT * FROM [fnQuotation]('ANG')
 		SELECT * FROM Quotation
 */
-CREATE FUNCTION [dbo].[fnQuotation](@pvIdLanguageUser VARCHAR(10)) 
+ALTER FUNCTION [dbo].[fnQuotation](@pvIdLanguageUser VARCHAR(10)) 
 RETURNS TABLE 
 AS
 
@@ -82,8 +76,8 @@ RETURN (SELECT
 				Sales_Executive				= Security_Users.[Name],
 				Sales_Executive_Email		= Security_Users.Email,
 
-				Id_Payment_Terms			= Quotation.Id_Payment_Term,
-				Payment_Terms_Desc			= Cat_Payment_Terms.Short_Desc,
+				--Id_Payment_Terms			= Quotation.Id_Payment_Term, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
+				--Payment_Terms_Desc			= Cat_Payment_Terms.Short_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 
 				Creation_Date				= Quotation.Creation_Date, 
 				SPR_Number					= Quotation.SPR_Number, 
@@ -164,8 +158,8 @@ RETURN (SELECT
 				Quotation.Id_Language_Translation = Cat_Languages_Translation.Id_Language AND
 				Cat_Languages_Translation.Id_Language_Translation = @pvIdLanguageUser
 
-				INNER JOIN Cat_Payment_Terms WITH(NOLOCK) ON
-				Quotation.Id_Payment_Term = Cat_Payment_Terms.Id_Payment_Term AND
-				Cat_Payment_Terms.Id_Language = @pvIdLanguageUser
+				--INNER JOIN Cat_Payment_Terms WITH(NOLOCK) ON  --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
+				--Quotation.Id_Payment_Term = Cat_Payment_Terms.Id_Payment_Term AND  --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
+				--Cat_Payment_Terms.Id_Language = @pvIdLanguageUser --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 		)
 

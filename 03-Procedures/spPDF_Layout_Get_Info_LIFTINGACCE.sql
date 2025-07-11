@@ -18,7 +18,7 @@ Desc:		Get spPDF_Layout_Get_Info_LIFTINGACCE
 Date:		12/01/2022
 Example:
 
-	EXEC spPDF_Layout_Get_Info_LIFTINGACCE  @pvIdZone = 'LIKMEX'
+	EXEC spPDF_Layout_Get_Info_LIFTINGACCE  @pvIdZone = 'LIKALL'
 
 
 */
@@ -39,8 +39,9 @@ WHERE Id_Item_Class = 'ACCE'
 	AND Id_ItemTemplate_Class = 'PROD'
 	AND Id_Line IN ('OVERLFT')
 	AND Id_Item_SubClass = 'LIFTINACCE'
-	AND Item_Long_Desc LIKE 'Universal SlingBar%350%'
-	AND Item_Long_Desc NOT LIKE '%Quick%'
+	--AND Item_Long_Desc LIKE 'Universal SlingBar%350%'
+	--AND Item_Long_Desc NOT LIKE '%Quick%'
+	AND Id_Item = '3156074'
 	AND Id_Zone = @pvIdZone
 ORDER BY Id_Item ASC
 

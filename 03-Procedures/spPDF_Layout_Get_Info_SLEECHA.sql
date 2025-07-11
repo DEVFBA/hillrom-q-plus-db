@@ -57,5 +57,6 @@ SELECT DISTINCT
 WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
 	 AND Id_Line IN ('SLCHP9135A', 'SLCHP9145A')
 	 AND Id_Item_Class = 'COMP'
-	 AND Id_Item_SubClass NOT IN ('UPHOLSTERY')
+	 --AND Id_Item_SubClass NOT IN ('UPHOLSTERY')
+	 AND Id_Item_SubClass IN ('TRAYTABLE')-- 20220921 A solicitud de Alexis
  ORDER BY Id_Item

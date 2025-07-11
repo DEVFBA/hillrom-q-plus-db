@@ -37,7 +37,7 @@ Example:
 										@pvContact			= 'NONGUNO',
 										@pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 
-			spCat_Customers_CRUD_Records @pvOptionCRUD = 'R', @piIdCustomer	= 681, @pvUser = 'ALZEPEDA'
+			spCat_Customers_CRUD_Records @pvOptionCRUD = 'R', @piIdCustomer	= 681, @pvUser = 'ALZEPEDA', @pvZone = 'ALL'
 			
 			spCat_Customers_CRUD_Records @pvOptionCRUD = 'R', @piIdCustomer	= 681,  @pvIdCountry = 'MX', @pvIdCustomerType = 'BILL'
 
@@ -87,7 +87,8 @@ CREATE PROCEDURE [dbo].spCat_Customers_CRUD_Records
 @pvContact			Varchar(100)= '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50),
-@pvIP				Varchar(20) = ''
+@pvIP				Varchar(20) = '',
+@pvZone				Varchar(10) = '' -- AEGH 25/05/14 Project Multiline Users
 AS
 
 SET NOCOUNT ON
@@ -135,7 +136,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- Donï¿½t Exists
 		BEGIN
 		SET @piIdCustomer = (SELECT ISNULL(MAX(Id_Customer),0) + 1 FROM Cat_Customers )
 			INSERT INTO Cat_Customers (
@@ -219,7 +220,7 @@ BEGIN TRY
 		WHERE CU.Id_Country IN (SELECT ZC.Id_Country 
 								FROM Cat_Zones_Countries ZC
 								INNER JOIN Security_Users U ON 
-								ZC.Id_Zone = U.Id_Zone
+								ZC.Id_Zone = '" + @pvZone + "' 
 								WHERE U.[User] = '" + @pvUser + "') "
 
 		IF @piIdCustomer <> 0 

@@ -40,7 +40,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	--Work Variables
 	--------------------------------------------------------------------
-	DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)
+	--DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser) --- AEGH 25/05/14 Project Multiline Users
 
 	--------------------------------------------------------------------
 	--Variables for log control
@@ -209,6 +209,12 @@ BEGIN TRY
 			-------------------------------------------------------------------
 			-- Update Flow PRAPP Rol
 			-------------------------------------------------------------------
+			/* AEGH 25/05/14 Project Multiline Users 
+			   This part has been disabled since now we do not have Preapprovers in Q+,
+			   in case the feature requires to be enabled again it is important to consider that
+			   Id_Role is now in Security_User_Roles Table
+			*/
+			/*
 			IF @pvIdRol = 'PRAPP'
 			BEGIN 
 				 UPDATE Approval_Workflow
@@ -216,6 +222,7 @@ BEGIN TRY
 				 WHERE Folio = @piFolio AND [Version] = @piVersion 
 				 AND Id_Role = @pvIdRol
 			END 
+			*/
 
 		END	
 	END

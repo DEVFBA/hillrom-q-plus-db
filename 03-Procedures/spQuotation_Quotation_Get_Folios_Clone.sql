@@ -21,8 +21,7 @@ Date:		12/05/2021
 Example:
 	
 	EXEC spQuotation_Quotation_Get_Folios_Clone @pvIdLanguageUser = 'SPA', @pvUser = 'ANGUTIERRE'
-	EXEC spQuotation_Quotation_Get_Folios_Clone @piFolio = 593
-	EXEC spQuotation_Quotation_Get_Folios_Clone @pvUser = 'ANGUTIERRE'
+	EXEC spQuotation_Quotation_Get_Folios_Clone @piFolio = 677, @pvUser = 'ANGUTIERRE'
 	EXEC spQuotation_Quotation_Get_Folios_Clone @pvCustomer = 'REDE'
 
 */
@@ -39,7 +38,7 @@ SELECT	Folio,
 		Customer_Bill_To
 FROM [fnQuotation](@pvIdLanguageUser)
 WHERE
-	(@piFolio = 0 OR Folio = @piFolio) AND
+	(@piFolio = 0 OR Folio <> @piFolio) AND
 	(@pvUser = '' OR Id_Sales_Executive = @pvUser) AND 
 	(@pvCustomer = '' OR Customer_Bill_To LIKE '%' + @pvCustomer + '%')  
 	--AND Id_Quotation_Status <> 'DRAF' --20220223 Ajuste realizado a solcitud de angel

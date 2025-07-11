@@ -57,5 +57,6 @@ SELECT DISTINCT
  WHERE Id_ItemTemplate_Class IN ('PROD', 'ACCE')
 	 AND Id_Line IN ('SLSOP9176A', 'SLSOP9186A')
 	 AND Id_Item_Class = 'COMP'
-	 AND Id_Item_SubClass NOT IN ('UPHOLSTERY')
+	--AND Id_Item_SubClass NOT IN ('UPHOLSTERY') 
+	AND Id_Item_SubClass IN ('DRAWERS','CASTORS','TRAYTABLE')-- 20220921 A solicitud de Alexis
  ORDER BY Id_Item;

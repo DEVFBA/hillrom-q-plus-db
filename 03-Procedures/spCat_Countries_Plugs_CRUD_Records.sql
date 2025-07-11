@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spCat_Countries_Plugs_CRUD_Records]    Script Date: 3/23/2025 12:39:32 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spCat_Countries_Plugs_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spCat_Countries_Plugs_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spCat_Countries_Plugs_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spCat_Countries_Plugs_CRUD_Records
 GO
 
 /*
@@ -27,10 +19,10 @@ Example:
 
 			spCat_Countries_Plugs_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'US' , @pvIdPlug = 'Plug2', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Countries_Plugs_CRUD_Records @pvOptionCRUD = 'R'
-			spCat_Countries_Plugs_CRUD_Records @pvOptionCRUD = 'R',@pvIdLanguageUser = 'ANG', @pvIdCountry = 'BR'
+			spCat_Countries_Plugs_CRUD_Records @pvOptionCRUD = 'R',@pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX'
 			SELECT * FROM Cat_Countries_Plugs
 */
-CREATE PROCEDURE [dbo].spCat_Countries_Plugs_CRUD_Records
+ALTER PROCEDURE [dbo].[spCat_Countries_Plugs_CRUD_Records]
 @pvOptionCRUD		Varchar(1),
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdCountry		Varchar(10) = '',
@@ -68,7 +60,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO Cat_Countries_Plugs(
 				Id_Country,
@@ -110,7 +102,7 @@ BEGIN TRY
 
 		WHERE (@pvIdCountry = '' OR CP.Id_Country = @pvIdCountry) AND
 			  (@pvIdPlug    = '' OR CP.Id_Plug = @pvIdPlug)
-		ORDER BY CP.Id_Country, CP.Id_Plug
+		ORDER BY CP.Id_Country, CP.Id_Plug DESC --Q+SO029 - Reordenar Plug (AEGH 9/4/24)
 	END
 
 	--------------------------------------------------------------------
