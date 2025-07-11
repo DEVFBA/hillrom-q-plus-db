@@ -19,9 +19,9 @@ Date:		10/08/2021
 Example:
 
 	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'VIROJAS',@pvUserSaleExecitive = 'VIROJAS'
-	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUÑOZ', @piFolio = 293
-	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUÑOZ', @pvUserSaleExecitive = 'ADVEGA'
-	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUÑOZ', @piFolio = 2, @pvUserSaleExecitive = 'ADVEGA'
+	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUï¿½OZ', @piFolio = 293
+	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUï¿½OZ', @pvUserSaleExecitive = 'ADVEGA'
+	EXEC spQuotation_ApprovalRoutes_Get_Pending_Approval_Quotation @pvUser = 'LUMUï¿½OZ', @piFolio = 2, @pvUserSaleExecitive = 'ADVEGA'
 
 	select * from Approval_Workflow_Quotation order by 1 
 */
@@ -93,8 +93,11 @@ AS
 	AW.[Version] = CF.[Version] AND 
 	AW.Approval_Flow_Sequence = CF.Approval_Flow_Sequence
 
-	INNER JOIN Security_Users USR ON
+	/** AEGH 05/19/25 Project MultiLine Users **/
+	INNER JOIN Security_User_Roles USR ON
 	AW.Id_Role = USR.Id_Role
+	/*INNER JOIN Security_Users USR ON
+	AW.Id_Role = USR.Id_Role*/
 
 
 	INNER JOIN Cat_Quotation_Status CQS ON 

@@ -29,7 +29,7 @@ CREATE PROCEDURE [dbo].spDashboard_Get_Sales
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @pvPeriod			Varchar(20) = 'CY',
 @pvUser				Varchar(20) = '',
-@pvIdZone			Varchar(10) = '',
+@pvIdZone			Varchar(10) = '', 
 @pvRole				Varchar(10) = '' -- AEGH 05/08/25 -- Multiline Users Project
 
 AS
@@ -40,7 +40,7 @@ AS
 	DECLARE @vInitialDate			Varchar(8)  = (SELECT InitialDate FROM fnGetPeriodDates(@pvPeriod))
 	DECLARE @vFinalDate				Varchar(8)	= (SELECT FinalDate FROM fnGetPeriodDates(@pvPeriod))
 	--DECLARE @vUserRol				Varchar(10)  = ISNULL((SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser), '') -- AEGH 05/08/25 -- Multiline Users Project
-	DECLARE @vIdSalesExecutive		Varchar(10) = (CASE WHEN @vUserRol = 'ADMIN' THEN '' ELSE @pvUser END)
+	DECLARE @vIdSalesExecutive		Varchar(10) = (CASE WHEN @pvRole = 'ADMIN' THEN '' ELSE @pvUser END)
 
 	/*============================================================*/
 	-- TOTALS
@@ -59,7 +59,7 @@ AS
 
 	INNER JOIN Security_Users U ON 
 	Q.Id_Sales_Executive = U.[User]
-	
+
 	INNER JOIN Security_User_Roles SUR ON -- AEGH 05/08/25 -- Multiline Users Project
 	U.[User] = SUR.[User]				  -- AEGH 05/08/25 -- Multiline Users Project
 	
@@ -70,5 +70,6 @@ AS
 	GROUP BY	 MONTH(Q.Creation_Date),  
 				DATENAME(MONTH, Q.Creation_Date)
 	ORDER BY IdMonth
+
 
 	
