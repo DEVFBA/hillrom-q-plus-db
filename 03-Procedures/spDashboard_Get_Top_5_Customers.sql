@@ -23,14 +23,15 @@ Periods
 			CY = Acumulado Anual <Year To Date>
 
 Example:
-	EXEC spDashboard_Get_Top_5_Customers @pvIdLanguageUser = 'ANG', @pvPeriod = 'LM', @pvUser = 'ANGUTIERRE', @pvIdZone = ''
-	EXEC spDashboard_Get_Top_5_Customers @pvIdLanguageUser = 'ANG', @pvPeriod = 'CM', @pvUser = 'ANGUTIERRE', @pvIdZone = ''
+	EXEC spDashboard_Get_Top_5_Customers @pvIdLanguageUser = 'ANG', @pvPeriod = 'LM', @pvUser = 'ANGUTIERRE', @pvIdZone = '', @pvRole = 'ADMIN'
+	EXEC spDashboard_Get_Top_5_Customers @pvIdLanguageUser = 'ANG', @pvPeriod = 'CM', @pvUser = 'ANGUTIERRE', @pvIdZone = '', @pvRole = 'ADMIN'
 */
 CREATE PROCEDURE [dbo].spDashboard_Get_Top_5_Customers
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @pvPeriod			Varchar(20) = 'LM',
 @pvUser				Varchar(20) = '',
-@pvIdZone			Varchar(10) = '' 
+@pvIdZone			Varchar(10) = '', 
+@pvRole				Varchar(10) = '' -- AEGH 05/08/25 -- Multiline Users Project
 
 AS
 
@@ -39,8 +40,8 @@ AS
 	/*============================================================*/
 	DECLARE @vInitialDate			Varchar(8)  = (SELECT InitialDate FROM fnGetPeriodDates(@pvPeriod))
 	DECLARE @vFinalDate				Varchar(8)	= (SELECT FinalDate FROM fnGetPeriodDates(@pvPeriod))
-	DECLARE @vUserRol				Varchar(10)  = ISNULL((SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser), '')
-	DECLARE @vIdSalesExecutive		Varchar(10) = (CASE WHEN @vUserRol = 'ADMIN' THEN '' ELSE @pvUser END)
+	--DECLARE @vUserRol				Varchar(10)  = ISNULL((SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser), '') -- AEGH 05/08/25 -- Multiline Users Project
+	DECLARE @vIdSalesExecutive		Varchar(10) = (CASE WHEN @pvRole = 'ADMIN' THEN '' ELSE @pvUser END)
 	DECLARE @vTotalColor			Varchar(30) = (SELECT [Value] FROM Cat_General_Parameters WHERE Id_Parameter = 43) 
 	DECLARE @vTotalQuotationColor	Varchar(30) = (SELECT [Value] FROM Cat_General_Parameters WHERE Id_Parameter = 42) 
 	DECLARE @tblTOP5				Table(Customer Varchar(255), Total_Sale Float, Total_Sale_Color Varchar(30) , Total_Quotation float, Total_Quotation_Color Varchar(30))
@@ -64,10 +65,13 @@ AS
 
 	INNER JOIN Security_Users U ON 
 	Q.Id_Sales_Executive = U.[User]
+
+	INNER JOIN Security_User_Roles SUR ON -- AEGH 05/08/25 -- Multiline Users Project
+	U.[User] = SUR.[User]				  -- AEGH 05/08/25 -- Multiline Users Project
 	
 	WHERE Q.Id_Quotation_Status = 'ACCE'
 	AND (@vIdSalesExecutive = '' OR Q.Id_Sales_Executive = @vIdSalesExecutive)
-	AND (@pvIdZone = '' OR U.Id_Zone = @pvIdZone)
+	AND (@pvIdZone = '' OR SUR.Id_Zone = @pvIdZone) -- AEGH 05/08/25 -- Multiline Users Project
 	AND CONVERT(varchar(8), Q.Creation_Date, 112) BETWEEN @vInitialDate AND @vFinalDate
 	GROUP BY	Q.Id_Customer_Bill_To,  
 				Q.Customer_Bill_To

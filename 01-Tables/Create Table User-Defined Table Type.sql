@@ -205,7 +205,9 @@ CREATE TYPE [dbo].[UDT_Quotation_Discounts]AS TABLE
  (
    Id_Item            varchar(50)          not null,
    Discount           float                not null,
-   Id_Country		  Varchar(10)	       not null
+   Id_Country		  Varchar(10)	       not null,
+   Id_Language		  varchar(10)		   not null, -- nuevo EFPSLI007
+   Id_Sales_Type      varchar(10)          not null  -- nuevo EFPSLI007
 )
 GO
 
@@ -306,3 +308,4 @@ CREATE TYPE [dbo].[UDT_Approval_Workflow]AS TABLE
    Comments             Varchar(1000)        null
   )
 GO
+

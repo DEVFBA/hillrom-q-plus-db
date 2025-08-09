@@ -21,7 +21,7 @@ Example:
 	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'MAQUINTERO'
 	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'LUMUNOZ', @piFolio = 10
 	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'LUMUNOZ', @pvUserSaleExecitive = 'ANGUTIERRE'
-	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'LUMUÑOZ', @piFolio = 2, @pvUserSaleExecitive = 'ADVEGA'
+	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'LUMUï¿½OZ', @piFolio = 2, @pvUserSaleExecitive = 'ADVEGA'
 
 	EXEC spQuotation_ApprovalRoutes_Get_History @pvIdLanguageUser = 'ANG', @pvUser = 'JOMONTANER', @piFolio = 681;
 
@@ -94,8 +94,11 @@ AS
 	AW.Id_Approval_Type = CF.Id_Approval_Type AND
 	AW.Approval_Flow_Sequence = CF.Approval_Flow_Sequence
 
-	INNER JOIN Security_Users USR ON
+	/** AEGH Project Multiline Users 05/19/25 **/
+	INNER JOIN Security_User_Roles USR ON
 	AW.Id_Role = USR.Id_Role
+	/*INNER JOIN Security_Users USR ON
+	AW.Id_Role = USR.Id_Role*/
 
 	INNER JOIN Cat_Zones_Countries ZC ON 
 	USR.Id_Zone = ZC.Id_Zone AND 
@@ -122,10 +125,19 @@ AS
 	Q.Id_Quotation_Status = CQS.Id_Quotation_Status AND
 	CQS.Id_Language = @pvIdLanguageUser
 
+	/** AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale
 	INNER JOIN Approvers_Sales_Executive ASE ON 
 	Q.Id_Sales_Executive = ASE.Sales_Executive 
 	AND ASE.[Status] = 1
 	AND ASE.[User] = @pvUser
+	**/
+
+	/** AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale **/
+	INNER JOIN Users_Sale_Types UST ON
+	Q.Id_Sales_Type = UST.Id_Sales_Type
+	AND UST.Id_Language = @pvIdLanguageUser
+	AND UST.[User] =  @pvUser
+	/** End AEGH 06/14/25 Project Approval Routes Indirect and Direct Sale **/
 
 	WHERE 
 	Q.Id_Quotation_Status = 'ROUT' AND 

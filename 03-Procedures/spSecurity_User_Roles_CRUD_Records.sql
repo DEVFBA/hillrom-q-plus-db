@@ -6,79 +6,53 @@ SET QUOTED_IDENTIFIER OFF
 GO
 
 /* ==================================================================================*/
--- spSecurity_Users_CRUD_Records
+-- spSecurity_User_Roles_CRUD_Records
 /* ==================================================================================*/	
-PRINT 'Crea Procedure: spSecurity_Users_CRUD_Records'
+PRINT 'Crea Procedure: spSecurity_User_Roles_CRUD_Records'
 
-IF OBJECT_ID('[dbo].[spSecurity_Users_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spSecurity_Users_CRUD_Records
+IF OBJECT_ID('[dbo].[spSecurity_User_Roles_CRUD_Records]','P') IS NOT NULL
+       DROP PROCEDURE [dbo].spSecurity_User_Roles_CRUD_Records
 GO
 
 /*
 Autor:		Alejandro Zepeda
-Desc:		Security_Users | Create - Read - Upadate - Delete 
+Desc:		Security_User_Roles | Create - Read - Upadate - Delete 
 Date:		12/01/2021
-----------------------------------
-Modifications:
-Date:		01/05/2025
-Comments:	
-1.- The following parameters were removed:
-	@pvIdRole			Varchar(100) = '', --'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'
-	@pvIdZone			Varchar(10)	= '',
-	@pvIdBusinessLine	Varchar(10) = '',
-2.- 
-	The following fields return no data in the current SELECT statement:
-	U.Id_Role,
-	Role_Desc = R.Short_Desc,
-	RZ.Id_Region,
-	Region_Desc = RE.Short_Desc,
-	U.Id_Zone,
-	Zone_Desc = Z.Short_Desc,
-
-	The WHERE clause no longer includes the following fields:
-	(@pvIdUser		 = ''	OR U.[User] = @pvIdUser) AND
-	(@pvIdRole		= ''	OR U.Id_Role IN(SELECT VALOR FROM fnSplit(@pvIdRole,'|'))) AND
-	(@pvIdZone		= ''	OR U.Id_Zone = @pvIdZone) AND
-	(@pvIdBusinessLine = '' OR R.Id_Business_Line = @pvIdBusinessLine)
-
-----------------------------------
 Example:
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'C',@pvIdUser = 'ALZEPEDA' , 
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'C',@pvIdUser = 'ALZEPEDA' , 
+																@pvIdRole = 'ADMIN', 
+																@pvIdZone = 'ALLZ', 
 																@pvIdLanguage ='SPA', 
-																@pvPassword = '6c690c09caf5abbab6178e980881cbf5568481e48cd344e4b726c34c6e81be57', 
-																@pvName = 'Alejandro Zepeda', 
-																@pvEmail = 'kelberoz@hotmail.com', 
-																@pbTempPassword = 0, 
+																@pbPrincipal = 0, 
 																@pbStatus = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ADVEGA'
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA'
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'R'
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'U',	@pvIdUser = 'ALZEPEDA', 
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ADVEGA', @pvIdRole = 'SALES', @pvIdZone = 'CEN' 
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA'
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdUser = 'ALZEPEDA', @pbPrincipal = 1
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdZone = 'MEX' 
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdRole = 'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'  
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'R'
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'U',	@pvIdUser = 'ALZEPEDA' , 
+																@pvIdRole = 'ADMIN', 
+																@pvIdZone = 'ALLZ', 
 																@pvIdLanguage ='SPA', 
-																@pvPassword = '6c690c09caf5abbab6178e980881cbf5568481e48cd344e4b726c34c6e81be57', 
-																@pvName = 'Alejandro Zepeda', 
-																@pvEmail = 'kelberoz@hotmail.com', 
-																@pbTempPassword = 0, 
+																@pbPrincipal = 0, 
 																@pbStatus = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
 
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'D', @pvIdUser = 'KELBEROZ' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spSecurity_Users_CRUD_Records @pvOptionCRUD = 'X', @pvIdUser = 'KELBEROZ' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-
-
-
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'D', @pvIdUser = 'ALZEPEDA', @pvIdRole = 'ADMIN', @pbStatus = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
+			spSecurity_User_Roles_CRUD_Records @pvOptionCRUD = 'X', @pvIdUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
 			
 */
-CREATE PROCEDURE [dbo].spSecurity_Users_CRUD_Records
+CREATE PROCEDURE [dbo].spSecurity_User_Roles_CRUD_Records
 @pvOptionCRUD		Varchar(1),
 @pvIdLanguageUser	Varchar(10) = '',
 @pvIdUser			Varchar(20) = '',
+@pvIdRole			Varchar(100) = '', --'SAAPP|MAAPP|FIAPP|VPAPP|LPAPP'
+@pvIdZone			Varchar(10)	= '',
 @pvIdLanguage		Varchar(10)	= '',
-@pvPassword			Varchar(255)= '',
-@pvName				Varchar(255)= '',
-@pvEmail			Varchar(50)	= '',
-@pbTempPassword		Bit			= 0,	 
+@pvIdBusinessLine	Varchar(10) = '',
+@pbPrincipal		Bit			= NULL,	 
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
@@ -96,18 +70,18 @@ BEGIN TRY
 	--Variables for log control
 	--------------------------------------------------------------------
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Security_Users - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'Security_User_Roles - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Users_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "', @pvPassword = '" + ISNULL(@pvPassword,'NULL') + "', @pvName = '" + ISNULL(@pvName,'NULL') + "', @pvEmail = '" + ISNULL(@pvEmail,'NULL') + "', @pbTempPassword = '" + ISNULL(CAST(@pbTempPassword AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_User_Roles_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdUser = '" + ISNULL(@pvIdUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "', @pvIdZone = '" + ISNULL(@pvIdZone,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "',  @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pbPrincipal = '" + ISNULL(CAST(@pbPrincipal AS VARCHAR),'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
 		-- Validate if the record already exists
-		IF EXISTS(SELECT * FROM Security_Users WHERE [User] = @pvIdUser)
+		IF EXISTS(SELECT * FROM Security_User_Roles WHERE [User] = @pvIdUser AND Id_Role = @pvIdRole)
 		BEGIN
 			SET @bSuccessful	= 0
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
@@ -115,26 +89,20 @@ BEGIN TRY
 		END
 		ELSE -- Don´t Exists
 		BEGIN
-			INSERT INTO Security_Users (
+			INSERT INTO Security_User_Roles (
 				[User],
-				Id_Language,
-				[Password],
-				[Name],
-				Email,
-				Temporal_Password,
-				Final_Effective_Date,
+				Id_Role,
+				Id_Zone,
+				Principal,
 				[Status],
 				Modify_Date,
 				Modify_By,
 				Modify_IP)
 			VALUES (
 				@pvIdUser,
-				@pvIdLanguage,
-				@pvPassword,
-				@pvName,
-				@pvEmail,
-				@pbTempPassword,
-				@vFinal_Effective_Date,
+				@pvIdRole,
+				@pvIdZone,
+				@pbPrincipal,
 				@pbStatus,
 				GETDATE(),
 				@pvUser,
@@ -150,28 +118,40 @@ BEGIN TRY
 	BEGIN
 		SELECT 
 		U.[User],
-		U.Id_Language,
-		Language_Desc = L.Short_Desc,
-		U.[Password],
-		U.[Name],
-		U.Email,
-		Temporal_Password,
-		Final_Effective_Date,
+		U.Id_Role,
+		Role_Desc = R.Short_Desc,
+		RZ.Id_Region,
+		Region_Desc = RE.Short_Desc,
+		U.Id_Zone,
+		Zone_Desc = Z.Short_Desc,
+		Principal,
+		R.Id_Business_Line,
 		U.[Status],
 		U.Modify_Date,
 		U.Modify_By,
 		U.Modify_IP
-		FROM Security_Users U
+		FROM Security_User_Roles U
 
-		LEFT OUTER JOIN Cat_Languages L ON 
-		U.Id_Language = L.Id_Language AND
-		U.Id_Language = L.Id_Language_Translation
+		INNER JOIN Security_Roles R ON 
+		U.Id_Role = R.Id_Role
+
+		INNER JOIN Cat_Zones Z ON
+		U.Id_Zone = Z.Id_Zone
+
+		INNER JOIN Cat_Region_Zones RZ ON 
+		Z.Id_Zone = RZ.Id_Zone
+
+		INNER JOIN Cat_Regions RE ON
+		RZ.Id_Region = RE.Id_Region
+
 
 		WHERE 
-		(@pvIdLanguageUser = ''  OR L.Id_Language = @pvIdLanguageUser) AND
 		(@pvIdUser		 = ''	OR U.[User] = @pvIdUser) AND
-		(@pvIdLanguage	= ''	OR U.Id_Language = @pvIdLanguage)
-		ORDER BY  [User]
+		(@pvIdRole		= ''	OR U.Id_Role IN(SELECT VALOR FROM fnSplit(@pvIdRole,'|'))) AND
+		(@pvIdZone		= ''	OR U.Id_Zone = @pvIdZone) AND
+		(@pvIdBusinessLine = '' OR R.Id_Business_Line = @pvIdBusinessLine) AND
+		(@pbPrincipal IS NULL   OR U.Principal = @pbPrincipal)
+		ORDER BY  [User],U.Id_Role
 		RETURN
 	END
 
@@ -180,28 +160,26 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		UPDATE Security_Users 
-		SET Id_Language			= @pvIdLanguage,
-			[Password]			= @pvPassword,
-			[Name]				= @pvName,
-			Email				= @pvEmail,
-			Temporal_Password	= @pbTempPassword,
-			Final_Effective_Date= (CASE WHEN @pbTempPassword = 1 THEN @vFinal_Effective_Date ELSE Final_Effective_Date END),
+		UPDATE Security_User_Roles 
+		SET Id_Role				= @pvIdRole,
+			Id_Zone				= @pvIdZone,
+			Principal			= @pbPrincipal,
 			[Status]			= @pbStatus,
 			Modify_Date			= GETDATE(),
 			Modify_By			= @pvUser,
 			Modify_IP			= @pvIP
-		WHERE [User]			= @pvIdUser 
+		WHERE [User]			= @pvIdUser AND
+			  Id_Role			= @pvIdRole
 	END
 
 	--------------------------------------------------------------------
 	--Delete Records
 	--------------------------------------------------------------------
-	IF @pvOptionCRUD = 'D' OR @vDescOperationCRUD = 'N/A'
+	IF @pvOptionCRUD = 'D'
 	BEGIN
-		SET @bSuccessful	= 0
-		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+		DELETE Security_User_Roles 
+		WHERE [User]			= @pvIdUser AND
+			  Id_Role			= @pvIdRole
 	END
 
 	--------------------------------------------------------------------

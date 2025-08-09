@@ -29,7 +29,9 @@ ALTER PROCEDURE [dbo].[spQuotation_ApprovalRoutes_Upd_Workflow]
 @pvIdApprovalStatus		Varchar(10),
 @pudtApprovalWorkflow	UDT_Approval_Workflow	 Readonly,
 @pvUser					Varchar(50),
-@pvIP					Varchar(20)
+@pvIP					Varchar(20),
+@pvZone					Varchar(10),
+@pvRole					Varchar(10)
 AS
 
 SET NOCOUNT ON
@@ -120,7 +122,7 @@ BEGIN TRY
 
 	----4. Quotation Pending to Approve
 	IF @pvIdApprovalStatus = 'APP' -- 
-		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = @pvIdLanguageUser, @piIdNotification = 4, @piFolio =  @iFolio , @piVersion = @iVersion, @pvUser = @pvUser
+		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = @pvIdLanguageUser, @piIdNotification = 4, @piFolio =  @iFolio , @piVersion = @iVersion, @pvUser = @pvUser, @pvRole = @pvRole, @pvZone = @pvZone
 
 	--------------------------------------------------------------------
 	--Register Transaction Log

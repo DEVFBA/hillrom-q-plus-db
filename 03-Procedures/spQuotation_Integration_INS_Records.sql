@@ -70,7 +70,9 @@ CREATE PROCEDURE [dbo].[spQuotation_Integration_INS_Records]
 @pudtQuotationCommissions		UDT_Quotation_Commissions Readonly,
 @pvIdQuotationStatus			Varchar(10),
 @pvUser							Varchar(50)	= '',
-@pvIP							Varchar(20)	= ''
+@pvIP							Varchar(20)	= '',
+@pvZone							Varchar(10), --- AEGH 25/05/14 Project Multiline Users
+@pvRole							Varchar(10)
 AS
 
 
@@ -85,6 +87,11 @@ BEGIN TRY
 	DECLARE @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
 	DECLARE @TableResponse TABLE([Successful] bit, MessageType varchar(30), [Message] varchar(max), IdTransacLog numeric(18,0))
 	DECLARE @TableResponseQ TABLE([Successful] bit, MessageType varchar(30), [Message] varchar(max), IdTransacLog numeric(18,0), Folio Numeric, [Version] INT)
+	/** AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
+	DECLARE @pvIdSalesType	VARCHAR(10)	
+
+	SET @pvIdSalesType = (SELECT Id_Sales_Type FROM Quotation WHERE Folio = @piFolio AND [Version] = @piVersion)
+	/** End AEGH 25/05/30 Project Approval Routes Direct & Indirect Sale **/
 
 
 	--------------------------------------------------------------------
@@ -131,7 +138,7 @@ BEGIN TRY
 		--Update Status QuotationS
 		------------------------
 		INSERT INTO @TableResponseQ
-		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP			
+		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP, @pvZone = @pvZone
 								
 
 		INSERT INTO @TableResponse
@@ -142,13 +149,13 @@ BEGIN TRY
 		------------------------
 
 		INSERT @TableResponse
-		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = @piFolio, @piVersion = @piVersion, @pvUser = @pvUser, @pvIP = @pvIP
+		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = @piFolio, @piVersion = @piVersion, @pvIdSalesType = @pvIdSalesType, @pvIdLanguage = 'ANG', @pvUser = @pvUser, @pvIP = @pvIP -- AEGH 25/05/30 Project Approval Routes Direct & Indirect Sales || Add pvIdSalesType and pvIdLanguage
 	
 		INSERT INTO @TableResponse
 		EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation  @piFolio = @piFolio, @piVersion = @piVersion, @pvUser = @pvUser, @pvIP = @pvIP
 
 		IF @pvIdQuotationStatus = 'ROUT'
-		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+		EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvRole = @pvRole, @pvZone = @pvZone
 			
 
 

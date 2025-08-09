@@ -108,6 +108,7 @@ ALTER PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
 @pvComments					Varchar(1000)= '',
 @pvUser						Varchar(50) = '',
 @pvIP						Varchar(20) = '',
+@pvZone						Varchar(10), --- AEGH 25/05/14 Project Multiline Users
 ----------------------------------------------
 --Additional search parameters
 ----------------------------------------------
@@ -360,17 +361,17 @@ IF @pvOptionCRUD = 'U'
 
 			----1. Quotation Send to Client
 			IF @pvIdQuotationStatus = 'SENT' 
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 1, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 1, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 
 			----2. Quotation Approved 
 			IF @pvIdQuotationStatus = 'SENT' 
 			BEGIN
 				IF @pvIdQuotationStatusPrevious = 'ROUT'
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 2, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 2, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 			END
 			----3. Quotation Rejected
 			IF @pvIdQuotationStatus = 'DIRE' -- 
-				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 3, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser
+				EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD = 'C',  @piIdNotification = 3, @piFolio =  @piFolio , @piVersion = @piVersion, @pvUser = @pvUser, @pvZone = @pvZone
 		
 		END
 

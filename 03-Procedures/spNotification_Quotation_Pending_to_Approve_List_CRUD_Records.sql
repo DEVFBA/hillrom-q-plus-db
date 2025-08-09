@@ -34,7 +34,9 @@ ALTER PROCEDURE [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Rec
 @piIdNotification		Int			= 0,
 @piFolio				Int			= 0,
 @piVersion				Int			= 0,
-@pvUser					Varchar(50) = 'sa'
+@pvUser					Varchar(50) = 'sa',
+@pvZone					Varchar(10) = '',
+@pvRole					Varchar(10) = ''
 
 AS
 
@@ -68,7 +70,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + " "
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + ", @pvZone = " + ISNULL(CAST(@pvZone AS VARCHAR),'NULL') + ", @pvRole = " + ISNULL(CAST(@pvRole AS VARCHAR),'NULL') + " "
 	
 
 	--------------------------------------------------------------------
@@ -106,7 +108,7 @@ BEGIN TRY
 		Approval_Roles.[Version],
 		Quotation.Customer_Bill_To,
 		Quotation.Country_Bill_To,
-		Users.[User],
+		Users_Roles.[User], -- AEGH Multiline Users Project 05/20/25
 		Users.Name,
 		Users.Email
 		FROM @tblWF_CurrentFolios AS Approval_Roles 
@@ -123,16 +125,32 @@ BEGIN TRY
 		INNER JOIN Cat_Zones_Countries AS Zones
 		ON Quotation.Id_Country_Bill_To = Zones.Id_Country AND
 		Zones.[Status] = 1
+		/** AEGH 05/20/25 Multiline Users Project **/
+		INNER JOIN Security_User_Roles AS Users_Roles
+		--ON Zones.Id_Zone = 'LAN'
+		--AND Workflow.Id_Role = 'SAAPP' AND
+		ON Users_Roles.Id_Zone = Zones.Id_Zone
+		AND Users_Roles.Id_Role = Workflow.Id_Role AND 
+		Users_Roles.[Status] = 1
 
 		INNER JOIN Security_Users AS Users
-		ON USERS.Id_Zone = Zones.Id_Zone
+		ON Users_Roles.[User] = Users.[User]
+		AND Users.[Status] =1
+		/*INNER JOIN Security_Users AS Users
+		ON Users.Id_Zone = Zones.Id_Zone
 		AND Users.Id_Role = Workflow.Id_Role AND 
-		Users.[Status] = 1
+		Users.[Status] = 1*/
+
+		/** AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
+		INNER JOIN Users_Sale_Types AS UST ON
+		UST.Id_Sales_Type = Quotation.Id_Sales_Type
+		AND Users_Roles.[User] = UST.[User]
+		/** End AEGH 06/14/25 Project Approval Routes Direct Indirect Sale **/
 		
 		WHERE (@piFolio		= 0	OR Workflow.Folio	  = @piFolio) AND 
 			  (@piVersion	= 0	OR Workflow.[Version] = @piVersion)  
 		
-		ORDER BY Users.[User], Approval_Roles.Folio, Approval_Roles.[Version]
+		ORDER BY Users_Roles.[User], Approval_Roles.Folio, Approval_Roles.[Version]
 
 		------------------------------------------------------------
 

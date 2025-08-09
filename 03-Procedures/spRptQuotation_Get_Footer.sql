@@ -19,10 +19,10 @@ Desc:		Report Quotation Footer
 Date:		12/02/2021
 Example:
 
-	EXEC spRptQuotation_Get_Footer @pvIdLanguageUser = 'ANG', @piFolio = 343, @piVersion = 1 
+	EXEC spRptQuotation_Get_Footer @pvIdLanguageUser = 'ANG', @piFolio = 2802, @piVersion = 1 
 
 
-*/SS
+*/
 CREATE PROCEDURE [dbo].spRptQuotation_Get_Footer
 @pvIdLanguageUser	Varchar(10) = 'ANG',
 @piFolio			Int,
@@ -32,7 +32,7 @@ AS
 	SELECT 
 			Folio,
 			[Version],
-			Total					= (SELECT SUM(Grand_Total) FROM Quotation_Header WHERE Folio = @piFolio AND [Version] = @piVersion),
+			Total					= (SELECT SUM(Grand_Total) + SUM(Installation_Charges_Price) FROM Quotation_Header WHERE Folio = @piFolio AND [Version] = @piVersion),
 			Id_Incoterm,
 			Incoterm_Desc,
 			Sales_Executive,
@@ -41,12 +41,19 @@ AS
 			Symbol
 		
 	FROM [fnQuotation](@pvIdLanguageUser) Q
+	/** AEGH 25/05/22 Project Multiline Users **/
+	--INNER JOIN Security_Users U ON 
+	--Q.Id_Sales_Executive = U.[User]
+
+	INNER JOIN Security_User_Roles UR ON 
+	Q.Id_Sales_Executive = UR.[User]
 
 	INNER JOIN Security_Users U ON 
-	Q.Id_Sales_Executive = U.[User]
+	UR.[User] = U.[User]
+	/** Finish AEGH 25/05/22 Project Multiline Users **/
 
 	INNER JOIN Cat_Region_Zones RZ ON 
-	U.Id_Zone = RZ.Id_Zone 
+	UR.Id_Zone = RZ.Id_Zone 
 	
 	INNER JOIN Cat_Regions RE ON
 	RZ.Id_Region =  RE.Id_Region
@@ -57,4 +64,6 @@ AS
 
 	WHERE Folio = @piFolio AND [Version] = @piVersion
 	
+	 
+
 	 

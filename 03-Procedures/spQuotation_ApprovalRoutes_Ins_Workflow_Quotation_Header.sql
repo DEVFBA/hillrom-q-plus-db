@@ -20,10 +20,10 @@ Desc:		spQuotation Approval WorkFlow | Create - Read - Upadate - Delete
 Date:		09/02/2021
 Example:
 
-	select * from Quotation WHERE folio = 509 AND ID_QUOTATION_STATUS = 'ROUT'
-	delete from Approval_Workflow WHERE folio = 509
-	EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = 509, @piVersion = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
-	SELECT *  from Approval_Workflow WHERE folio = 509
+	select * from Quotation WHERE folio = 2716 AND ID_QUOTATION_STATUS = 'ROUT'
+	delete from Approval_Workflow WHERE folio = 2716
+	EXEC spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header  @piFolio = 2716, @piVersion = 1, @pvUser = 'ALZEPEDA', @pvIP ='192.168.1.254'
+	SELECT *  from Approval_Workflow WHERE folio = 2716
 
 */
 
@@ -31,6 +31,8 @@ CREATE PROCEDURE [dbo].spQuotation_ApprovalRoutes_Ins_Workflow_Quotation_Header
 @pvIdLanguageUser	Varchar(10) = '',
 @piFolio			Int			= 0,
 @piVersion			Int			= 0,
+@pvIdLanguage		Varchar(50) = '',
+@pvIdSalesType		Varchar(20) = '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = ''
 AS
@@ -40,7 +42,7 @@ BEGIN TRY
 	--Work Variables
 	--------------------------------------------------------------------
 	DECLARE @vDescOperationCRUD		Varchar(50) = dbo.fnGetOperationCRUD('C')
-	DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)
+	--DECLARE @pvIdRol				Varchar(10) = (SELECT Id_Role FROM Security_Users WHERE [User] = @pvUser)  --- AEGH 25/05/14 Project Multiline Users
 	DECLARE @tblDscountTypes		TABLE (Id_Header Smallint, Item_Template Varchar(50),Total Float, Id_Discount_Type Varchar(10), Approval_Group Varchar(20))
 	DECLARE @fMinimumRouteAmount	FLOAT = (SELECT [Value] FROM Cat_General_Parameters WHERE Id_Parameter = 21)
 	DECLARE @fExchangeRate			FLOAT = (SELECT ER.Exchange_Rate FROM Cat_Exchange_Rates ER
@@ -121,7 +123,9 @@ BEGIN TRY
 
 			WHERE QH.Folio = @piFolio AND QH.[Version] = @piVersion 
 			AND AD.Id_Discount_Type = 'PERC'
-			AND QH.Discount BETWEEN AD.Bottom_Limit AND AD.Upper_Limit	
+			AND QH.Discount BETWEEN AD.Bottom_Limit AND AD.Upper_Limit	AND
+			(@pvIdSalesType = '' OR AD.Id_Sales_Type = @pvIdSalesType) AND
+		    (@pvIdLanguageUser = '' OR  AD.Id_Language = @pvIdLanguage) 
 
 
 			--Insert flow
@@ -195,7 +199,10 @@ BEGIN TRY
 
 			WHERE QH.Folio = @piFolio AND QH.[Version] = @piVersion 
 			AND QH.Discount BETWEEN AD.Bottom_Limit AND AD.Upper_Limit
-			AND AD.Id_Discount_Type = 'PERC'
+			AND AD.Id_Discount_Type = 'PERC' AND			
+			(@pvIdSalesType = '' OR AD.Id_Sales_Type = @pvIdSalesType) AND
+		    (@pvIdLanguageUser = '' OR  AD.Id_Language = @pvIdLanguage) 
+
 	
 			
 			UNION ALL
@@ -254,7 +261,10 @@ BEGIN TRY
 
 			WHERE QH.Folio = @piFolio AND QH.[Version] = @piVersion 
 			AND TMP.Total BETWEEN (AD.Bottom_Limit * @fExchangeRate) AND (AD.Upper_Limit * @fExchangeRate)	
-			AND AD.Id_Discount_Type = 'AMOU'
+			AND AD.Id_Discount_Type = 'AMOU' AND
+			(@pvIdSalesType = '' OR AD.Id_Sales_Type = @pvIdSalesType) AND
+		    (@pvIdLanguageUser = '' OR  AD.Id_Language = @pvIdLanguage) 
+
 					
 			
 			ORDER BY  QH.Item_Template, SR.Approval_Flow_Sequence
@@ -322,6 +332,12 @@ BEGIN TRY
 			-------------------------------------------------------------------
 			-- Update Flow PRAPP Rol
 			-------------------------------------------------------------------
+			/* AEGH 25/05/14 Project Multiline Users 
+			   This part has been disabled since now we do not have Preapprovers in Q+,
+			   in case the feature requires to be enabled again it is important to consider that
+			   Id_Role is now in Security_User_Roles Table
+			*/
+			/*
 			IF @pvIdRol = 'PRAPP'
 			BEGIN 
 				 UPDATE Approval_Workflow
@@ -329,6 +345,7 @@ BEGIN TRY
 				 WHERE Folio = @piFolio AND [Version] = @piVersion 
 				 AND Id_Role = @pvIdRol
 			END 
+			*/
 		END	
 
 	END
