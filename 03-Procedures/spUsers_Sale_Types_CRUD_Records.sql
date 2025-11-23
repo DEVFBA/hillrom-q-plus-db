@@ -33,7 +33,7 @@ Example:
 */
 CREATE PROCEDURE [dbo].spUsers_Sale_Types_CRUD_Records
 @pvOptionCRUD		Varchar(1),
-@pvIdUser			Varchar(10) = '',
+@pvIdUser			Varchar(20) = '',
 @pvIdSalesType		Varchar(10) = '',
 @pvIdLanguageUser	Varchar(10) = '',
 @pbStatus			Bit			= '',
@@ -69,7 +69,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END		
-		ELSE -- Don´t Exists
+		ELSE -- Donï¿½t Exists
 		BEGIN
 			INSERT INTO Users_Sale_Types(
 				[User],
