@@ -1,43 +1,25 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Hierarchy_Levels_CRUD_Records]    Script Date: 9/14/2025 6:34:30 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
 
-/* ==================================================================================*/
--- spCat_Item_Classes_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spCat_Item_Classes_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spCat_Item_Classes_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spCat_Item_Classes_CRUD_Records
-GO
-
 /*
-Autor:		Alejandro Zepeda
-Desc:		Cat_Item_Classes | Create - Read - Upadate - Delete 
-Date:		09/01/2021
+Autor:		Angel Gutiérrez
+Desc:		Cat_Hierarchy_Levels | Create - Read - Update - Delete | EFGSS002 
+Date:		16/09/2025
 Example:
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvShortDesc = 'Transport Chairs', @pvLongDesc = 'Transport Chairs for Hospitals', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE', @pvIdBusinessLine = 'PSS'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvShortDesc = 'Transport Chairs "Modify"', @pvLongDesc = 'Transport Chairs for Hospitals', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'MEDSUq' , @pvShortDesc = 'Med-Surg', @pvLongDesc = 'Med-Surg for Hospitals', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'R'
+			EXEC spGSS_Cat_Hierarchy_Levels_CRUD_Records @pvOptionCRUD = 'R', @pvIdHierarchyLevel = 'LINE' 
+			EXEC spGSS_Cat_Hierarchy_Levels_CRUD_Records @pvOptionCRUD = 'R'
 */
-CREATE PROCEDURE [dbo].spCat_Item_Classes_CRUD_Records
+CREATE PROCEDURE [dbo].[spGSS_Cat_Hierarchy_Levels_CRUD_Records]
 @pvOptionCRUD		Varchar(1),
-@pvIdLanguageUser	Varchar(10) = '',
-@pvIdItemClass		Varchar(10) = '',
-@pvShortDesc		Varchar(50) = '',
-@pvLongDesc			Varchar(255)= '',
-@pbStatus			Bit			= '',
+@pvIdHierarchyLevel   Varchar(10) = '',
 @pvUser				Varchar(50) = '',
 @pvIP				Varchar(20) = '',
-@pvIdBusinessLine	Varchar(10)	= ''
+@pvIdLanguageUser	Varchar(10) = 'ANG'
 AS
 
 SET NOCOUNT ON
@@ -51,11 +33,11 @@ BEGIN TRY
 	--Variables for log control
 	--------------------------------------------------------------------
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Cat_Item_Classes - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'Cat_Hierarchy_Levels - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Item_Classes_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdItemClass = '" + ISNULL(@pvIdItemClass,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Cat_Hierarchy_Levels_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + ISNULL(@pvIdHierarchyLevel,'NULL') + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -70,29 +52,18 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-		SELECT 
-		Id_Catalog			= CIC.Id_Item_Class,
-		Business_Line_Id	= CIC.Id_Business_Line,
-		Business_Line		= CBL.Short_Desc,
-		CIC.Short_Desc,
-		CIC.Long_Desc,
-		CIC.[Status],
-		CIC.TabGenerals,
-		CIC.TabConfiguration,
-		CIC.TabTemplate,
-		CIC.TabExceptions,
-		CIC.TabKits,
-		CIC.TabOperationCost,
-		CIC.TabCommercialRelease,
-		CIC.Modify_Date,
-		CIC.Modify_By,
-		CIC.Modify_IP
-		FROM Cat_Item_Classes AS CIC INNER JOIN Cat_Business_Line AS CBL ON
-									CIC.Id_Business_Line = CBL.Id_Business_Line
-		WHERE  (@pvIdItemClass = ''  OR Id_Item_Class = @pvIdItemClass) AND Id_Item_Class <> 'KIT'
-			AND (@pvIdBusinessLine = '' OR CIC.Id_Business_Line = @pvIdBusinessLine)
-		ORDER BY  Id_Catalog
+		SELECT
+		Id_Catalog = A.Id_Hierarchy_Level,
+		A.Short_Desc,
+		A.Long_Desc,
+		A.Level
+		FROM GSS_Cat_Hierarchy_Levels A
 
+
+		WHERE 
+		(@pvIdHierarchyLevel = '' OR Id_Hierarchy_Level = @pvIdHierarchyLevel)
+		ORDER BY  A.Short_Desc
+		
 	END
 
 	--------------------------------------------------------------------
@@ -129,7 +100,7 @@ BEGIN TRY
 
 	IF @pvOptionCRUD <> 'R'
 	SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
-
+	 
 END TRY
 BEGIN CATCH
 	--------------------------------------------------------------------
