@@ -6,35 +6,27 @@ SET QUOTED_IDENTIFIER OFF
 GO
 
 /* ==================================================================================*/
--- spSecurity_Roles_CRUD_Records
+-- spCat_Role_Types_CRUD_Records
 /* ==================================================================================*/	
-PRINT 'Crea Procedure: spSecurity_Roles_CRUD_Records'
+PRINT 'Crea Procedure: spCat_Role_Types_CRUD_Records'
 
-IF OBJECT_ID('[dbo].[spSecurity_Roles_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spSecurity_Roles_CRUD_Records
+IF OBJECT_ID('[dbo].[spCat_Role_Types_CRUD_Records]','P') IS NOT NULL
+       DROP PROCEDURE [dbo].spCat_Role_Types_CRUD_Records
 GO
 
 /*
 Autor:		Alejandro Zepeda
-Desc:		Security_Roles | Create - Read - Upadate - Delete 
-Date:		12/01/2021
+Desc:		Cat_Role_Types | Create - Read - Upadate - Delete 
+Date:		11/09/2025
 Example:
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'C', @pvIdRole = 'ADMIN' , @pvShortDesc = 'System Administrator', @pvLongDesc = 'System Administrator', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdRole = 'ADMIN' 
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdBusinessLine = 'PSS_LIKO' 
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R', @pvIdRoleType = 'ADM' 
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'R'
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'U', @pvIdRole = 'ADMIN' , @pvShortDesc = 'System Administrator', @pvLongDesc = 'System Administrator', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'D', @pvIdRole = 'ADMIN' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spSecurity_Roles_CRUD_Records @pvOptionCRUD = 'X', @pvIdRole = 'ADMIN' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-
+			EXEC spCat_Role_Types_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'SPA', @pvIdRoleType = 'DIRSA' 
+			EXEC spCat_Role_Types_CRUD_Records @pvOptionCRUD = 'R'
+			EXEC spCat_Role_Types_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'SPA', @pvIdRoleType = 'ADM' 
 */
-CREATE PROCEDURE [dbo].spSecurity_Roles_CRUD_Records
+CREATE PROCEDURE [dbo].spCat_Role_Types_CRUD_Records
 @pvOptionCRUD		Varchar(1),
-@pvIdLanguageUser	Varchar(10) = '',
-@pvIdRole			Varchar(10) = 'All',
+@pvIdLanguageUser	Varchar(10) = 'ANG',
 @pvIdRoleType		Varchar(10) = '',
-@pvIdBusinessLine	Varchar(10) = '',
 @pvShortDesc		Varchar(50) = '',
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
@@ -53,11 +45,11 @@ BEGIN TRY
 	--Variables for log control
 	--------------------------------------------------------------------
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Security_Roles - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'Cat_Role_Types - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spSecurity_Roles_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRole = '" + ISNULL(@pvIdRole,'NULL') + "',  @pvIdBusinessLine = '" + ISNULL(@pvIdBusinessLine,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Role_Types_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdRoleType = '" + ISNULL(@pvIdRoleType,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -72,27 +64,20 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-		SELECT 
-		SR.Id_Role,
-		SR.Short_Desc,
-		SR.Long_Desc,
-		TR.Id_Role_Type,
-		Role_Type = TR.Short_Desc,
-		SR.Approval_Flow_Sequence,
-		SR.Id_Business_Line,
-		SR.[Status],
-		SR.Modify_Date,
-		SR.Modify_By,
-		SR.Modify_IP
-		FROM Security_Roles SR
+		SELECT
+		Id_Catalog = A.Id_Role_Type,
+		A.Short_Desc,
+		A.Long_Desc,
+		A.[Status],
+		A.Modify_Date,
+		A.Modify_By,
+		A.Modify_IP
+		FROM Cat_Role_Types A
 
-		LEFT OUTER JOIN Cat_Role_Types TR ON
-		SR.Id_Role_Type = TR.Id_Role_Type
 
-		WHERE (@pvIdRole = 'All' OR SR.Id_Role = @pvIdRole) 
-		AND   (@pvIdRoleType = '' OR TR.Id_Role_Type = @pvIdRoleType)
-		AND   (@pvIdBusinessLine = '' OR SR.Id_Business_Line = @pvIdBusinessLine)
-		ORDER BY  SR.Id_Role
+		WHERE 
+		(@pvIdRoleType = '' OR Id_Role_Type = @pvIdRoleType)
+		ORDER BY  Id_Catalog
 		
 	END
 
@@ -130,7 +115,7 @@ BEGIN TRY
 
 	IF @pvOptionCRUD <> 'R'
 	SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
-
+	 
 END TRY
 BEGIN CATCH
 	--------------------------------------------------------------------
