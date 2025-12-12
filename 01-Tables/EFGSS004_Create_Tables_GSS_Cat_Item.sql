@@ -95,6 +95,11 @@ create table GSS_Cat_Item (
    Modify_By            varchar(50)          not null,
    Modify_Date          datetime             not null,
    Modify_IP            varchar(20)          not null,
+	Price                float                not null,
+	Id_Currency          varchar(10)          not null,
+	Id_Language          varchar(10)          not null,
+	Standard_Cost        float                not null,
+	On_Request           bit                  not null,
    constraint PK_GSS_CAT_ITEM primary key nonclustered (Id_Item)
 )
 go

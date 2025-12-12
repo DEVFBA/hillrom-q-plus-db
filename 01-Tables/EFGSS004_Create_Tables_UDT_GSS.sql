@@ -10,8 +10,8 @@ GO
 
 CREATE TYPE [dbo].[UDT_GSS_Items_Configuration]AS TABLE
 (
-   Id_Item              varchar(50)          not null,
-   Id_Category_Hierarchy numeric             not null
+   Id_Item                      varchar(50)             not null,
+   Id_Category_Hierarchy        int                     not null
 )
 GO
 
