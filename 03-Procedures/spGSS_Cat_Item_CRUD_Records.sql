@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/11/2025 4:46:38 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spGSS_Cat_Item_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spGSS_Cat_Item_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spGSS_Cat_Item_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spGSS_Cat_Item_CRUD_Records
 GO
 
 /*
@@ -105,6 +97,11 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Item_CRUD_Records]
 @pvItemSPR						Varchar(50)		= '',
 @pvUser							Varchar(50)		= '',
 @pvIP							Varchar(20)		= '',
+@pfPrice						Float			= 0,
+@pfStandardCost					Float			= 0,
+@pvCurrency						Varchar(10)		= '',
+@pbOnRequest					Bit				= 0,
+--------------------------------------------------------------
 @pvIdCountryComercialRealease	Varchar(10)		= ''
 AS
 
@@ -115,7 +112,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 
 	Declare @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
-	DECLARE @iIdStsAvailable	Varchar(50)	= 1 -- AValible/Disponible
+	DECLARE @iIdStsAvailable	Varchar(50)	= 1 -- Avalible/Disponible
 	DECLARE @vStsAvailable		Varchar(50)	= ISNULL((SELECT Short_Desc FROM Cat_Status_Commercial_Release WHERE Id_Status_Commercial_Release = @iIdStsAvailable AND Id_Language = @pvIdLanguageUser),'')
 	DECLARE @vSQL				Varchar(MAX)
 
@@ -148,7 +145,7 @@ BEGIN TRY
 		END
 		ELSE -- Don�t Exists
 		BEGIN
-			INSERT INTO Cat_Item(
+			INSERT INTO GSS_Cat_Item(
 				Id_Item,
 				Id_Country,
 				Id_Item_Class,
@@ -167,7 +164,13 @@ BEGIN TRY
 				Item_SPR,
 				Modify_By,
 				Modify_Date,
-				Modify_IP)
+				Modify_IP, 
+				Price,
+				Standard_Cost,
+				Id_Currency,
+				Id_Language,
+				On_Request
+				)
 			VALUES (
 				@pvIdItem,
 				@pvIdCountry,
@@ -187,8 +190,13 @@ BEGIN TRY
 				@pvItemSPR,
 				@pvUser,
 				GETDATE(),
-				@pvIP)
-
+				@pvIP,
+				@pfPrice,
+				@pfStandardCost,
+				@pvCurrency,
+				'ANG',
+				@pbOnRequest
+				)
 
 			IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
 			BEGIN
@@ -211,8 +219,9 @@ BEGIN TRY
 		I.Id_Discount_Category,
 		Discount_Category_Desc = DC.Short_Desc,
 		I.Id_Country,
-		Item_Country_Desc = CON.Short_Desc,
-		Item_CountryPackage_Desc = CONPKG.Short_Desc,
+		Country_Desc = CON.Short_Desc,
+		Id_Country_Package = I.Id_Country_Package,
+		Package_Country = CONPKG.Short_Desc,
 		I.Id_Item,
 		I.Short_Desc,
 		I.Long_Desc,
@@ -226,7 +235,7 @@ BEGIN TRY
 		I.Id_Item_Related,
 		Id_Item_Related_Desc = (SELECT Short_Desc FROM Cat_Item WHERE Id_Item = I.Id_Item_Related),"
 		
-		IF @pvIdItemClass = 'GSSPACK'
+		/*IF @pvIdItemClass = 'GSSPACK'
 		BEGIN
 		SET @vSQL += "	
 		Id_Status_Commercial_Release = ISNULL((SELECT SCR.Id_Status_Commercial_Release
@@ -261,7 +270,7 @@ BEGIN TRY
 											AND SCR.Id_Language = '" +  @pvIdLanguageUser + "'
 											WHERE Id_Item = I.Id_Item AND Id_Country = '" +   @pvIdCountryComercialRealease + "'),'" + @vStsAvailable + "'),"
 		
-		END
+		END*/
 
 		SET @vSQL += "		
 		I.Modify_Date,
@@ -290,9 +299,9 @@ BEGIN TRY
 		I.Id_Country_Package = CONPKG.Id_Country 
 		AND CON.Status = 1
 		 
-		INNER JOIN GSS_Items_Configuration IC  WITH(NOLOCK) ON
-		I.Id_Item = IC.Id_Item
-		AND IC.Status = 1
+		--INNER JOIN GSS_Items_Configuration IC  WITH(NOLOCK) ON
+		--I.Id_Item = IC.Id_Item
+		--AND IC.Status = 1
 
 		WHERE 1= 1 "
 
@@ -320,8 +329,8 @@ BEGIN TRY
 		IF @pvIdItemRelated <> ''
 		SET @vSQL += "AND I.Id_Item_Related = '" + @pvIdItemRelated + "'"
 		
-		SET @vSQL += " ORDER BY IC.Id_Item, IC.Id_Family , IC.Id_Category , IC.Id_Line "
-		PRINT (@vSQL)
+		--SET @vSQL += " ORDER BY IC.Id_Item "
+		--PRINT (@vSQL)
 		EXEC(@vSQL)
 	
 	END
@@ -331,7 +340,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		UPDATE Cat_Item 
+		UPDATE GSS_Cat_Item 
 		SET		Id_Country			= @pvIdCountry,
 				Id_Item_Class		= @pvIdItemClass,
 				Id_Item_SubClass	= @pvIdItemSubClass,
@@ -349,7 +358,12 @@ BEGIN TRY
 				Item_SPR			= @pvItemSPR,
 				Modify_By			= @pvUser, 
 				Modify_Date			= GETDATE(),		
-				Modify_IP			= @pvIP
+				Modify_IP			= @pvIP,
+				Price				= @pfPrice,
+				Standard_Cost		= @pfStandardCost,
+				Id_Currency			= @pvCurrency,
+				Id_Language			= 'ANG',
+				On_Request			= @pbOnRequest
 			WHERE Id_Item = @pvIdItem
 
 			IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )

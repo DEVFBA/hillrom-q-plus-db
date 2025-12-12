@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Categories_CRUD_Records]    Script Date: 12/9/2025 5:16:57 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spGSS_Cat_Categories_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spGSS_Cat_Categories_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spGSS_Cat_Categories_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spGSS_Cat_Categories_CRUD_Records
 GO
 
 /*
@@ -24,7 +16,7 @@ Example:
 			EXEC spGSS_Cat_Categories_CRUD_Records @pvOptionCRUD = 'R', @pvIdCategory = '', @pvShortDesc = 'Accessories', @pvPDFLayout = '', @pvHierarchyLevel = '';
 			EXEC spGSS_Cat_Categories_CRUD_Records @pvOptionCRUD = 'R', @piLevel = 2;
 			EXEC spGSS_Cat_Categories_CRUD_Records @pvOptionCRUD = 'U', @pvIdCategory = 'AEGHTEST01', @pvShortDesc = 'AEGH Update S', @pvLongDesc = 'AEGH Test Long Desc Updated', @pbStatus = 0, @pvPDFLayout = 'Test UPD', @pvHierarchyLevel = 'GROUP', @pvUser = 'ANGUTIERRE', @pvIP = 'TST';
-						
+			
 */
 CREATE PROCEDURE [dbo].[spGSS_Cat_Categories_CRUD_Records]
 @pvOptionCRUD		Varchar(1),
@@ -37,7 +29,8 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Categories_CRUD_Records]
 @pvUser				Varchar(50)		= '',
 @pvIP				Varchar(20)		= '',
 @pvIdLanguageUser   Varchar(10)		= 'ANG',
-@piLevel			Int				= 0
+@piLevel			Int				= 0,
+@piIdParent			Int				= 0
 AS
 
 SET NOCOUNT ON
@@ -168,6 +161,40 @@ BEGIN TRY
 	END
 
 	--------------------------------------------------------------------
+	--Validate Records
+	--------------------------------------------------------------------
+	IF @pvOptionCRUD = 'V'
+	BEGIN
+		
+		SELECT 
+			Id_Catalog = GCC.Id_Category,
+			GCC.Short_Desc,
+			GCC.Long_Desc,
+			Id_Hierarchy_Level = GCC.Id_Hierarchy_Level,
+			GCC.PDF_Layout,
+			GCC.[Status],
+			GCC.Modify_Date,
+			GCC.Modify_By,
+			GCC.Modify_IP,
+			GCH.Id_Category_Hierarchy,
+			GCH.[Level],
+			GCH.[Parent],
+			GCH.[Status]
+		FROM GSS_Cat_Categories AS GCC INNER JOIN GSS_Cat_Hierarchy_Levels AS GCHL ON
+														GCC.Id_Hierarchy_Level = GCHL.Id_Hierarchy_Level
+									   LEFT JOIN GSS_Categories_Hierarchies AS GCH ON
+														GCC.Id_Category = GCH.Id_Category
+													AND GCH.[Parent] = @piIdParent
+		WHERE 
+				GCHL.Id_Hierarchy_Level = (SELECT TOP 1 Id_Hierarchy_Level
+												FROM GSS_Cat_Hierarchy_Levels
+												WHERE [Level] <= @piLevel
+												ORDER BY [Level] DESC)
+			AND GCH.Id_Category_Hierarchy IS NULL;
+		
+	END
+
+	--------------------------------------------------------------------
 	--Register Transaction Log
 	--------------------------------------------------------------------
 	EXEC spSecurity_Transaction_Log_Ins_Record	@pvDescription	= @vDescription, 
@@ -179,7 +206,7 @@ BEGIN TRY
 												@pnIdTransacLog	= @nIdTransacLog OUTPUT
 	SET NOCOUNT OFF
 
-	IF @pvOptionCRUD <> 'R'
+	IF @pvOptionCRUD NOT IN ('R', 'V')
 	SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
 
 END TRY

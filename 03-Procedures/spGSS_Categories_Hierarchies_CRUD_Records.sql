@@ -1,26 +1,18 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Categories_Hierarchies_CRUD_Records]    Script Date: 12/8/2025 8:15:48 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
-
-/* ==================================================================================*/
--- spGSS_Categories_Hierarchies
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spGSS_Categories_Hierarchies'
-
-IF OBJECT_ID('[dbo].[spGSS_Categories_Hierarchies]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spGSS_Categories_Hierarchies
-GO
 /*
 Autor:		Alejandro Zepeda
-Desc:		spGSS_Categories_Hierarchies| Create - Read - Upadate - Delete 
+Desc:		spGSS_Categories_Hierarchies_CRUD_Records| Create - Read - Upadate - Delete 
 Date:		08/10/2023
 Example:
 			DECLARE  @pudtGSS_Categories_Hierarchies  UDT_GSS_Categories_Hierarchies
 
-			INSERT INTO @pudtGSS_Categories_Hierarchies
+			INSERT INTO @pudtGSS_Categories_Hierarchies_CRUD_Records
 			SELECT 1, 'ORLIGHTS'  , '#', 0,	'path',	0 UNION ALL
 			SELECT 2, 'HELUXPRO25',	'1', 1,	'path',	1 UNION ALL
 			SELECT 3, 'HELPRMOBLI',	'2', 2,	'path',	1 UNION ALL
@@ -29,28 +21,28 @@ Example:
 
 			--SELECT * FROM @pudtGSS_Categories_Hierarchies
 			
-			EXEC spGSS_Categories_Hierarchies @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
+			EXEC spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
 
-			EXEC spGSS_Categories_Hierarchies @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
+			EXEC spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
 
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piIdCategoryHierarchy = 1
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCategory = 'ORLIGHTS'
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'ABPMSY' , @pvIdFLCFamily = 'ABPM6100AC', @pvIdFLCGroup = 'ABPACC', @pvIdItem= 'Id Item'			
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvParent = '#'			
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piLevel = 2
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piIdCategoryHierarchy = 1
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdCategory = 'ORLIGHTS'
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'ABPMSY' , @pvIdFLCFamily = 'ABPM6100AC', @pvIdFLCGroup = 'ABPACC', @pvIdItem= 'Id Item'			
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvParent = '#'			
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @piLevel = 2
 
 
 			SELECT * FROM GSS_Categories_Hierarchies
 
-			EXEC spGSS_Categories_Hierarchies @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
+			EXEC spGSS_Categories_Hierarchies_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pudtGSS_Categories_Hierarchies = @pudtGSS_Categories_Hierarchies,  @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
 			
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'Id' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spGSS_Categories_Hierarchies @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'Id' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254''
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOption = 'D', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'Id' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spGSS_Categories_Hierarchies_CRUD_Records @pvOption = 'X', @pvIdLanguageUser = 'ANG', @pvIdFLCCategory = 'Id' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254''
 */
-CREATE PROCEDURE [dbo].spGSS_Categories_Hierarchies
+CREATE PROCEDURE [dbo].[spGSS_Categories_Hierarchies_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = 'ANG',
-@piIdCategoryHierarchy			Numeric		= 0,
+@piIdCategoryHierarchy			Int			= 0,
 @pvIdCategory					Varchar(10) = '',
 @pvParent						Varchar(5)	= '',
 @piLevel						Int			= NULL,
@@ -81,19 +73,23 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'C'
 	BEGIN		
 		INSERT INTO GSS_Categories_Hierarchies(
+			Id_Category_Hierarchy,
 			Id_Category,
 			Parent,
 			[Level],
 			[Path],
+			[Order],
 			[Status],
 			Modify_By,
 			Modify_Date,
 			Modify_IP)
 		SELECT 
+			Id_Category_Hierarchy,
 			Id_Category,
 			Parent,
 			[Level],
 			[Path],
+			[Order],
 			[Status],
 			@pvUser,
 			GETDATE(),
@@ -104,29 +100,86 @@ BEGIN TRY
 	--Reads Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
-	BEGIN
-		SELECT 
-			CH.Id_Category_Hierarchy,
-			CH.Id_Category,
-			Category = C.Short_Desc,
-			CH.Parent,
-			CH.[Level],
-			CH.[Path],
-			CH.[Status],
-			CH.Modify_Date,
-			CH.Modify_By,
-			CH.Modify_IP
-		FROM GSS_Categories_Hierarchies CH
-		INNER JOIN GSS_Cat_Categories C ON 
-		CH.Id_Category = C.Id_Category
+	BEGIN	
 
-		WHERE (@piIdCategoryHierarchy = 0 OR CH.Id_Category_Hierarchy = @piIdCategoryHierarchy)
-		AND (@pvIdCategory = '' OR CH.Id_Category = @pvIdCategory )
-		AND (@pvParent = '' OR CH.Parent = @pvParent )
-		AND (@piLevel IS NULL OR CH.[Level] = @piLevel)
-		AND (@pbStatus IS NULL OR CH.[Status] = @pbStatus)
+		WITH Base AS (
+						SELECT
+							h.Id_Category_Hierarchy,
+							h.Id_Category,
+							h.Parent,
+							h.[Level],
+							h.[Order],
+							h.[Path],
+							h.[Status],
+							ROW_NUMBER() OVER (
+								PARTITION BY h.Parent
+								ORDER BY h.[Order], h.Id_Category_Hierarchy
+							) AS SiblingSeq,
+							c.Short_Desc
+						FROM GSS_Categories_Hierarchies h
+						INNER JOIN GSS_Cat_Categories c
+							ON h.Id_Category = c.Id_Category
+		),
+		Tree AS (
+				SELECT
+					b.Id_Category_Hierarchy,
+					b.Id_Category,
+					b.Parent,
+					b.[Level],
+					b.[Order],
+					b.[Path],
+					b.[Status],
+					b.SiblingSeq,
+					b.Short_Desc,
+					CAST(b.Short_Desc AS VARCHAR(MAX)) AS Path_Desc,
+					CAST(RIGHT('000000' + CAST(b.SiblingSeq AS VARCHAR(10)), 6) AS VARCHAR(1000)) AS SortKey
+				FROM Base b
+				WHERE b.Parent = 0
 
-		ORDER BY CH.Id_Category_Hierarchy,CH.Id_Category,CH.Parent
+				UNION ALL
+
+				-- Hijos recursivos
+				SELECT
+					ch.Id_Category_Hierarchy,
+					ch.Id_Category,
+					ch.Parent,
+					ch.[Level],
+					ch.[Order],
+					ch.[Path],
+					ch.[Status],
+					ch.SiblingSeq,
+					ch.Short_Desc,
+					CAST(t.Path_Desc + '/' + ch.Short_Desc AS VARCHAR(MAX)) AS Path_Desc,
+					CAST(t.SortKey + '.' + RIGHT('000000' + CAST(ch.SiblingSeq AS VARCHAR(10)), 6) AS VARCHAR(1000)) AS SortKey
+				FROM Base ch
+				INNER JOIN Tree t
+					ON ch.Parent = t.Id_Category_Hierarchy
+		)
+		SELECT
+			REPLICATE('   ', T.[Level]-1) + CAST(T.Id_Category AS VARCHAR(50)) AS TreeView,
+			T.Id_Category_Hierarchy,
+			T.Id_Category,
+			REPLICATE('   ', T.[Level]-1) + CAST(T.Short_Desc AS VARCHAR(50)) AS CategoryTreeView,
+			T.Short_Desc AS Category,
+			T.Parent AS Parent_Id,
+			CASE 
+						WHEN GCH.Id_Category IS NULL THEN '#'
+						ELSE CAST(GCH.Id_Category AS VARCHAR(100))
+					END AS Parent,
+			T.[Level],
+			T.[Path],
+			T.Path_Desc,
+			T.[Status],
+			T.[Order],
+			T.SortKey,
+			(SELECT MAX(Id_Category_Hierarchy) FROM GSS_Categories_Hierarchies) + 1 AS Next_Number
+		FROM Tree T
+		INNER JOIN GSS_Cat_Categories AS GCC 
+					ON T.Id_Category = GCC.Id_Category
+				LEFT JOIN GSS_Categories_Hierarchies AS GCH 
+				ON T.Parent = GCH.Id_Category_Hierarchy
+		ORDER BY T.SortKey;
+
 	END
 
 	--------------------------------------------------------------------
@@ -140,6 +193,7 @@ BEGIN TRY
 			A.Parent		= B.Parent,
 			A.[Level]		= B.[Level],
 			A.[Path]		= B.[Path],
+			A.[Order]		= B.[Order],
 			A.[Status]		= B.[Status],
 			A.Modify_Date	= GETDATE(),
 			A.Modify_By		= @pvUser,
