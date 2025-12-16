@@ -44,12 +44,12 @@ go
 /* Table: GSS_Items_Configuration                               */
 /*==============================================================*/
 create table GSS_Items_Configuration (
-   Id_Item                 varchar(50)          not null,
-   Id_Category_Hierarchy   int                  not null,
-   Status                  bit                  not null,
-   Modify_By               varchar(50)          not null,
-   Modify_Date             datetime             not null,
-   Modify_IP               varchar(20)          not null,
+   Id_Item              varchar(50)          not null,
+   Id_Category_Hierarchy int                  not null,
+   Status               bit                  not null,
+   Modify_By            varchar(50)          not null,
+   Modify_Date          datetime             not null,
+   Modify_IP            varchar(20)          not null,
    constraint PK_GSS_ITEMS_CONFIGURATION primary key (Id_Item, Id_Category_Hierarchy)
 )
 go
