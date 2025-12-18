@@ -1,11 +1,18 @@
 USE DBQS
-GO
 
+GO
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
    where r.fkeyid = object_id('GSS_Categories_Hierarchies') and o.name = 'FK_Category_CategoryHierarchy')
 alter table GSS_Categories_Hierarchies
    drop constraint FK_Category_CategoryHierarchy
+go
+
+if exists (select 1
+   from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
+   where r.fkeyid = object_id('GSS_Items_Configuration') and o.name = 'FK_CategoryHierarchy_GSSItemConfig')
+alter table GSS_Items_Configuration
+   drop constraint FK_CategoryHierarchy_GSSItemConfig
 go
 
 if exists (select 1
@@ -28,7 +35,7 @@ go
 /* Table: GSS_Categories_Hierarchies                            */
 /*==============================================================*/
 create table GSS_Categories_Hierarchies (
-   Id_Category_Hierarchy numeric              identity,
+   Id_Category_Hierarchy int                  not null,
    Id_Category          varchar(10)          not null,
    Parent               varchar(5)           not null,
    Level                int                  not null,
