@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 12/10/2025 10:51:15 AM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 12/16/2025 6:55:32 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -43,6 +43,7 @@ BEGIN TRY
 
 	Declare @vDescOperationCRUD Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
     DECLARE @iNumRegistros		Int = (SELECT COUNT(*) FROM @pudtGSSItemsConfiguration)
+	DECLARE @vjsonUDTGSSConfiguration		NVarchar(MAX)	= (SELECT * FROM @pudtGSSItemsConfiguration FOR JSON AUTO);
 
 	--------------------------------------------------------------------
 	--Variables for log control
@@ -53,30 +54,83 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	--DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Items_Configuration_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdItem = '" + ISNULL(@pvIdItem,'NULL') + "', @piIdCategoryHierarchy = '" + ISNULL(@piIdCategoryHierarchy, 0) + "', @pudtGSSItemsConfiguration = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
-	DECLARE @vExecCommand	Varchar(Max)	= "TEST"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Items_Configuration_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pudtGSSItemsConfiguration = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	--DECLARE @vExecCommand	Varchar(Max)	= "TEST"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
 		
-        DELETE GSS_Items_Configuration WHERE Id_Item = @pvIdItem
+		PRINT @vjsonUDTGSSConfiguration
+		
+		PRINT 'Borra Registros'
 
+		DELETE GSS_Items_Configuration 
+		--WHERE Id_Item = @pvIdItem;
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSItemsConfiguration);
+
+		PRINT 'Inserta Registros'
+
+		-- Declarar variables
+		--DECLARE @Id INT, @Nombre NVARCHAR(100);
+
+		-- Declarar cursor
+		DECLARE curGSSItemsConfiguration CURSOR FOR
+		SELECT Id_Item, Id_Category_Hierarchy
+		FROM @pudtGSSItemsConfiguration;
+
+		-- Abrir cursor
+		OPEN curGSSItemsConfiguration;
+
+		-- Obtener primera fila
+		FETCH NEXT FROM curGSSItemsConfiguration INTO @pvIdItem, @piIdCategoryHierarchy;
+
+		-- Recorrer filas
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			PRINT 'Id_Item: ' + CAST(@pvIdItem AS NVARCHAR) + ' - Id_Category_Hierarchy: ' + CAST(@piIdCategoryHierarchy AS NVARCHAR);
+
+				INSERT INTO GSS_Items_Configuration (
+					Id_Item,
+					Id_Category_Hierarchy,
+					Modify_By,
+					Modify_Date,
+					Modify_IP
+				) VALUES (
+					@pvIdItem,
+					@piIdCategoryHierarchy,
+					@pvUser,
+					GETDATE(),
+					@pvIP
+				)
+
+			FETCH NEXT FROM curGSSItemsConfiguration INTO @pvIdItem, @piIdCategoryHierarchy;
+		END;
+
+		-- Cerrar y liberar
+		CLOSE curGSSItemsConfiguration;
+		DEALLOCATE curGSSItemsConfiguration;
+
+		/*
 		INSERT INTO GSS_Items_Configuration(
 			Id_Item,
             Id_Category_Hierarchy,
 			Modify_By,
 			Modify_Date,
 			Modify_IP)
-
 		SELECT 
 			Id_Item,
             Id_Category_Hierarchy,
 			@pvUser,
 			GETDATE(),
 			@pvIP
-		FROM @pudtGSSItemsConfiguration
+		FROM @pudtGSSItemsConfiguration;
+		*/
+
+		PRINT 'Finaliza'
 		
 	END
 	--------------------------------------------------------------------
@@ -150,9 +204,27 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		SET @bSuccessful	= 0
-		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+
+		DELETE GSS_Items_Configuration 
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSItemsConfiguration);
+
+		INSERT INTO GSS_Items_Configuration(
+			Id_Item,
+            Id_Category_Hierarchy,
+			Modify_By,
+			Modify_Date,
+			Modify_IP)
+
+		SELECT 
+			Id_Item,
+            Id_Category_Hierarchy,
+			@pvUser,
+			GETDATE(),
+			@pvIP
+		FROM @pudtGSSItemsConfiguration
+
 	END
 
 	--------------------------------------------------------------------
@@ -172,8 +244,8 @@ BEGIN TRY
 	--Register Transaction Log
 	--------------------------------------------------------------------
 	EXEC spSecurity_Transaction_Log_Ins_Record	@pvDescription	= @vDescription, 
-												--@pvExecCommand	= @vExecCommand,
-												@pvExecCommand	= 'TEST',
+												@pvExecCommand	= @vExecCommand,
+												--@pvExecCommand	= 'TEST',
 												@pbSuccessful	= @bSuccessful,
 												@pvMessagetType = @vMessageType, 
 												@pvMessage		= @vMessage, 
@@ -192,8 +264,8 @@ BEGIN CATCH
 	SET @vMessage		= dbo.fnGetTransacErrorBD()
 	SET @bSuccessful	= 0 --Execution with errors
 	EXEC spSecurity_Transaction_Log_Ins_Record	@pvDescription	= @vDescription, 
-												--@pvExecCommand	= @vExecCommand,
-												@pvExecCommand	= 'TEST',
+												@pvExecCommand	= @vExecCommand,
+												--@pvExecCommand	= 'TEST',
 												@pbSuccessful	= @bSuccessful, 
 												@pvMessagetType = @vMessageType,
 												@pvMessage		= @vMessage, 
@@ -205,5 +277,6 @@ BEGIN CATCH
 		SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
 		
 END CATCH
+
 
 
