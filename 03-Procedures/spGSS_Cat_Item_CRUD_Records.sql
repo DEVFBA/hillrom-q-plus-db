@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/11/2025 4:46:38 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/16/2025 6:52:45 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -11,65 +11,77 @@ Autor:		Angel Gutierrez
 Desc:		GSS_Cat_Item | Create - Read - Upadate - Delete 
 Date:		11/09/2025
 Example:
-			spGSS_Cat_Item_CRUD_Records @pvOptionCRUD		= 'C',
+			EXEC spGSS_Cat_Item_CRUD_Records @pvOptionCRUD		= 'C',
 									@pvIdLanguageUser	= 'ANG', 
-									@pvIdItem			= 'XXXXX', 
+									@pvIdItem			= 'TST121201', 
 									@pvIdCountry		= 'US' , 
-									@pvIdItemClass		= 'PROD', 
+									@pvIdItemClass		= 'GSSPROD', 
 									@pvIdItemSubClass	= 'PROD', 
-									@pvIdDiscountCategory = 'XXX',
+									@pvIdDiscountCategory = 'GSSNA',
 									@pvIdCountryPackage = '',
 									@pvIdItemRelated    = '',
-									@pvShortDesc		= 'Short Desc', 
-									@pvLongDesc			= 'Long Desc', 
+									@pvShortDesc		= 'Test 12122501', 
+									@pvLongDesc			= 'Test 12122501 Long Desc', 
 									@pvModel			= 'Model',
 									@pvSpecifications	= 'Specs',
-									@pvWeight			= 'XXX',
-									@pvMeasurements		= 'XXXX',
-									@pvImagePath		= 'XXXX',
-									@pbStatus			= 1, 
-									@pvItemSPR			= '0',
-									@pvUser				= 'AZEPEDA', 
-									@pvIP				='192.168.1.254'
-
-			EXEC spGSS_Cat_Item_CRUD_Records @pvOptionCRUD		= 'R', 
-									@pvIdLanguageUser = 'ANG', 
-									@pvIdItemClass		= 'PACK', 
-									@pvIdItemSubClass	= '',
-									@pvIdDiscountCategory = 'HR900',
-									@pvIdItem			= '',
-									@pvIdCountryPackage = '',
-									@pvIdItemRelated    = '',
-									@pvShortDesc		= '',
-									@pvIdFamily			= '',
-									@pvIdCategory		= '',
-									@pvIdLine			= '',
-									@pvIdCountryComercialRealease = 'CU'
-
-			EXEC spGSS_Cat_Item_CRUD_Records 
-									@pvOptionCRUD		= 'R', 
-									@pvIdItem			= 'XXXX',
-									@pvIdCountryComercialRealease = 'BR'
- 
-			spGSS_Cat_Item_CRUD_Records @pvOptionCRUD		= 'U', 
-									@pvIdItem			= 'BR_ACCELLA_STD3', 
-									@pvIdCountry		= 'FR' , 
-									@pvIdItemClass		= 'PACKD', 
-									@pvIdItemSubClass	= 'PACKD', 
-									@pvIdDiscountCategory = 'HRACC', 
-									@pvIdCountryPackage = 'BR',
-									@pvIdItemRelated    = 'ACCELLA',
-									@pvShortDesc		= 'ACC3_CONN_THERAPY', 
-									@pvLongDesc			= 'ACCELLA3_CONN_THERAPY', 
-									@pvModel			= 'ACCELLA',
-									@pvSpecifications	= '',
-									@pvWeight			= '166 KG',
-									@pvMeasurements		= '100 x 55 x 235',
+									@pvWeight			= '12 KG',
+									@pvMeasurements		= '125 CM',
 									@pvImagePath		= '',
 									@pbStatus			= 1, 
-									@pvItemSPR			= '',
-									@pvUser				= 'AZEPEDA', 
-									@pvIP				='192.168.1.254'
+									@pvItemSPR			= '0',
+									@pvUser				= 'ANGUTIERRE', 
+									@pvIP				='TESTING',
+									@pfPrice			= 12345,
+									@pfStandardCost		= 10,
+									@pbOnRequest		= 0,
+									@pvCurrency			= 'EUR';
+
+			EXEC spGSS_Cat_Item_CRUD_Records	@pvOptionCRUD			= 'R', 
+									@pvFamily				= 'ORLIGHTS', 
+									@pvLine					= 'HELUXPRO25', 
+									@pvLevel3Parent			= 'HELPRCEIVE',
+									@pvLevel4Parent			= 'CEANRACEI',
+									@pvLevel5Parent			= 'SOLOINSTA',
+									@pvShortDesc			= '',
+									@pvIdItemClass			= 'GSSPROD',
+									@pvIdItemSubClass		= 'PROD',
+									@pvIdItem				= '';
+
+			EXEC spGSS_Cat_Item_CRUD_Records	@pvOptionCRUD			= 'R', 
+												@pvFamily				= '', 
+												@pvLine					= '', 
+												@pvLevel3Parent			= '',
+												@pvLevel4Parent			= '',
+												@pvLevel5Parent			= '',
+												@pvShortDesc			= '',
+												@pvIdItemClass			= '',
+												@pvIdItemSubClass		= '',
+												@pvIdItem				= '2069687'; 
+ 
+			EXEC spGSS_Cat_Item_CRUD_Records @pvOptionCRUD		= 'U', 
+									@pvIdLanguageUser	= 'ANG', 
+									@pvIdItem			= 'TST121201', 
+									@pvIdCountry		= 'US' , 
+									@pvIdItemClass		= 'GSSPROD', 
+									@pvIdItemSubClass	= 'PROD', 
+									@pvIdDiscountCategory = 'GSSNA',
+									@pvIdCountryPackage = '',
+									@pvIdItemRelated    = '',
+									@pvShortDesc		= 'Test 12122501', 
+									@pvLongDesc			= 'Test 12122501 Long Desc', 
+									@pvModel			= 'Model',
+									@pvSpecifications	= 'Specs',
+									@pvWeight			= '12 KG',
+									@pvMeasurements		= '125 CM',
+									@pvImagePath		= '',
+									@pbStatus			= 1, 
+									@pvItemSPR			= '0',
+									@pvUser				= 'ANGUTIERRE', 
+									@pvIP				='TESTING',
+									@pfPrice			= 12345,
+									@pfStandardCost		= 10,
+									@pbOnRequest		= 0,
+									@pvCurrency			= 'EUR';
 
 */
 CREATE PROCEDURE [dbo].[spGSS_Cat_Item_CRUD_Records]
@@ -78,8 +90,8 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Item_CRUD_Records]
 @pvIdItem						Varchar(50)		= '',
 @pvIdItemDetalle				Varchar(50)		= '',
 @pvIdCountry					Varchar(10)		= 'All',
-@pvIdItemClass					Varchar(10)		= 'All',
-@pvIdItemSubClass				Varchar(10)		= 'All',
+@pvIdItemClass					Varchar(10)		= '',
+@pvIdItemSubClass				Varchar(10)		= '',
 @pvIdDiscountCategory			Varchar(10)		= 'All',
 @pvIdFamily						Varchar(10)		= 'All',
 @pvIdCategory					Varchar(10)		= 'All',
@@ -101,6 +113,11 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Item_CRUD_Records]
 @pfStandardCost					Float			= 0,
 @pvCurrency						Varchar(10)		= '',
 @pbOnRequest					Bit				= 0,
+@pvFamily						Varchar(10)		= '',
+@pvLine							Varchar(10)		= '',
+@pvLevel3Parent					Varchar(10)		= '',
+@pvLevel4Parent					Varchar(10)		= '',
+@pvLevel5Parent					Varchar(10)		= '',
 --------------------------------------------------------------
 @pvIdCountryComercialRealease	Varchar(10)		= ''
 AS
@@ -211,127 +228,172 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-	SET @vSQL = "SELECT 	
-		I.Id_Item_Class, 
-		Item_Class_Desc = ICL.Short_Desc,
-		I.Id_Item_SubClass, 
-		Item_SubClass_Desc = ISCL.Short_Desc,
-		I.Id_Discount_Category,
-		Discount_Category_Desc = DC.Short_Desc,
-		I.Id_Country,
-		Country_Desc = CON.Short_Desc,
-		Id_Country_Package = I.Id_Country_Package,
-		Package_Country = CONPKG.Short_Desc,
-		I.Id_Item,
-		I.Short_Desc,
-		I.Long_Desc,
-		I.Model,
-		I.Specifications,
-		I.[Weight],
-		I.Measurements,
-		I.Image_Path,	
-		I.[Status],
-		I.Item_SPR,
-		I.Id_Item_Related,
-		Id_Item_Related_Desc = (SELECT Short_Desc FROM Cat_Item WHERE Id_Item = I.Id_Item_Related),"
-		
-		/*IF @pvIdItemClass = 'GSSPACK'
-		BEGIN
-		SET @vSQL += "	
-		Id_Status_Commercial_Release = ISNULL((SELECT SCR.Id_Status_Commercial_Release
-												FROM GSS_Commercial_Release CR
-												INNER JOIN Cat_Status_Commercial_Release SCR ON
-												CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release
-												AND SCR.Id_Language = '" +  @pvIdLanguageUser + "'
-												WHERE Id_Item = I.Id_Item_Related AND Id_Country = '" +   @pvIdCountryComercialRealease + "')," + @iIdStsAvailable + "), 
-		
 
-		Status_Commercial_Release = ISNULL((SELECT SCR.Short_Desc 
-												FROM GSS_Commercial_Release CR
-												INNER JOIN Cat_Status_Commercial_Release SCR ON
-												CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release
-												AND SCR.Id_Language = '" +  @pvIdLanguageUser + "'
-												WHERE Id_Item = I.Id_Item_Related AND Id_Country = '" +   @pvIdCountryComercialRealease + "'),'" + @vStsAvailable + "'),"
-		END
-		ELSE
-		BEGIN
-		SET @vSQL += "	
-		Id_Status_Commercial_Release = ISNULL((SELECT SCR.Id_Status_Commercial_Release 
-											FROM GSS_Commercial_Release CR
-											INNER JOIN Cat_Status_Commercial_Release SCR ON
-											CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release
-											AND SCR.Id_Language = '" +  @pvIdLanguageUser + "'
-											WHERE Id_Item = I.Id_Item AND Id_Country = '" +   @pvIdCountryComercialRealease + "')," + @iIdStsAvailable + "), 
-		
-		Status_Commercial_Release = ISNULL((SELECT SCR.Short_Desc 
-											FROM GSS_Commercial_Release CR
-											INNER JOIN Cat_Status_Commercial_Release SCR ON
-											CR.Id_Status_Commercial_Release = SCR.Id_Status_Commercial_Release
-											AND SCR.Id_Language = '" +  @pvIdLanguageUser + "'
-											WHERE Id_Item = I.Id_Item AND Id_Country = '" +   @pvIdCountryComercialRealease + "'),'" + @vStsAvailable + "'),"
-		
-		END*/
+		WITH Base AS (
+				SELECT
+					h.Id_Category_Hierarchy,
+					h.Id_Category,
+					h.Parent,
+					h.[Level],
+					h.[Order],
+					h.[Path],
+					h.[Status],
+					ROW_NUMBER() OVER (
+						PARTITION BY h.Parent
+						ORDER BY h.[Order], h.Id_Category_Hierarchy
+					) AS SiblingSeq,
+					c.Short_Desc
+				FROM GSS_Categories_Hierarchies h
+				INNER JOIN GSS_Cat_Categories c
+					ON h.Id_Category = c.Id_Category
+			),
+			Tree AS (
+				-- Anchor
+				SELECT
+					b.Id_Category_Hierarchy,
+					b.Id_Category,
+					b.Parent,
+					b.[Level],
+					b.[Order],
+					CAST(b.Id_Category AS VARCHAR(MAX)) AS Path,   
+					b.[Status],
+					b.SiblingSeq,
+					b.Short_Desc,
+					CAST(b.Short_Desc AS VARCHAR(MAX)) AS Path_Desc,
+					CAST(RIGHT('000000' + CAST(b.SiblingSeq AS VARCHAR(10)), 6) AS VARCHAR(1000)) AS SortKey
+				FROM Base b
+				WHERE b.Parent = 0
 
-		SET @vSQL += "		
-		I.Modify_Date,
-		I.Modify_By,
-		I.Modify_IP
+				UNION ALL
 
-		FROM GSS_Cat_Item I
+				-- Recursivo
+				SELECT
+					ch.Id_Category_Hierarchy,
+					ch.Id_Category,
+					ch.Parent,
+					ch.[Level],
+					ch.[Order],
+					CAST(t.Path + '|' + CAST(ch.Id_Category AS VARCHAR(50)) AS VARCHAR(MAX)) AS Path,   
+					ch.[Status],
+					ch.SiblingSeq,
+					ch.Short_Desc,
+					CAST(t.Path_Desc + '|' + ch.Short_Desc AS VARCHAR(MAX)) AS Path_Desc,               
+					CAST(t.SortKey + '.' + RIGHT('000000' + CAST(ch.SiblingSeq AS VARCHAR(10)), 6) AS VARCHAR(1000)) AS SortKey
+				FROM Base ch
+				INNER JOIN Tree t
+					ON ch.Parent = t.Id_Category_Hierarchy
+			)
+		SELECT
+			--REPLICATE('   ', T.[Level]-1) + CAST(T.Id_Category AS VARCHAR(50)) AS TreeView,
+			--T.Id_Category_Hierarchy,
+			--T.Id_Category,
+			--REPLICATE('   ', T.[Level]-1) + CAST(T.Short_Desc AS VARCHAR(50)) AS CategoryTreeView,
+			--T.Short_Desc AS Category,
+			--T.Parent AS Parent_Id,
+			--CASE 
+				--WHEN GCH.Id_Category IS NULL THEN '#'
+				--ELSE CAST(GCH.Id_Category AS VARCHAR(100))
+			--END AS Parent,
+			--T.[Level],
+			--T.[Path],
+			--T.Path_Desc,
 
-		INNER JOIN Cat_Item_Classes ICL WITH(NOLOCK) ON 
-		I.Id_Item_Class = ICL.Id_Item_Class
-		AND ICL.Status = 1
+			-- Parents parsed with STRING_SPLIT (names)
+			P.Parent1,
+			P.Parent2,
+			P.Parent3,
+			P.Parent4,
+			P.Parent5,
 
-		INNER JOIN Cat_Item_SubClasses ISCL WITH(NOLOCK) ON 
-		I.Id_Item_Class = ISCL.Id_Item_Class AND
-		I.Id_Item_SubClass = ISCL.Id_Item_SubClass
-		AND ISCL.Status = 1
+			-- Parents parsed with STRING_SPLIT (Ids)
+			PI.ParentId1,
+			PI.ParentId2,
+			PI.ParentId3,
+			PI.ParentId4,
+			PI.ParentId5,
 
-		INNER JOIN Cat_Discount_Categories DC ON
-		I.Id_Discount_Category = DC.Id_Discount_Category
-
-		INNER JOIN Cat_Countries CON WITH(NOLOCK) ON 
-		I.Id_Country = CON.Id_Country 
-		AND CON.Status = 1
-
-		LEFT OUTER JOIN Cat_Countries CONPKG WITH(NOLOCK) ON 
-		I.Id_Country_Package = CONPKG.Id_Country 
-		AND CON.Status = 1
-		 
-		--INNER JOIN GSS_Items_Configuration IC  WITH(NOLOCK) ON
-		--I.Id_Item = IC.Id_Item
-		--AND IC.Status = 1
-
-		WHERE 1= 1 "
-
-		IF @pvIdItemClass <> 'ALL' AND @pvIdItemClass <> ''
-		SET @vSQL += "AND I.Id_Item_Class = '" + @pvIdItemClass + "'"
-
-		IF @pvIdItemSubClass <> 'ALL' AND @pvIdItemSubClass <> ''
-		SET @vSQL += "AND I.Id_Item_SubClass = '" + @pvIdItemSubClass + "'"
-
-		IF @pvIdDiscountCategory <> 'ALL' AND @pvIdDiscountCategory <> ''
-		SET @vSQL += "AND I.Id_Discount_Category = '" + @pvIdDiscountCategory + "'"
-
-		IF @pvIdItem <> ''
-		SET @vSQL += "AND I.Id_Item LIKE '%" + @pvIdItem + "%'"
-
-		IF @pvIdItemDetalle <> ''
-		SET @vSQL += "AND I.Id_Item = '" + @pvIdItemDetalle + "'"
-
-		IF @pvShortDesc <> ''
-		SET @vSQL += "AND I.Short_Desc LIKE '%" + @pvShortDesc + "%'"
-
-		IF @pvIdCountryPackage <> 'ALL' AND @pvIdCountryPackage <> ''
-		SET @vSQL += "AND I.Id_Country_Package = '" + @pvIdCountryPackage + "'"
-
-		IF @pvIdItemRelated <> ''
-		SET @vSQL += "AND I.Id_Item_Related = '" + @pvIdItemRelated + "'"
-		
-		--SET @vSQL += " ORDER BY IC.Id_Item "
-		--PRINT (@vSQL)
-		EXEC(@vSQL)
+			--T.[Status] AS Hierarchy_Status,
+			--T.[Order],
+			--T.SortKey,
+			GCI.Id_Item_Class,
+			CIC.Short_Desc AS Class,
+			GCI.Id_Item_SubClass,
+			CISC.Short_Desc AS SubClass,
+			GCI.Id_Item,
+			GCI.Short_Desc,
+			GCI.Long_Desc,
+			GCI.Id_Currency,
+			CC.Short_Desc AS Currency,
+			GCI.Specifications, 
+			GCI.On_Request, 
+			GCI.Model, 
+			GCI.[Weight], 
+			GCI.Measurements, 
+			GCI.Id_Discount_Category,
+			GCI.Id_Country, 
+			GCI.Price,
+			GCI.Standard_Cost,
+			GCI.[Status],
+			GCI.Modify_By,
+			GCI.Modify_Date,
+			GCI.Modify_IP
+			--GCC.PDF_Layout
+		FROM Tree T
+		OUTER APPLY (
+			SELECT
+				MAX(CASE WHEN rn = 1 THEN token END) AS Parent1,
+				MAX(CASE WHEN rn = 2 THEN token END) AS Parent2,
+				MAX(CASE WHEN rn = 3 THEN token END) AS Parent3,
+				MAX(CASE WHEN rn = 4 THEN token END) AS Parent4,
+				MAX(CASE WHEN rn = 5 THEN token END) AS Parent5
+			FROM (
+				SELECT 
+					ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn,
+					value AS token
+				FROM STRING_SPLIT(T.Path_Desc, '|')
+			) s
+		) P
+		OUTER APPLY (
+			SELECT
+				MAX(CASE WHEN rn = 1 THEN token END) AS ParentId1,
+				MAX(CASE WHEN rn = 2 THEN token END) AS ParentId2,
+				MAX(CASE WHEN rn = 3 THEN token END) AS ParentId3,
+				MAX(CASE WHEN rn = 4 THEN token END) AS ParentId4,
+				MAX(CASE WHEN rn = 5 THEN token END) AS ParentId5
+			FROM (
+				SELECT 
+					ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn,
+					value AS token
+				FROM STRING_SPLIT(T.Path, '|')
+			) s
+		) PI
+		LEFT JOIN GSS_Cat_Categories AS GCC 
+			ON T.Id_Category = GCC.Id_Category
+		LEFT JOIN GSS_Categories_Hierarchies AS GCH 
+			ON T.Parent = GCH.Id_Category_Hierarchy
+		LEFT JOIN GSS_Items_Configuration AS GIC
+			ON T.Id_Category_Hierarchy = GIC.Id_Category_Hierarchy
+		INNER JOIN GSS_Cat_Item AS GCI -- LEFT JOIN For PDF Query
+			ON GIC.Id_Item = GCI.Id_Item
+		INNER JOIN Cat_Item_Classes AS CIC 
+			ON GCI.Id_Item_Class = CIC.Id_Item_Class
+		INNER JOIN Cat_Item_SubClasses AS CISC 
+			ON GCI.Id_Item_SubClass = CISC.Id_Item_SubClass
+				AND CISC.Id_Item_Class = CIC.Id_Item_Class
+		INNER JOIN Cat_Currencies AS CC 
+			ON CC.Id_Currency = GCI.Id_Currency
+				AND CC.Id_Language = @pvIdLanguageUser
+		WHERE
+				(@pvFamily = '' OR ParentId1 = @pvFamily) AND
+				(@pvLine = '' OR ParentId2 = @pvLine) AND
+				(@pvLevel3Parent = '' OR ParentId3 = @pvLevel3Parent) AND
+				(@pvLevel4Parent = '' OR ParentId4 = @pvLevel4Parent) AND
+				(@pvLevel5Parent = '' OR ParentId5 = @pvLevel5Parent) AND
+				(@pvShortDesc = '' OR GCI.Short_Desc LIKE '%' + @pvShortDesc + '%') AND
+				(@pvIdItemClass = '' OR GCI.Id_Item_Class = @pvIdItemClass) AND
+				(@pvIdItemSubClass = '' OR GCI.Id_Item_SubClass = @pvIdItemSubClass) AND
+				(@pvIdItem = '' OR GCI.Id_Item = @pvIdItem)
+		ORDER BY T.SortKey;
 	
 	END
 
