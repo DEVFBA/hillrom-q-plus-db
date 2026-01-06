@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Operation_Cost_CRUD_Records]    Script Date: 11/29/25 10:12:12 a. m. ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Operation_Cost_CRUD_Records]    Script Date: 12/23/2025 7:43:46 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -26,7 +26,7 @@ Example:
 			EXEC spGSS_Operation_Cost_CRUD_Records @pvOptionCRUD = 'W'
  
 */
-CREATE PROCEDURE [dbo].[spGSS_Operation_Cost_CRUD_Records]
+ALTER PROCEDURE [dbo].[spGSS_Operation_Cost_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
 @pvIdItem						Varchar(50) = '', 
@@ -54,9 +54,13 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
-	IF @pvOptionCRUD = 'C'
+	IF @pvOptionCRUD = 'C' 
 	BEGIN
-		DELETE GSS_Operation_Cost WHERE Id_Item = @pvIdItem
+
+		DELETE GSS_Operation_Cost 
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSOperationCost); 
 
 		INSERT INTO GSS_Operation_Cost(
 			Id_Item,
@@ -85,7 +89,6 @@ BEGIN TRY
 			@pvIP
 		FROM @pudtGSSOperationCost
 
-		
 	END
 	--------------------------------------------------------------------
 	--Reads Records
@@ -122,9 +125,13 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		DELETE GSS_Operation_Cost WHERE Id_Item = @pvIdItem
 
-		INSERT INTO Operation_Cost(
+		DELETE GSS_Operation_Cost
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSOperationCost); 
+
+		INSERT INTO GSS_Operation_Cost(
 			Id_Item,
 			Id_Country,
 			Allocation,
@@ -150,6 +157,7 @@ BEGIN TRY
 			GETDATE(),
 			@pvIP
 		FROM @pudtGSSOperationCost
+
 	END
 	--------------------------------------------------------------------
 	--Delete Records

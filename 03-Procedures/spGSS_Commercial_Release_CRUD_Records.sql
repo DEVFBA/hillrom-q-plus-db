@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Commercial_Release_CRUD_Records]    Script Date: 12/23/2025 8:02:06 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spGSS_Commercial_Release_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spGSS_Commercial_Release_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spGSS_Commercial_Release_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spGSS_Commercial_Release_CRUD_Records
 GO
 
 /*
@@ -41,7 +33,7 @@ Example:
 			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG' 
  
 */
-CREATE PROCEDURE [dbo].spGSS_Commercial_Release_CRUD_Records
+CREATE PROCEDURE [dbo].[spGSS_Commercial_Release_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
 @pvIdItem						Varchar(50) = '',
@@ -73,7 +65,11 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
-		DELETE GSS_Commercial_Release WHERE Id_Item = @pvIdItem
+
+		DELETE GSS_Commercial_Release
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSCommercialRelease);
 
 		INSERT INTO GSS_Commercial_Release(
 			Id_Item,
@@ -93,7 +89,6 @@ BEGIN TRY
 			GETDATE(),
 			@pvIP
 		FROM @pudtGSSCommercialRelease
-
 		
 	END
 	--------------------------------------------------------------------
@@ -134,7 +129,11 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		DELETE GSS_Commercial_Release WHERE Id_Item = @pvIdItem
+
+		DELETE GSS_Commercial_Release
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSCommercialRelease);
 
 		INSERT INTO GSS_Commercial_Release(
 			Id_Item,
@@ -154,6 +153,7 @@ BEGIN TRY
 			GETDATE(),
 			@pvIP
 		FROM @pudtGSSCommercialRelease
+
 	END
 
 	--------------------------------------------------------------------

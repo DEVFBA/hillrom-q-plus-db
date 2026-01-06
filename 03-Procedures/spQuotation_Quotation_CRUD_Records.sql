@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spQuotation_Quotation_CRUD_Records]    Script Date: 02/05/2024 10:04:23 a. m. ******/
+/****** Object:  StoredProcedure [dbo].[spQuotation_Quotation_CRUD_Records]    Script Date: 12/19/2025 10:03:16 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -79,7 +79,7 @@ Example:
 
 			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R', @pvIdSalesExecutive = 'VIROJAS';
 */
-ALTER PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
+CREATE PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
 @pvOptionCRUD				Varchar(1),
 @pvIdLanguageUser			Varchar(10) = 'ANG',
 @piFolio					Int			= 0,
@@ -217,6 +217,27 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
+		
+		/* Start change to give access to see and modify quotations to Role 'PSSSPEC' */
+		DECLARE @pvIdRole VARCHAR(10) = (SELECT 
+												Id_Role 
+										 FROM Security_User_Roles 
+										 WHERE 
+												[User] = @pvIdSalesExecutive 
+											AND Id_Role IN (SELECT 
+																	Id_Role 
+															FROM Security_Roles 
+															WHERE 
+																	Id_Business_Line = 'PSSLIKO'))
+		
+		IF @pvIdRole = 'PSSSPEC'
+		BEGIN
+			SET @pvSalesExecutive = ''
+			SET @pvIdSalesExecutive = ''
+		END
+
+		/* Finish change to give access to see and modify quotations to Role 'PSSSPEC' */
+
 		SELECT 
 			Folio,
 			[Version],
@@ -264,17 +285,17 @@ BEGIN TRY
 			Comments,
 
 			Next_Approver = (CASE WHEN Id_Quotation_Status = 'DIRE' THEN ''
-            ELSE
-            (ISNULL((	SELECT DISTINCT Role_Desc 
+			ELSE
+			(ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
 									WHERE AWF.Folio = vwQuotation.Folio  AND AWF.[Version] = vwQuotation.[Version] AND Id_Approval_Status = 'PTA' 
 									AND AWF.Approval_Flow_Sequence = (	SELECT MIN(Approval_Flow_Sequence)	
 																		FROM vwWorkflows 
 																		WHERE  Folio = vwQuotation.Folio AND [Version] = vwQuotation.[Version]  AND Id_Approval_Status = 'PTA' 
-																	 )
-							     ), ''))
-            END
-                            ),
+																		)
+									), ''))
+			END
+							),
 
 			Rejected_Approver =ISNULL((	SELECT DISTINCT Role_Desc 
 									FROM vwWorkflows  AWF
@@ -282,8 +303,8 @@ BEGIN TRY
 									AND AWF.Approval_Flow_Sequence = (	SELECT MIN(Approval_Flow_Sequence)	
 																		FROM vwWorkflows 
 																		WHERE  Folio = vwQuotation.Folio AND [Version] = vwQuotation.[Version]  AND Id_Approval_Status = 'REJ' 
-																	 )
-							     ), ''),
+																		)
+									), ''),
 			Modify_By,
 			Modify_Date,
 			Modify_IP
@@ -319,7 +340,7 @@ BEGIN TRY
 				(@pvCreationDateFin			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) <= @pvCreationDateFin)  
 
 		ORDER BY  Folio DESC, [Version] 
-		
+
 	END
 
 	--------------------------------------------------------------------

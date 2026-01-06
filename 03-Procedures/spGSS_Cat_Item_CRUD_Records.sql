@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/16/2025 6:52:45 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/23/2025 7:40:57 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -427,12 +427,13 @@ BEGIN TRY
 				Id_Language			= 'ANG',
 				On_Request			= @pbOnRequest
 			WHERE Id_Item = @pvIdItem
-
+			/*
 			IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
 			BEGIN
 				INSERT INTO GSS_Commercial_Release (Id_Item,Id_Country,Id_Status_Commercial_Release,Final_Effective_Date,Modify_By,Modify_Date,Modify_IP)
 				VALUES (@pvIdItem, @pvIdCountryPackage, 1,NULL, @pvUser, GETDATE(), @pvIP)
 			END
+			*/
 	END
 
 	--------------------------------------------------------------------

@@ -39,6 +39,7 @@ create table GSS_Categories_Hierarchies (
    Id_Category          varchar(10)          not null,
    Parent               varchar(5)           not null,
    Level                int                  not null,
+   Order                int                  not null,
    Path                 varchar(1000)        null,
    Status               bit                  not null,
    Modify_By            varchar(50)          not null,

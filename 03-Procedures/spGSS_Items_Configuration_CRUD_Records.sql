@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 12/16/2025 6:55:32 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 12/23/2025 8:01:41 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
