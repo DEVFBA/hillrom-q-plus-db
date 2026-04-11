@@ -48,7 +48,8 @@ CREATE PROCEDURE [dbo].spCommercial_Release_CRUD_Records
 @pvIdCountry					Varchar(10) = '',
 @pudtCommercialRelease			UDT_Commercial_Release Readonly,
 @pvUser							Varchar(50) = '',
-@pvIP							Varchar(20) = ''
+@pvIP							Varchar(20) = '',
+@pvIdItemSubClass				Varchar(10) = ''
 AS
 
 SET NOCOUNT ON
@@ -75,25 +76,48 @@ BEGIN TRY
 	BEGIN
 		DELETE Commercial_Release WHERE Id_Item = @pvIdItem
 
-		INSERT INTO Commercial_Release(
-			Id_Item,
-			Id_Country,
-			Id_Status_Commercial_Release,
-			Final_Effective_Date,
-			Modify_By,
-			Modify_Date,
-			Modify_IP)
+		IF @pvIdItemSubClass = 'PACKD'
+		BEGIN
+			INSERT INTO Commercial_Release(
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date,
+				Modify_By,
+				Modify_Date,
+				Modify_IP)
+			VALUES (
+				@pvIdItem,
+				@pvIdCountry,
+				1,
+				NULL,
+				@pvUser,
+				GETDATE(),
+				@pvIP
+			)
+		END
+		
+		IF @pvIdItemSubClass <> 'PACKD'
+		BEGIN
+			INSERT INTO Commercial_Release(
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date,
+				Modify_By,
+				Modify_Date,
+				Modify_IP)
 
-		SELECT 
-			Id_Item,
-			Id_Country,
-			Id_Status_Commercial_Release,
-			Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
-			@pvUser,
-			GETDATE(),
-			@pvIP
-		FROM @pudtCommercialRelease
-
+			SELECT 
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
+				@pvUser,
+				GETDATE(),
+				@pvIP
+			FROM @pudtCommercialRelease
+		END
 		
 	END
 	--------------------------------------------------------------------
@@ -136,24 +160,48 @@ BEGIN TRY
 	BEGIN
 		DELETE Commercial_Release WHERE Id_Item = @pvIdItem
 
-		INSERT INTO Commercial_Release(
-			Id_Item,
-			Id_Country,
-			Id_Status_Commercial_Release,
-			Final_Effective_Date,
-			Modify_By,
-			Modify_Date,
-			Modify_IP)
+		IF @pvIdItemSubClass = 'PACKD'
+		BEGIN
+			INSERT INTO Commercial_Release(
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date,
+				Modify_By,
+				Modify_Date,
+				Modify_IP)
+			VALUES (
+				@pvIdItem,
+				@pvIdCountry,
+				1,
+				NULL,
+				@pvUser,
+				GETDATE(),
+				@pvIP
+			)
+		END
+		
+		IF @pvIdItemSubClass <> 'PACKD'
+		BEGIN
+			INSERT INTO Commercial_Release(
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date,
+				Modify_By,
+				Modify_Date,
+				Modify_IP)
 
-		SELECT 
-			Id_Item,
-			Id_Country,
-			Id_Status_Commercial_Release,
-			Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
-			@pvUser,
-			GETDATE(),
-			@pvIP
-		FROM @pudtCommercialRelease
+			SELECT 
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release,
+				Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
+				@pvUser,
+				GETDATE(),
+				@pvIP
+			FROM @pudtCommercialRelease
+		END
 	END
 
 	--------------------------------------------------------------------

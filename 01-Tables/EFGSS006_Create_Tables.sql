@@ -157,8 +157,6 @@ CREATE INDEX IX_GSSQuotationDetail_Item ON GSS_Quotation_Detail (Id_Item);
 /*==============================================================*/
 ALTER TABLE GSS_Quotation_Detail ADD CONSTRAINT FK_GSSQuotationDetail_GSSQuotation FOREIGN KEY (Folio, Version) REFERENCES GSS_Quotation (Folio, Version);
 
-ALTER TABLE GSS_Quotation_Detail ADD CONSTRAINT FK_GSSQuotationDetail_Parent FOREIGN KEY (Id_Parent) REFERENCES GSS_Quotation_Detail (Id_Detail);
-
 ALTER TABLE GSS_Quotation_Detail ADD CONSTRAINT FK_GSSQuotationDetail_GSSCatItem FOREIGN KEY (Id_Item) REFERENCES GSS_Cat_Item (Id_Item);
 
 -- GSS_Quotation Foreign Keys

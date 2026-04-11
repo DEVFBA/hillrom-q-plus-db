@@ -30,7 +30,9 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Categories_CRUD_Records]
 @pvIP				Varchar(20)		= '',
 @pvIdLanguageUser   Varchar(10)		= 'ANG',
 @piLevel			Int				= 0,
-@piIdParent			Int				= 0
+@piIdParent			Int				= 0,
+@pvAdditionalDesc	Varchar(1000)	= '',
+@pvImagePath		Varchar(255)	= ''
 AS
 
 SET NOCOUNT ON
@@ -72,7 +74,9 @@ BEGIN TRY
                 PDF_Layout,
 				Modify_Date,
 				Modify_By,
-				Modify_IP)
+				Modify_IP,
+				Additional_Desc,
+				Image_Path)
 			VALUES (
 				@pvIdCategory,
 				@pvShortDesc,
@@ -82,7 +86,9 @@ BEGIN TRY
                 @pvPDFLayout,
 				GETDATE(),
 				@pvUser,
-				@pvIP)
+				@pvIP,
+				@pvAdditionalDesc,
+				@pvImagePath)
 		END
 	END
 	--------------------------------------------------------------------
@@ -101,7 +107,9 @@ BEGIN TRY
 			GCC.[Status],
 			GCC.Modify_Date,
 			GCC.Modify_By,
-			GCC.Modify_IP
+			GCC.Modify_IP,
+			GCC.Additional_Desc,
+			GCC.Image_Path
 			FROM GSS_Cat_Categories AS GCC INNER JOIN GSS_Cat_Hierarchy_Levels AS GCHL ON
 														GCC.Id_Hierarchy_Level = GCHL.Id_Hierarchy_Level
 			WHERE (@pvIdCategory = '' OR GCC.Id_Category = @pvIdCategory) AND
@@ -122,7 +130,9 @@ BEGIN TRY
 				GCC.[Status],
 				GCC.Modify_Date,
 				GCC.Modify_By,
-				GCC.Modify_IP
+				GCC.Modify_IP,
+				GCC.Additional_Desc,
+				GCC.Image_Path
 			FROM GSS_Cat_Categories AS GCC INNER JOIN GSS_Cat_Hierarchy_Levels AS GCHL ON
 															GCC.Id_Hierarchy_Level = GCHL.Id_Hierarchy_Level
 			WHERE GCHL.Id_Hierarchy_Level = (SELECT TOP 1 Id_Hierarchy_Level
@@ -145,7 +155,9 @@ BEGIN TRY
             PDF_Layout          = @pvPDFLayout,
 			Modify_Date			= GETDATE(),
 			Modify_By			= @pvUser,
-			Modify_IP			= @pvIP
+			Modify_IP			= @pvIP,
+			Additional_Desc		= @pvAdditionalDesc,
+			Image_Path			= @pvImagePath
 		WHERE Id_Category		= @pvIdCategory
  
 	END
@@ -179,7 +191,9 @@ BEGIN TRY
 			GCH.Id_Category_Hierarchy,
 			GCH.[Level],
 			GCH.[Parent],
-			GCH.[Status]
+			Hierarchy_Status = GCH.[Status],
+			Additional_Desc = GCC.Additional_Desc,
+			Image_Path = GCC.Image_Path
 		FROM GSS_Cat_Categories AS GCC INNER JOIN GSS_Cat_Hierarchy_Levels AS GCHL ON
 														GCC.Id_Hierarchy_Level = GCHL.Id_Hierarchy_Level
 									   LEFT JOIN GSS_Categories_Hierarchies AS GCH ON

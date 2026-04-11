@@ -326,6 +326,7 @@ BEGIN TRY
 			CC.Short_Desc AS Currency,
 			GCI.Specifications, 
 			GCI.On_Request, 
+			GCI.Generic,
 			GCI.Model, 
 			GCI.[Weight], 
 			GCI.Measurements, 
