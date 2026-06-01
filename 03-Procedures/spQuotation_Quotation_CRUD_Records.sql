@@ -364,12 +364,57 @@ IF @pvOptionCRUD = 'U'
 			END
 			ELSE
 			BEGIN
-				UPDATE Quotation
-				SET Id_Quotation_Status = @pvIdQuotationStatus,
-					Modify_By			= @pvUser,
-					Modify_Date			= GETDATE(),
-					Modify_IP			= @pvIP
-				WHERE Folio = @piFolio AND [Version] = @piVersion
+				IF @pvIdQuotationStatus = 'DRAF'
+				BEGIN
+					PRINT 'Revert Folio'
+
+					DECLARE @vIdRole AS VARCHAR(10) = (SELECT
+															Id_Role
+													   FROM Security_User_Roles
+													   WHERE 
+																[User] = @pvUser
+															AND Id_Role IN (SELECT 
+																				Id_Role
+																			FROM Security_Roles
+																			WHERE Id_Business_Line = 'PSSLIKO'));
+
+					IF @vIdRole = 'ADMIN'
+					BEGIN
+
+						PRINT 'Revert Folio';
+						
+						 DELETE Approval_Workflow
+						 WHERE 
+								Folio = @piFolio
+							AND [Version] =  @piVersion;
+
+						UPDATE Quotation SET Id_Quotation_Status = @pvIdQuotationStatus, Modify_By = @pvUser, Modify_Date = GETDATE(), Modify_IP = @pvIP
+						WHERE 
+								Folio =  @piFolio
+							AND [Version] = @piVersion;
+
+					END
+					ELSE
+					BEGIN
+
+						PRINT 'Issue Error';
+
+						SET @bSuccessful	= 0
+						SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
+						SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+
+					END
+				END
+				ELSE
+				BEGIN
+					UPDATE Quotation
+					SET Id_Quotation_Status = @pvIdQuotationStatus,
+						Modify_By			= @pvUser,
+						Modify_Date			= GETDATE(),
+						Modify_IP			= @pvIP
+					WHERE Folio = @piFolio AND [Version] = @piVersion
+				END
+				
 			END
 
 			--------------------------------------------------------------------------

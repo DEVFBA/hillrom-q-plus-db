@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Operation_Cost_CRUD_Records]    Script Date: 12/23/2025 7:43:46 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Operation_Cost_CRUD_Records]    Script Date: 5/31/2026 7:50:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -26,7 +26,7 @@ Example:
 			EXEC spGSS_Operation_Cost_CRUD_Records @pvOptionCRUD = 'W'
  
 */
-ALTER PROCEDURE [dbo].[spGSS_Operation_Cost_CRUD_Records]
+CREATE PROCEDURE [dbo].[spGSS_Operation_Cost_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
 @pvIdItem						Varchar(50) = '', 

@@ -1,33 +1,33 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Records]    Script Date: 4/26/2026 12:23:08 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records]    Script Date: 4/26/2026 4:32:28 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
 
 /*
-Autor:		Alejandro Zepeda
-Desc:		Quotation_Pending_to_Approve_List | Create - Read - Upadate - Delete 
-Date:		11/04/2021
+Autor:		Angel Gutierrez
+Desc:		GSS Quotation_Pending_to_Approve_List | Create - Read - Upadate - Delete 
+Date:		26/04/2026
 Example:
 Id_Notification | Short_Desc 
 4	Quotation Pending to Approve
 5	Quotation Pending to Approve List
 
-			EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  34 , @piVersion = 1, @pvUser = 'SA'
-			EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  445 , @piVersion = 1, @pvUser = 'SA'
-			spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 5
+			EXEC spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  34 , @piVersion = 1, @pvUser = 'SA'
+			EXEC spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 4, @piFolio =  445 , @piVersion = 1, @pvUser = 'SA'
+			spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'C', @piIdNotification = 5
 
-			EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'R' , @piIdNotification = 4
-			EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'R' , @piIdNotification = 5
-			spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'U', @pnIdMailNotification = 1
+			EXEC spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'R' , @piIdNotification = 4
+			EXEC spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'R' , @piIdNotification = 5
+			spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD = 'U', @pnIdMailNotification = 1
 
 			select * from Notification_Quotation_Pending_Approvals where notification_send =0
 			DELETE Notification_Quotation_Pending_Approvals where notification_send =0
 		
 */
-CREATE PROCEDURE [dbo].[spNotification_Quotation_Pending_to_Approve_List_CRUD_Records]
+CREATE PROCEDURE [dbo].[spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records]
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10) = 'ANG',
 @pnIdMailNotification	Numeric		= 0,
@@ -70,13 +70,7 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
-													+ "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') 
-													+ ", @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') 
-													+ ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') 
-													+ ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') 
-													+ ", @pvZone = " + ISNULL(CAST(@pvZone AS VARCHAR),'NULL') 
-													+ ", @pvRole = " + ISNULL(CAST(@pvRole AS VARCHAR),'NULL') + " "
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Notification_Quotation_Pending_to_Approve_List_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pnIdMailNotification = " + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + ", , @piIdNotification = " + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + ", @piFolio = " + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + ", @piVersion = " + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + ", @pvZone = " + ISNULL(CAST(@pvZone AS VARCHAR),'NULL') + ", @pvRole = " + ISNULL(CAST(@pvRole AS VARCHAR),'NULL') + " "
 	
 
 	--------------------------------------------------------------------
@@ -84,7 +78,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
-
+		
 		------------------------------------------------------------
 		--Insert Quotation Pending to Approve
 		------------------------------------------------------------

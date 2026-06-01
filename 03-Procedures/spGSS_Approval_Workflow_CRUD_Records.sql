@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Approval_Workflow_CRUD_Records]    Script Date: 4/8/2026 8:14:53 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Approval_Workflow_CRUD_Records]    Script Date: 4/29/2026 10:25:28 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -12,22 +12,31 @@ Desc:		GSS_Approval_Workflow | Create - Read - Upadate - Delete
 Date:		04/07/26
 Example:
 
-			EXEC spGSS_Approval_Workflow_CRUD_Records @pvOptionCRUD		= 'C',
-													  @pvIdLanguageUser = 'ANG',
-													  @pvUser			= 'ANGUTIERRE',
-													  @pvIP				= '0.0.0.0',
-													  @piFolio			= 1,
-													  @piVersion		= 1,
-													  @piIdDetail		= 1,
-													  @pvIdItem			= '2078108',
-													  @piIdApprovalFlow = 21;
+			EXEC spGSS_Approval_Workflow_CRUD_Records @pvOptionCRUD				= 'C',
+													  @pvIdLanguageUser			= 'ANG',
+													  @pvUser					= 'ANGUTIERRE',
+													  @pvIP						= '0.0.0.0',
+													  @piFolio					= 1,
+													  @piVersion				= 1,
+													  @piIdDetail				= 1,
+													  @pvIdItem					= '2078108',
+													  @piIdApprovalFlow			= 21;
 
-			EXEC spGSS_Approval_Workflow_CRUD_Records @pvOptionCRUD		= 'R',
-													  @pvIdLanguageUser = 'ANG',
-													  @pvUser			= 'ANGUTIERRE',
-													  @pvIP				= '0.0.0.0',
-													  @piFolio			= 1,
-													  @piVersion		= 1;									
+			EXEC spGSS_Approval_Workflow_CRUD_Records @pvOptionCRUD				= 'R',
+													  @pvIdLanguageUser			= 'ANG',
+													  @pvUser					= 'ANGUTIERRE',
+													  @pvIP						= '0.0.0.0',
+													  @piFolio					= 1,
+													  @piVersion				= 1;	
+			
+			EXEC spGSS_Approval_Workflow_CRUD_Records @pvOptionCRUD				= 'U',
+													  @pvIdLanguageUser			= 'ANG',
+													  @pvUser					= 'ANGUTIERRE',
+													  @pvIP						= '0.0.0.0',
+													  @piFolio					= 17,
+													  @piVersion				= 1,
+													  @pvIdRole					= 'SAAPP',
+													  @pvIdApprovalStatus		= 'APP';
 
 
 */
@@ -40,8 +49,11 @@ CREATE PROCEDURE [dbo].[spGSS_Approval_Workflow_CRUD_Records]
 @piVersion						Int				= 0,
 @piIdDetail						Int				= 0,
 @pvIdItem						Varchar(50)		= '',
-@piIdApprovalFlow				Smallint
-
+@piIdApprovalFlow				Smallint		= 0,
+@pvIdRole						Varchar(10)		= '',
+@pvIdApprovalStatus				Varchar(10)		= '',
+@pvComments						Varchar(1000)	= '',
+@pvSPRNumber					Varchar(50)		= ''				
 AS
 
 SET NOCOUNT ON
@@ -77,6 +89,8 @@ BEGIN TRY
 													+ "', @piIdDetail =  '" + ISNULL(CAST(@piIdDetail AS Varchar(MAx)),'NULL') 
 													+ "', @pvIdItem =  '" + ISNULL(@pvIdItem,'NULL')
 													+ "', @piIdApprovalFlow =  '" + ISNULL(CAST(@piIdApprovalFlow AS Varchar(MAx)),'NULL')
+													+ "', @pvIdRole =  '" + ISNULL(@pvIdRole,'NULL')
+													+ "', @pvComments =  '" + ISNULL(@pvComments,'NULL')
 													+ "'";
 
 	--------------------------------------------------------------------
@@ -157,7 +171,42 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'U'
 	BEGIN
 		
-		PRINT 'Update Records'
+		UPDATE GSS_Approval_Workflow SET Id_Approval_Status = @pvIdApprovalStatus, Modify_By = @pvUser, Modify_Date = GETDATE(), Modify_IP = @pvIP, Comments = @pvComments
+		WHERE
+				Folio = @piFolio
+			AND [Version] = @piVersion
+			AND Id_Role = @pvIdRole
+
+		IF @pvIdApprovalStatus = 'REJ'
+		BEGIN
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'U',
+													@pvIdLanguageUser = 'ANG',
+													@pvIdQuotationStatus = 'DIRE',
+													@pvUser = @pvUser,
+													@pvIP = @pvIP,
+													@piFolio = @piFolio,
+													@piVersion = @piVersion;
+		END
+
+		DECLARE @viApprovalPendingCount INT = (SELECT 
+													COUNT(Id_Approval_Status) 
+											   FROM GSS_Approval_Workflow
+											   WHERE 
+														Folio = @piFolio
+													AND [Version] = @piVersion
+													AND Id_Approval_Status = 'PTA');
+
+		IF @viApprovalPendingCount = 0
+		BEGIN
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'U',
+													@pvIdLanguageUser = 'ANG',
+													@pvIdQuotationStatus = 'SENT',
+													@pvUser = @pvUser,
+													@pvIP = @pvIP,
+													@piFolio = @piFolio,
+													@piVersion = @piVersion,
+													@pvSPRNumber = @pvSPRNumber;
+		END
 
 	END
 
@@ -206,3 +255,7 @@ BEGIN CATCH
 		SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog
 		
 END CATCH
+
+
+
+

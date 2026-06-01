@@ -1,7 +1,7 @@
 USE [DBQS]
 GO
 
-/****** Object:  UserDefinedFunction [dbo].[fnGetApprovalFlow]    Script Date: 4/7/2026 9:55:33 PM ******/
+/****** Object:  UserDefinedFunction [dbo].[fnGSSGetApprovalFlow]    Script Date: 4/7/2026 9:55:33 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -17,10 +17,10 @@ Return
 			@ApprovalFlow Smallint
 Example:	
 			Declare @ApprovalFlow Smallint
-			SET @ApprovalFlow = dbo.fnGetApprovalFlow('2078108', 70, 'DCLMEXI', 'DIRSA')
+			SET @ApprovalFlow = dbo.fnGSSGetApprovalFlow('2078108', 70, 'DCLMEXI', 'DIRSA')
 			SELECT @ApprovalFlow
 */
-CREATE FUNCTION [dbo].[fnGetApprovalFlow](@pvIdItem Varchar(50), @pfDiscount Float, @pvIdZone Varchar(10), @pvIdSalesType Varchar(10))
+CREATE FUNCTION [dbo].[fnGSSGetApprovalFlow](@pvIdItem Varchar(50), @pfDiscount Float, @pvIdZone Varchar(10), @pvIdSalesType Varchar(10))
 RETURNS Smallint
 AS
 BEGIN

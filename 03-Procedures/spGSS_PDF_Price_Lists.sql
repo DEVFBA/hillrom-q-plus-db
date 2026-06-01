@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_PDF_Price_Lists]    Script Date: 12/28/2025 12:07:51 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_PDF_Price_Lists]    Script Date: 5/24/2026 8:16:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -14,7 +14,12 @@ Example:
 			
 			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
 			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';		
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
+
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX';
+
 */
 CREATE PROCEDURE [dbo].[spGSS_PDF_Price_Lists]
 @pvOptionCRUD		Varchar(1),
@@ -22,7 +27,8 @@ CREATE PROCEDURE [dbo].[spGSS_PDF_Price_Lists]
 @pvLineId           Varchar(10)     = '',
 @pvUser				Varchar(50)		= '',
 @pvIP				Varchar(20)		= '',
-@pvIdLanguageUser   Varchar(10)		= 'ANG'
+@pvIdLanguageUser   Varchar(10)		= 'ANG',
+@pvIdCountry		Varchar(10)		
 AS
 
 SET NOCOUNT ON
@@ -314,7 +320,8 @@ BEGIN TRY
 				GCI.Modify_By,
 				GCI.Modify_Date,
 				GCI.Modify_IP,
-				GCC.PDF_Layout
+				GCC.PDF_Layout,
+				GCR.Id_Status_Commercial_Release
 			FROM Tree T
 			OUTER APPLY (
 				SELECT
@@ -355,9 +362,27 @@ BEGIN TRY
 				ON T.Id_Category_Hierarchy = GIC.Id_Category_Hierarchy
 			LEFT JOIN GSS_Cat_Item AS GCI
 				ON GIC.Id_Item = GCI.Id_Item
+			--------------------------------------------------------------------------------------
+			-- BEGIN Commercial Release JOIN
+			--------------------------------------------------------------------------------------
+			LEFT JOIN GSS_Commercial_Release AS GCR ON 
+							GCR.Id_Item = GCI.Id_Item
+						AND (@pvIdCountry = '' OR GCR.Id_Country = @pvIdCountry)
+						--AND GCR.Id_Country = @pvIdCountry
+						--AND GCR.Id_Status_Commercial_Release = 1
+			--------------------------------------------------------------------------------------
+			-- END Commercial Release JOIN
+			--------------------------------------------------------------------------------------
 			WHERE
 					GCI.Id_Item IS NOT NULL
 				AND (@pvLineId = '' OR PI.ParentId2 = @pvLineId)
+			--------------------------------------------------------------------------------------
+			-- START Commercial Release Select
+			--------------------------------------------------------------------------------------
+				AND (GCR.Id_Status_Commercial_Release = 1 OR GCR.Id_Status_Commercial_Release = NULL)
+			--------------------------------------------------------------------------------------
+			-- END Commercial Release JOIN
+			--------------------------------------------------------------------------------------
 			ORDER BY T.SortKey;
 
         END
@@ -365,8 +390,21 @@ BEGIN TRY
 		ELSE IF @piMode = 3 -- Get All
 		BEGIN
 
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = @pvLineId, @pvUser = @pvUser, @pvIP = @pvIP, @pvIdLanguageUser = @pvIdLanguageUser;
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = @pvLineId, @pvUser = @pvUser, @pvIP = @pvIP, @pvIdLanguageUser = @pvIdLanguageUser;
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', 
+									   @piMode = 1, 
+									   @pvLineId = @pvLineId, 
+									   @pvUser = @pvUser, 
+									   @pvIP = @pvIP, 
+									   @pvIdLanguageUser = @pvIdLanguageUser,
+									   @pvIdCountry = @pvIdCountry;
+
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', 
+									   @piMode = 2, 
+									   @pvLineId = @pvLineId, 
+									   @pvUser = @pvUser, 
+									   @pvIP = @pvIP, 
+									   @pvIdLanguageUser = @pvIdLanguageUser, 
+									   @pvIdCountry = @pvIdCountry;
 
 		END
         

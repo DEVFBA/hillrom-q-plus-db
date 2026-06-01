@@ -137,7 +137,6 @@ create table GSS_Cat_Item (
    Modify_By            varchar(50)          not null,
    Modify_Date          datetime             not null,
    Modify_IP            varchar(20)          not null,
-   Generic              bit                  not null Default 0,
    constraint PK_GSS_CAT_ITEM primary key nonclustered (Id_Item)
 )
 go

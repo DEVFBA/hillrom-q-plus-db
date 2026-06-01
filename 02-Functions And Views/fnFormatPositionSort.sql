@@ -20,7 +20,7 @@ Example:
 					dbo.fnFormatPositionSort('1.2.3.4.5.6') AS Test5;
 */
 
-ALTER FUNCTION [dbo].[fnFormatPositionSort] (@val VARCHAR(200))
+CREATE FUNCTION [dbo].[fnFormatPositionSort] (@val VARCHAR(200))
 RETURNS VARCHAR(500)
 AS
 BEGIN

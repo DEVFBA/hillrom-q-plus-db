@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 12/23/2025 7:40:57 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Cat_Item_CRUD_Records]    Script Date: 5/31/2026 10:12:01 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -118,8 +118,10 @@ CREATE PROCEDURE [dbo].[spGSS_Cat_Item_CRUD_Records]
 @pvLevel3Parent					Varchar(10)		= '',
 @pvLevel4Parent					Varchar(10)		= '',
 @pvLevel5Parent					Varchar(10)		= '',
+@pvIdPackageLine				Varchar(10)		= '',
 --------------------------------------------------------------
-@pvIdCountryComercialRealease	Varchar(10)		= ''
+@pvIdCountryComercialRealease	Varchar(10)		= '',
+@pvPackageCategory				Varchar(10)		= ''
 AS
 
 SET NOCOUNT ON
@@ -169,7 +171,7 @@ BEGIN TRY
 				Id_Item_SubClass,
 				Id_Discount_Category,
 				Id_Country_Package,
-				Id_Item_Related,
+				Id_Package_Line,
 				Short_Desc,
 				Long_Desc,
 				Model,
@@ -186,7 +188,8 @@ BEGIN TRY
 				Standard_Cost,
 				Id_Currency,
 				Id_Language,
-				On_Request
+				On_Request,
+				Package_Category
 				)
 			VALUES (
 				@pvIdItem,
@@ -195,7 +198,7 @@ BEGIN TRY
 				@pvIdItemSubClass,
 				@pvIdDiscountCategory,
 				@pvIdCountryPackage,
-				@pvIdItemRelated,
+				@pvIdPackageLine,
 				@pvShortDesc,
 				@pvLongDesc,
 				@pvModel,
@@ -212,14 +215,15 @@ BEGIN TRY
 				@pfStandardCost,
 				@pvCurrency,
 				'ANG',
-				@pbOnRequest
+				@pbOnRequest,
+				@pvPackageCategory
 				)
 
-			IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
+			/*IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
 			BEGIN
 				INSERT INTO GSS_Commercial_Release (Id_Item,Id_Country,Id_Status_Commercial_Release,Final_Effective_Date,Modify_By,Modify_Date,Modify_IP)
 				VALUES (@pvIdItem, @pvIdCountryPackage, 1,NULL, @pvUser, GETDATE(), @pvIP)
-			END
+			END*/
 
 		END
 	END
@@ -409,7 +413,7 @@ BEGIN TRY
 				Id_Item_SubClass	= @pvIdItemSubClass,
 				Id_Discount_Category= @pvIdDiscountCategory,
 				Id_Country_Package	= @pvIdCountryPackage,
-				Id_Item_Related		= @pvIdItemRelated,
+				Id_Package_Line		= @pvIdPackageLine,
 				Short_Desc			= @pvShortDesc,
 				Long_Desc			= @pvLongDesc,
 				Model				= @pvModel,
@@ -426,7 +430,8 @@ BEGIN TRY
 				Standard_Cost		= @pfStandardCost,
 				Id_Currency			= @pvCurrency,
 				Id_Language			= 'ANG',
-				On_Request			= @pbOnRequest
+				On_Request			= @pbOnRequest,
+				Package_Category	= @pvPackageCategory
 			WHERE Id_Item = @pvIdItem
 			/*
 			IF( (@pvIdItemClass IN ('GSSPACK','GSSPACKD')) AND  NOT EXISTS (SELECT * FROM GSS_Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )

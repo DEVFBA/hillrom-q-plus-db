@@ -99,6 +99,7 @@ CREATE TABLE
         Creation_Date DATETIME NOT NULL,
         SPR_Number VARCHAR(50) NULL,
         Purchase_Order INT NULL,
+        TTQ_Quote_Number VARCHAR(50),
         Comments VARCHAR(1000) NULL,
         --Id_Language				VARCHAR(10)			NOT NULL,
         Modify_By VARCHAR(50) NOT NULL,
