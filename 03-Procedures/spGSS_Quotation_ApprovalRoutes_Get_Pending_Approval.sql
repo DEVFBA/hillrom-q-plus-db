@@ -22,7 +22,7 @@ Example:
 	EXEC spGSS_Quotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'DICASADO', @piFolio = 571
 	EXEC spGSS_Quotation_ApprovalRoutes_Get_Pending_Approval @pvUser = 'MAQUINTERO', @pvUserSaleExecutiveName = 'Rojas'
 */
-ALTER PROCEDURE [dbo].[spGSS_Quotation_ApprovalRoutes_Get_Pending_Approval]
+CREATE PROCEDURE [dbo].[spGSS_Quotation_ApprovalRoutes_Get_Pending_Approval]
 @pvIdLanguageUser			Varchar(10) = 'ANG',
 @pvUser						Varchar(50),
 @piFolio					Int = 0,
