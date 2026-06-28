@@ -109,6 +109,7 @@ CREATE PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
 @pvUser						Varchar(50) = '',
 @pvIP						Varchar(20) = '',
 @pvZone						Varchar(10), --- AEGH 25/05/14 Project Multiline Users
+@pvUpdateMode				Int			= 0, -- 0 -- Comes from Update Status in Quotation by Admin || 1 -- Comes from Quotation Integration
 ----------------------------------------------
 --Additional search parameters
 ----------------------------------------------
@@ -366,47 +367,70 @@ IF @pvOptionCRUD = 'U'
 			BEGIN
 				IF @pvIdQuotationStatus = 'DRAF'
 				BEGIN
-					PRINT 'Revert Folio'
 
-					DECLARE @vIdRole AS VARCHAR(10) = (SELECT
-															Id_Role
-													   FROM Security_User_Roles
-													   WHERE 
-																[User] = @pvUser
-															AND Id_Role IN (SELECT 
-																				Id_Role
-																			FROM Security_Roles
-																			WHERE Id_Business_Line = 'PSSLIKO'));
-
-					IF @vIdRole = 'ADMIN'
+					IF @pvUpdateMode = 0
 					BEGIN
-
-						PRINT 'Revert Folio';
 						
-						 DELETE Approval_Workflow
-						 WHERE 
-								Folio = @piFolio
-							AND [Version] =  @piVersion;
+						PRINT 'Revert Folio'
 
-						UPDATE Quotation SET Id_Quotation_Status = @pvIdQuotationStatus, Modify_By = @pvUser, Modify_Date = GETDATE(), Modify_IP = @pvIP
-						WHERE 
-								Folio =  @piFolio
-							AND [Version] = @piVersion;
+						DECLARE @vIdRole AS VARCHAR(10) = (SELECT
+																Id_Role
+														   FROM Security_User_Roles
+														   WHERE 
+																	[User] = @pvUser
+																AND Id_Role IN (SELECT 
+																					Id_Role
+																				FROM Security_Roles
+																				WHERE Id_Business_Line = 'PSSLIKO'));
+
+						IF @vIdRole = 'ADMIN'
+						BEGIN
+
+							PRINT 'Revert Folio';
+						
+							 DELETE Approval_Workflow
+							 WHERE 
+									Folio = @piFolio
+								AND [Version] =  @piVersion;
+
+							UPDATE Quotation SET Id_Quotation_Status = @pvIdQuotationStatus, Modify_By = @pvUser, Modify_Date = GETDATE(), Modify_IP = @pvIP
+							WHERE 
+									Folio =  @piFolio
+								AND [Version] = @piVersion;
+
+						END
+						ELSE
+						BEGIN
+
+							PRINT 'Issue Error';
+
+							SET @bSuccessful	= 0
+							SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
+							SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+
+						END
 
 					END
-					ELSE
+					ELSE IF @pvUpdateMode = 1
 					BEGIN
 
-						PRINT 'Issue Error';
+						PRINT 'Comes from Integration'
 
-						SET @bSuccessful	= 0
-						SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-						SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+						UPDATE Quotation
+						SET Id_Quotation_Status = @pvIdQuotationStatus,
+							Modify_By			= @pvUser,
+							Modify_Date			= GETDATE(),
+							Modify_IP			= @pvIP
+						WHERE Folio = @piFolio AND [Version] = @piVersion
 
 					END
+					
 				END
 				ELSE
 				BEGIN
+
+					PRINT 'Update other Status'
+
 					UPDATE Quotation
 					SET Id_Quotation_Status = @pvIdQuotationStatus,
 						Modify_By			= @pvUser,
@@ -523,3 +547,4 @@ BEGIN CATCH
 		SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog, Folio = @piFolio, [Version] = @piVersion
 		
 END CATCH
+
