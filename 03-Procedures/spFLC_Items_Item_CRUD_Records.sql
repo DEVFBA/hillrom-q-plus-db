@@ -73,6 +73,7 @@ CREATE PROCEDURE [dbo].[spFLC_Items_Item_CRUD_Records]
 @pbStatus						Bit				= 0,
 @pudtItemsConfiguration			UDT_FLC_Items_Configuration Readonly,
 @pudtCommercialRelease			UDT_FLC_Commercial_Release Readonly,
+@pudtFLCZonesPrices				UDT_FLC_Zones_Prices Readonly,
 @pvUser							Varchar(50)		= '',
 @pvIP							Varchar(20)		= ''
 AS
@@ -127,6 +128,14 @@ BEGIN TRY
 	INSERT INTO @TableResponse
 	EXEC spFLC_Commercial_Release_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, @pvIdLanguageUser = @pvIdLanguageUser, @pudtCommercialRelease = @pudtCommercialRelease, @pvUser = @pvUser, @pvIP = @pvIP
 	
+	/* FLC Zones Prices */
+
+	INSERT INTO @TableResponse
+	EXEC spFLC_Zones_Prices_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, 
+												 @pvIdLanguageUser = @pvIdLanguageUser, 
+												 @pudtFLCZonesPrices = @pudtFLCZonesPrices,  
+												 @pvUser = @pvUser, 
+												 @pvIP = @pvIP;	
 
 	IF (select COUNT(*) from @TableResponse where Successful = 0) > 0
 	BEGIN
