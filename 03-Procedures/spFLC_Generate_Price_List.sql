@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spFLC_Generate_Price_List]    Script Date: 31/01/2024 11:53:16 a. m. ******/
+/****** Object:  StoredProcedure [dbo].[spFLC_Generate_Price_List]    Script Date: 6/10/2026 1:41:36 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -35,7 +35,7 @@ Example:
 
 */
 
-ALTER PROCEDURE [dbo].[spFLC_Generate_Price_List]
+CREATE PROCEDURE [dbo].[spFLC_Generate_Price_List]
 @pvModality				Varchar(20) ,
 @pvIdCluster			Varchar(10) = '',
 @pvIdDistributor		Int			= 0,
@@ -121,6 +121,29 @@ BEGIN TRY
 	IF @pvModality = 'Cluster' OR @pvModality = 'Distributor'
 	BEGIN	
 
+		/** Zones Prices Change **/
+		DECLARE @vvIdZone VARCHAR(10);
+
+		IF @pvIdCluster = ''
+		BEGIN
+
+			SET @vvIdZone = (SELECT
+									Id_Zone
+							 FROM FLC_Customer_Zones
+							 WHERE
+									Id_Customer = @pvIdDistributor
+								AND [Status] = 1);
+
+		END
+		ELSE
+		BEGIN
+
+			SET @vvIdZone = @pvIdCluster
+
+		END
+
+		/** Finish Zones Prices Change **/
+
 		SELECT
 			Cluster_Id				= FCZ.Id_Zone,
 			Cluster					= CZ.Short_Desc,
@@ -132,7 +155,8 @@ BEGIN TRY
 			Family					= CF.Long_Desc,
 			Material				= FIC.Id_Item,
 			[Description]			= I.Long_Desc,
-			Suggested_Retail_Price	= I.Price, -- Angel Gutierrez a petición de Alexis
+			--Suggested_Retail_Price	= I.Price, -- Angel Gutierrez a petición de Alexis
+			Suggested_Retail_Price 	= dbo.fnGetFLCItemPrice(@vvIdZone, FIC.Id_Item),
 			Obsolescence			= I.Obsolescence,
 			Substitute_Item			= I.Substitute_Item ,
 			Comment					=  (CASE WHEN Obsolescence = 1 THEN(--'Discontinued' + ' \n ' +   /// Angel Gutierrez

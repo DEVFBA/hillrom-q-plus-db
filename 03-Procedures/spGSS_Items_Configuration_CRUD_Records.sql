@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 12/16/2025 6:55:32 PM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Items_Configuration_CRUD_Records]    Script Date: 5/31/2026 8:29:16 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -138,64 +138,135 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
-		WITH OrderedTree AS (
+
+		IF @pvIdItem <> ''
+		BEGIN
+
+			WITH OrderedTree AS (
+				-- Raíces
+				SELECT 
+					h.Id_Category_Hierarchy,
+					h.Id_Category,
+					h.Parent,
+					h.[Level],
+					h.[Order],
+					h.[Path],
+					h.[Status],
+					h.Modify_By,
+					h.Modify_Date,
+					h.Modify_IP
+				FROM GSS_Categories_Hierarchies h
+				WHERE h.Parent = 0
+
+				UNION ALL
+
+				-- Hijos recursivos
+				SELECT 
+					ch.Id_Category_Hierarchy,
+					ch.Id_Category,
+					ch.Parent,
+					ch.[Level],
+					ch.[Order],
+					ch.[Path],
+					ch.[Status],
+					ch.Modify_By,
+					ch.Modify_Date,
+					ch.Modify_IP
+				FROM GSS_Categories_Hierarchies ch
+				INNER JOIN OrderedTree ot 
+					ON ch.Parent = ot.Id_Category_Hierarchy
+			)
+			SELECT 
+					REPLICATE('   ', OT.[Level]-1) + CAST(OT.Id_Category AS VARCHAR(100)) AS TreeView,
+					OT.Id_Category_Hierarchy,
+					OT.Id_Category,
+					OT.Parent,
+					OT.[Level],
+					OT.[Path],
+					OT.[Order],
+					OT.[Status],
+					OT.Modify_By,
+					OT.Modify_Date,
+					OT.Modify_IP,
+					IC.Id_Category_Hierarchy AS Item_Category_Hierarchy,   
+					IC.Id_Item,
+					GCC.Short_Desc AS Category
+				FROM OrderedTree OT
+				INNER JOIN GSS_Cat_Categories AS GCC 
+					ON OT.Id_Category = GCC.Id_Category
+				LEFT JOIN GSS_Items_Configuration IC
+					ON OT.Id_Category_Hierarchy = IC.Id_Category_Hierarchy
+					AND (@pvIdItem = '' OR IC.Id_Item = @pvIdItem)
+				WHERE OT.[Status] = 1
+			   -- AND (@piIdCategoryHierarchy = 0 OR OT.Id_Category_Hierarchy = @piIdCategoryHierarchy)
+				ORDER BY OT.[Path], OT.[Order];
+
+		END
+		ELSE
+		BEGIN
+
+			WITH OrderedTree AS (
 			-- Raíces
-			SELECT 
-				h.Id_Category_Hierarchy,
-				h.Id_Category,
-				h.Parent,
-				h.[Level],
-				h.[Order],
-				h.[Path],
-				h.[Status],
-				h.Modify_By,
-				h.Modify_Date,
-				h.Modify_IP
-			FROM GSS_Categories_Hierarchies h
-			WHERE h.Parent = 0
+				SELECT 
+					h.Id_Category_Hierarchy,
+					h.Id_Category,
+					h.Parent,
+					h.[Level],
+					h.[Order],
+					h.[Path],
+					h.[Status],
+					h.Modify_By,
+					h.Modify_Date,
+					h.Modify_IP
+				FROM GSS_Categories_Hierarchies h
+				WHERE h.Parent = 0
 
-			UNION ALL
+				UNION ALL
 
-			-- Hijos recursivos
+				-- Hijos recursivos
+				SELECT 
+					ch.Id_Category_Hierarchy,
+					ch.Id_Category,
+					ch.Parent,
+					ch.[Level],
+					ch.[Order],
+					ch.[Path],
+					ch.[Status],
+					ch.Modify_By,
+					ch.Modify_Date,
+					ch.Modify_IP
+				FROM GSS_Categories_Hierarchies ch
+				INNER JOIN OrderedTree ot 
+					ON ch.Parent = ot.Id_Category_Hierarchy
+			)
 			SELECT 
-				ch.Id_Category_Hierarchy,
-				ch.Id_Category,
-				ch.Parent,
-				ch.[Level],
-				ch.[Order],
-				ch.[Path],
-				ch.[Status],
-				ch.Modify_By,
-				ch.Modify_Date,
-				ch.Modify_IP
-			FROM GSS_Categories_Hierarchies ch
-			INNER JOIN OrderedTree ot 
-				ON ch.Parent = ot.Id_Category_Hierarchy
-		)
-		SELECT 
-			REPLICATE('   ', OT.[Level]-1) + CAST(OT.Id_Category AS VARCHAR(100)) AS TreeView,
-			OT.Id_Category_Hierarchy,
-			OT.Id_Category,
-			OT.Parent,
-			OT.[Level],
-			OT.[Path],
-			OT.[Order],
-			OT.[Status],
-			OT.Modify_By,
-			OT.Modify_Date,
-			OT.Modify_IP,
-			IC.Id_Category_Hierarchy AS Item_Category_Hierarchy,   
-			IC.Id_Item,
-			GCC.Short_Desc AS Category
-		FROM OrderedTree OT
-		INNER JOIN GSS_Cat_Categories AS GCC 
-			ON OT.Id_Category = GCC.Id_Category
-		LEFT JOIN GSS_Items_Configuration IC
-			ON OT.Id_Category_Hierarchy = IC.Id_Category_Hierarchy
-			AND (@pvIdItem = '' OR IC.Id_Item = @pvIdItem)
-		WHERE OT.[Status] = 1
-       -- AND (@piIdCategoryHierarchy = 0 OR OT.Id_Category_Hierarchy = @piIdCategoryHierarchy)
-		ORDER BY OT.[Path], OT.[Order];
+				REPLICATE('   ', OT.[Level]-1) + CAST(OT.Id_Category AS VARCHAR(100)) AS TreeView,
+				OT.Id_Category_Hierarchy,
+				OT.Id_Category,
+				OT.Parent,
+				OT.[Level],
+				OT.[Path],
+				OT.[Order],
+				OT.[Status],
+				OT.Modify_By,
+				OT.Modify_Date,
+				OT.Modify_IP,
+				Item_Category_Hierarchy = NULL,
+				Id_Item = NULL,
+				--IC.Id_Category_Hierarchy AS Item_Category_Hierarchy,   
+				--IC.Id_Item,
+				GCC.Short_Desc AS Category
+			FROM OrderedTree OT
+			INNER JOIN GSS_Cat_Categories AS GCC 
+				ON OT.Id_Category = GCC.Id_Category
+			--LEFT JOIN GSS_Items_Configuration IC
+				--ON OT.Id_Category_Hierarchy = IC.Id_Category_Hierarchy
+				--AND (@pvIdItem = '' OR IC.Id_Item = @pvIdItem)
+			WHERE OT.[Status] = 1
+		   -- AND (@piIdCategoryHierarchy = 0 OR OT.Id_Category_Hierarchy = @piIdCategoryHierarchy)
+			ORDER BY OT.[Path], OT.[Order];
+
+		END
 
 	END
 

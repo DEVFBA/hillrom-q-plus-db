@@ -112,6 +112,8 @@ BEGIN TRY
 		----------------
 		--Insert Header
 		----------------
+
+		PRINT 'INSERT Header';
 		INSERT INTO @TableResponse
 		EXEC spQuotation_Header_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pudtQuotationHeader = @pudtQuotationHeader, @pvUser = @pvUser, @pvIP = @pvIP
 
@@ -119,26 +121,33 @@ BEGIN TRY
 		--Insert Details
 		----------------
 
+		PRINT 'INSERT Detail';
 		INSERT INTO @TableResponse
 		EXEC spQuotation_Detail_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pudtQuotationDetail = @pudtQuotationDetail, @pvUser = @pvUser, @pvIP = @pvIP
 		
 		----------------
 		--Insert Questionnaire
 		----------------
+
+		PRINT 'INSERT Questionnaire';
 		INSERT INTO @TableResponse
 		EXEC spQuotation_Questionnaire_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pudtQuotationQuestionnaire = @pudtQuotationQuestionnaire, @pvUser = @pvUser, @pvIP = @pvIP
 
 		----------------
 		--Insert Commissions
 		----------------
+
+		PRINT 'INSERT Commissions';
 		INSERT INTO @TableResponse
 		EXEC spQuotation_Commissions_CRUD_Records @pvOptionCRUD = @pvOptionCRUD, @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pudtQuotationCommissions = @pudtQuotationCommissions, @pvUser = @pvUser, @pvIP = @pvIP
 
 		------------------------
 		--Update Status QuotationS
 		------------------------
+
+		PRINT 'Update Quotation';
 		INSERT INTO @TableResponseQ
-		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP, @pvZone = @pvZone
+		EXEC spQuotation_Quotation_CRUD_Records  @pvOptionCRUD = 'U', @pvIdLanguageUser = @pvIdLanguageUser, @piFolio = @piFolio, @piVersion = @piVersion, @pvIdQuotationStatus = @pvIdQuotationStatus, @pvUser = @pvUser, @pvIP = @pvIP, @pvZone = @pvZone, @pvUpdateMode = 1
 								
 
 		INSERT INTO @TableResponse

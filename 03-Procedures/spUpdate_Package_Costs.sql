@@ -1,17 +1,9 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spUpdate_Package_Costs]    Script Date: 3/23/2026 8:50:19 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
-GO
-
-/* ==================================================================================*/
--- spUpdate_Package_Costs
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spUpdate_Package_Costs'
-
-IF OBJECT_ID('[dbo].[spUpdate_Package_Costs]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spUpdate_Package_Costs
 GO
 /*
 Autor:		Angel Gutiérrez
@@ -26,7 +18,7 @@ Example:
 			@pvPackageId = 'PACK-0001';	
 */
 
-CREATE PROCEDURE [dbo].spUpdate_Package_Costs
+CREATE PROCEDURE [dbo].[spUpdate_Package_Costs]
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10)		= '',
 @pvUser					Varchar(50)		= '',
@@ -52,7 +44,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Approved_Discounts - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'Update Package Costs - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)

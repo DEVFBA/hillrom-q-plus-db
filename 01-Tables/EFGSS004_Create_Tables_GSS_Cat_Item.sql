@@ -133,6 +133,7 @@ create table GSS_Cat_Item (
    Price                float                not null,
    Standard_Cost        float                not null,
    On_Request           bit                  not null,
+   Generic              bit                  not null,
    Modify_By            varchar(50)          not null,
    Modify_Date          datetime             not null,
    Modify_IP            varchar(20)          not null,

@@ -21,19 +21,15 @@ Date:		01/17/2021
 Example:
 			spCat_Item_CRUD_Records @pvOptionCRUD		= 'C',
 									@pvIdLanguageUser	= 'ANG', 
-<<<<<<< HEAD
-									@pvIdItem			= 'BR_ACCELLA_STD3', 
-=======
 									@pvIdItem			= 'ACCELLAX', 
->>>>>>> d593e1c92917e85ce2c99ba4c328b374fcc2ee65
 									@pvIdCountry		= 'FR' , 
 									@pvIdItemClass		= 'PROD', 
 									@pvIdItemSubClass	= 'PROD', 
 									@pvIdDiscountCategory = 'HR900',
 									@pvIdCountryPackage = '',
 									@pvIdItemRelated    = '',
-									@pvShortDesc		= 'Hill-Rom® 900 Accella', 
-									@pvLongDesc			= 'Hill-Rom® 900 Accella', 
+									@pvShortDesc		= 'Hill-Romï¿½ 900 Accella', 
+									@pvLongDesc			= 'Hill-Romï¿½ 900 Accella', 
 									@pvModel			= 'Bed Exit Alarm',
 									@pvSpecifications	= 'especs',
 									@pvWeight			= '80cm',
@@ -123,7 +119,9 @@ CREATE PROCEDURE [dbo].[spCat_Item_CRUD_Records]
 @pvAccessoryMessage				Varchar(255)	= '',
 @pvUser							Varchar(50)		= '',
 @pvIP							Varchar(20)		= '',
-@pvIdCountryComercialRealease	Varchar(10)		= ''
+@pvIdCountryComercialRealease	Varchar(10)		= '',
+@pbApplyFloorPrice				Bit				= 0,
+@pfFloorPrice					Float			= 0
 AS
 
 SET NOCOUNT ON
@@ -151,7 +149,27 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Item_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdItem = '" + ISNULL(@pvIdItem,'NULL') + "', @pvIdCountry = '" + ISNULL(@pvIdCountry,'NULL') + "', @pvIdItemClass = '" + ISNULL(@pvIdItemClass,'NULL') + "', @pvIdItemSubClass = '" + ISNULL(@pvIdItemSubClass,'NULL') + "', @pvIdDiscountCategory = '" + ISNULL(@pvIdDiscountCategory,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pvModel = '" + ISNULL(@pvModel,'NULL') + "', @pvSpecifications = '" + ISNULL(@pvSpecifications,'NULL') + "', @pvWeight = '" + ISNULL(@pvWeight,'NULL') + "', @pvMeasurements = '" + ISNULL(@pvMeasurements,'NULL') + "', @pvImagePath = '" + ISNULL(@pvImagePath,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvItemSPR = '" + @pvItemSPR + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCat_Item_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
+														+ "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') 
+														+ "', @pvIdItem = '" + ISNULL(@pvIdItem,'NULL') 
+														+ "', @pvIdCountry = '" + ISNULL(@pvIdCountry,'NULL') 
+														+ "', @pvIdItemClass = '" + ISNULL(@pvIdItemClass,'NULL') 
+														+ "', @pvIdItemSubClass = '" + ISNULL(@pvIdItemSubClass,'NULL') 
+														+ "', @pvIdDiscountCategory = '" + ISNULL(@pvIdDiscountCategory,'NULL') 
+														+ "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') 
+														+ "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') 
+														+ "', @pvModel = '" + ISNULL(@pvModel,'NULL') 
+														+ "', @pvSpecifications = '" + ISNULL(@pvSpecifications,'NULL') 
+														+ "', @pvWeight = '" + ISNULL(@pvWeight,'NULL') 
+														+ "', @pvMeasurements = '" + ISNULL(@pvMeasurements,'NULL') 
+														+ "', @pvImagePath = '" + ISNULL(@pvImagePath,'NULL') 
+														+ "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') 
+														+ "', @pvItemSPR = '" + ISNULL(@pvItemSPR, 'NULL') 
+														+ "', @pvUser = '" + ISNULL(@pvUser,'NULL') 
+														+ "', @pvIP = '" + ISNULL(@pvIP,'NULL') 
+														+ "', @pbApplyFloorPrice = '" + ISNULL(CAST(@pbApplyFloorPrice AS VARCHAR),'NULL') 
+														+ "', @pfFloorPrice = '" + ISNULL(CAST(@pfFloorPrice AS VARCHAR),'NULL') 
+														+ "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -164,7 +182,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO Cat_Item(
 				Id_Item,
@@ -186,7 +204,9 @@ BEGIN TRY
 				Accessory_Message,
 				Modify_By,
 				Modify_Date,
-				Modify_IP)
+				Modify_IP,
+				Apply_Floor_Price,
+				Floor_Price)
 			VALUES (
 				@pvIdItem,
 				@pvIdCountry,
@@ -207,7 +227,9 @@ BEGIN TRY
 				@pvAccessoryMessage,
 				@pvUser,
 				GETDATE(),
-				@pvIP)
+				@pvIP,
+				@pbApplyFloorPrice,
+				@pfFloorPrice)
 
 
 			IF( (@pvIdItemClass IN ('PACK','PACKD')) AND  NOT EXISTS (SELECT * FROM Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
@@ -252,6 +274,8 @@ BEGIN TRY
 		I.[Status],
 		I.Item_SPR,
 		I.Id_Item_Related,
+		I.Apply_Floor_Price,
+		I.Floor_Price,
 		Id_Item_Related_Desc = (SELECT Short_Desc FROM Cat_Item WHERE Id_Item = I.Id_Item_Related),		
 		Extended_Warranties = ISNULL((SELECT DISTINCT 1 FROM Cat_Extended_Warranties WHERE Id_Line = IC.Id_Line ),0),
 		Accessory_Message_Family =  ISNULL(F.Accessory_Message,''),
@@ -408,7 +432,9 @@ BEGIN TRY
 				Accessory_Message	= @pvAccessoryMessage,
 				Modify_By			= @pvUser, 
 				Modify_Date			= GETDATE(),		
-				Modify_IP			= @pvIP
+				Modify_IP			= @pvIP,
+				Apply_Floor_Price	= @pbApplyFloorPrice,
+				Floor_Price			= @pfFloorPrice
 			WHERE Id_Item = @pvIdItem
 
 			IF( (@pvIdItemClass IN ('PACK','PACKD')) AND  NOT EXISTS (SELECT * FROM Commercial_Release WHERE Id_Item = @pvIdItem AND Id_Country = @pvIdCountryPackage) )
