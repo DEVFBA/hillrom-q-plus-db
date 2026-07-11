@@ -1,122 +1,92 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spQuotation_Quotation_CRUD_Records]    Script Date: 12/19/2025 10:03:16 AM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_Quotation_CRUD_Records]    Script Date: 5/24/2026 9:17:36 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
 
 /*
-Autor:		Alejandro Zepeda
-Desc:		Quotation | Create - Read - Upadate - Delete 
-Date:		06/02/2021
+Autor:		Angel Gutierrez
+Desc:		GSS_Quotation | Create - Read - Upadate - Delete 
+Date:		01/10/2026
 Example:
-			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'C',
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'C',
 													@pvIdLanguageUser = 'ANG',
-													@pvIdCustomerBillTo = 5, 
-													@pvIdCustomerTypeBillTo = 'BILL', 
-													@pvIdCountryBillTo = 'VE',
-													@pvIdCustomerFinal = 6, 
-													@pvIdCustomerTypeFinal = 'FINA', 
-													@pvIdCountryFinal = 'VE',
-													@pvIdVoltage = '120V',
-													@pvIdLanguage = 'SPA',
-													@pvIdPlug = 'US',
-													@pvIdIncoterm = 'NA',
-													@pvIdCurrency = 'USD',
+													@pvIdQuotationStatus = 'DRAF',
+													@pvIdCustomerBillTo = '1',
+													@pvIdCustomerTypeBillTo = 'BILL',
+													@pvIdCountryBillTo = 'MX',
+													@pvIdCustomerFinal = '3',
+													@pvIdCustomerTypeFinal = 'FINA',
+													@pvIdCountryFinal = 'MX',
+													@pvIdIncoterm = 'FOB',
+													@pvIdCurrency = 'EUR',	
 													@piIdExchangeRate = 1,
 													@pvIdSalesType = 'DIRSA',
 													@pvIdPriceList = 'MAIN',
 													@pvIdValidityPrice = '30',
-													@pvIdSalesExecutive = 'RUGOMEZ',
-													@pvIdPaymentTerm    = 60,
+													@pvIdSalesExecutive = 'ANGUTIERRE',
 													@pvSPRNumber = 0,
 													@piPurchaseOrder = 0,
-													@pvComments = 'COMMENTS TEST 3 AZR',
-													@pvUser = 'RUGOMEZ', 
-													@pvIP ='192.168.1.254'
+													@pvComments = '',
+													@pvUser = 'ANGUTIERRE',
+													@pvIP = 'TEST',
+													@pvPDFFileName = 'GSS_1_1.pdf';
 
-			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R'
-			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R',
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'R';
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'R',
+													@pvIdLanguageUser = 'ANG';
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'R',
+											  @piFolio = 7,
+											  @piVersion = 1;
+
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'U',
 													@pvIdLanguageUser = 'ANG',
-													@piFolio = 1820, 
-													@piVersion = 1,
-													@pvIdCustomerBillTo = 5, 
-													@pvIdCustomerTypeBillTo = 'BILL', 
-													@pvIdCountryBillTo = 'VE',
-													@pvIdCustomerFinal = 6, 
-													@pvIdCustomerTypeFinal = 'FINA', 
-													@pvIdCountryFinal = 'VE',
-													@pvIdVoltage = '120V',
-													@pvIdLanguage = 'SPA',
-													@pvIdPlug = 'US',
-													@pvIdIncoterm = 'NA',
-													@pvIdCurrency = 'USD',
-													@piIdExchangeRate = 1,
-													@pvIdSalesType = 'DIRSA',
-													@pvIdPriceList = 'MAIN',
 													@pvIdQuotationStatus = 'ROUT',
-													@pvIdLanguageTranslation = 'SPA',
-													@pvIdSalesExecutive = 'RUGOMEZ',
-													@pvSPRNumber = 0,
-													@piPurchaseOrder = 0,
-													@pvCustomerBillTo  = 'VENEZ',
-													@pvSalesExecutive  = 'RUB�N',
-													@pvCreationDateIni = '20210101',
-													@pvCreationDateFin  = '20210103'
+													@pvUser = 'ANGUTIERRE',
+													@pvIP = '0.0.0.0',
+													@piFolio = 1,
+													@piVersion = 1,
+													@pvPDFFileName = 'GSS_1_1.pdf';
 
-
-
-			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'U',
-													@pvIdLanguageUser = 'ANG',
-													@piFolio = 9, 
-													@piVersion = 1 , 
-													@pvIdQuotationStatus = 'DIRE',
-													@piPurchaseOrder = 0,
-													@pvSPRNumber = 0											
-													@pvUser = 'RUGOMEZ', 
-													@pvIP ='192.168.1.254'
-
-			EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD = 'R', @pvIdSalesExecutive = 'VIROJAS';
+			EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD = 'R', @pvIdSalesExecutive = 'ANGUTIERRE';
 */
-CREATE PROCEDURE [dbo].[spQuotation_Quotation_CRUD_Records]
+
+CREATE PROCEDURE [dbo].[spGSS_Quotation_CRUD_Records]
 @pvOptionCRUD				Varchar(1),
-@pvIdLanguageUser			Varchar(10) = 'ANG',
-@piFolio					Int			= 0,
-@piVersion					Int			= 0,
-@pvIdCustomerBillTo			Int			= 0,
-@pvIdCustomerTypeBillTo		Varchar(10)	= '',
-@pvIdCountryBillTo			Varchar(10)	= '',
-@pvIdCustomerFinal			Int			= 0,
-@pvIdCustomerTypeFinal		Varchar(10)	= '',
-@pvIdCountryFinal			Varchar(10)	= '',
-@pvIdVoltage				Varchar(10)	= '',
-@pvIdLanguage				Varchar(10)	= '',
-@pvIdPlug					Varchar(10)	= '',
-@pvIdIncoterm				Varchar(10)	= '',
-@pvIdCurrency				Varchar(10)	= '',
-@piIdExchangeRate			Smallint	= 0,
-@pvIdSalesType				Varchar(10)	= '',
-@pvIdPriceList				Varchar(10)	= '',
-@pvIdValidityPrice			Varchar(10) = '',
-@pvIdQuotationStatus		Varchar(10)	= '',
-@pvIdLanguageTranslation	Varchar(10)	= '',
-@pvIdSalesExecutive			Varchar(20)	= '',
-@pvIdPaymentTerm			Varchar(10) = '',
-@pvSPRNumber				Varchar(50)	= '0',
-@piPurchaseOrder			Int			=0 ,
-@pvComments					Varchar(1000)= '',
-@pvUser						Varchar(50) = '',
-@pvIP						Varchar(20) = '',
-@pvZone						Varchar(10), --- AEGH 25/05/14 Project Multiline Users
-@pvUpdateMode				Int			= 0, -- 0 -- Comes from Update Status in Quotation by Admin || 1 -- Comes from Quotation Integration
+@pvIdLanguageUser			Varchar(10)		= 'ANG',
+@piFolio					Int				= 0,
+@piVersion					Int				= 0,
+@pvIdQuotationStatus		Varchar(10)		= '',
+@pvIdCustomerBillTo			Int				= 0,
+@pvIdCustomerTypeBillTo		Varchar(10)		= '',
+@pvIdCountryBillTo			Varchar(10)		= '',	
+@pvIdCustomerFinal			Int				= '',
+@pvIdCustomerTypeFinal		Varchar(10)		= '',
+@pvIdCountryFinal			Varchar(10)		= '',
+@pvIdIncoterm				Varchar(10)		= '',
+@pvIdCurrency				Varchar(10)		= '',
+@piIdExchangeRate			Smallint		= 0,
+@pvIdSalesType				Varchar(10)		= '',
+@pvIdPriceList				Varchar(10)		= '',
+@pvIdValidityPrice			Varchar(10)		= '',
+@pvIdSalesExecutive			Varchar(20)		= '',
+@pvSPRNumber				Varchar(50)		= '',
+@piPurchaseOrder			INT				= 0,
+@pvComments					Varchar(1000)	= '',			
+@pvUser						Varchar(50)		= '',
+@pvIP						Varchar(20)		= '',
+@pvPDFFileName				Varchar(255)	= '',
+@pvTTQQuoteNumber			Varchar(50)		= '',
+
 ----------------------------------------------
 --Additional search parameters
 ----------------------------------------------
-@pvCustomerBillTo		Varchar(255)= '',
-@pvSalesExecutive		Varchar(255)= '',
-@pvCreationDateIni		Varchar(8)	= '',
-@pvCreationDateFin		Varchar(8)	= ''
+@pvCustomerBillTo			Varchar(255)= '',
+@pvSalesExecutive			Varchar(255)= '',
+@pvCreationDateIni			Varchar(8)	= '',
+@pvCreationDateFin			Varchar(8)	= ''
 AS
 
 SET NOCOUNT ON
@@ -130,29 +100,60 @@ BEGIN TRY
 	--Variables for log control
 	--------------------------------------------------------------------
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Quotation - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'GSS_Quotation - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK', @pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD, @pvIdLanguageUser)	
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spQuotation_Quotation_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @piFolio = '" + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + "', @piVersion = '" + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + "',  @pvIdCustomerBillTo = '" + ISNULL(CAST(@pvIdCustomerBillTo AS VARCHAR),'NULL') + "', @pvIdCustomerTypeBillTo = '" + ISNULL(@pvIdCustomerTypeBillTo,'NULL') + "', @pvIdCountryBillTo = '" + ISNULL(@pvIdCountryBillTo,'NULL') + "', @pvIdCustomerFinal = '" + ISNULL(CAST(@pvIdCustomerFinal AS VARCHAR),'NULL') + "', @pvIdCustomerTypeFinal = '" + ISNULL(@pvIdCustomerTypeFinal,'NULL') + "', @pvIdCountryFinal = '" + ISNULL(@pvIdCountryFinal,'NULL') + "', @pvIdVoltage = '" + ISNULL(@pvIdVoltage,'NULL') + "', @pvIdLanguage = '" + ISNULL(@pvIdLanguage,'NULL') + "', @pvIdPlug = '" + ISNULL(@pvIdPlug,'NULL') + "', @pvIdIncoterm = '" + ISNULL(@pvIdIncoterm,'NULL') + "', @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL') + "', @piIdExchangeRate = '" + ISNULL(CAST(@piIdExchangeRate AS VARCHAR),'NULL') + "', @pvIdSalesType = '" + ISNULL(@pvIdSalesType,'NULL') + "', @pvIdPriceList = '" + ISNULL(@pvIdPriceList,'NULL') + "', @pvIdValidityPrice = '" + ISNULL(@pvIdValidityPrice,'NULL') + "', @pvIdQuotationStatus = '" + ISNULL(@pvIdQuotationStatus,'NULL') + "', @pvIdSalesExecutive = '" + ISNULL(@pvIdSalesExecutive,'NULL') + "', @pvSPRNumber = '" + ISNULL(@pvSPRNumber,'NULL') + "', @piPurchaseOrder = '" + ISNULL(CAST(@piPurchaseOrder AS VARCHAR),'NULL') + "', @pvComments = '" + ISNULL(@pvComments,'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Quotation_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
+													+ "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') 
+													+ "', @piFolio = '" + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') 
+													+ "', @piVersion = '" + ISNULL(CAST(@piVersion AS VARCHAR),'NULL')
+													+ "', @piVersion = '" + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') 
+													+ "', @pvIdQuotationStatus = '" + ISNULL(@pvIdQuotationStatus,'NULL')
+													+ "', @pvIdCustomerBillTo = '" + ISNULL(CAST(@pvIdCustomerBillTo AS vARCHAR(MAX)),'NULL')
+													+ "', @pvIdCustomerTypeBillTo = '" + ISNULL(@pvIdCustomerTypeBillTo,'NULL')
+													+ "', @pvIdCountryBillTo = '" + ISNULL(@pvIdCountryBillTo,'NULL')
+													+ "', @pvIdCustomerFinal = '" + ISNULL(CAST(@pvIdCustomerFinal AS VARCHAR(MAX)),'NULL')
+													+ "', @pvIdCustomerTypeFinal = '" + ISNULL(@pvIdCustomerTypeFinal,'NULL')
+													+ "', @pvIdCountryFinal = '" + ISNULL(@pvIdCountryFinal,'NULL')
+													+ "', @pvIdIncoterm = '" + ISNULL(@pvIdIncoterm,'NULL')
+													+ "', @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL')
+													+ "', @piIdExchangeRate = '" + ISNULL(CAST(@piIdExchangeRate AS VARCHAR(MAX)),'NULL')
+													+ "', @pvIdSalesType = '" + ISNULL(@pvIdSalesType,'NULL')
+													+ "', @pvIdPriceList = '" + ISNULL(@pvIdPriceList,'NULL')
+													+ "', @pvIdValidityPrice = '" + ISNULL(@pvIdValidityPrice,'NULL')
+													+ "', @pvIdSalesExecutive = '" + ISNULL(@pvIdSalesExecutive,'NULL')
+													+ "', @pvSPRNumber = '" + ISNULL(@pvSPRNumber,'NULL')
+													+ "', @piPurchaseOrder = '" + ISNULL(CAST(@piPurchaseOrder AS VARCHAR(MAX)),'NULL')
+													+ "', @pvComments = '" + ISNULL(@pvComments	,'NULL')
+													+ "', @pvUser = '" + ISNULL(@pvUser	,'NULL')
+													+ "', @pvIP = '" + ISNULL(@pvIP	,'NULL')
+													+ "', @pvPDFFileName = '" + ISNULL(@pvPDFFileName	,'NULL')
+													+ "', @pvTTQQuoteNumber = '" + ISNULL(@pvTTQQuoteNumber	,'NULL')
+													+ "'";
+	
+	PRINT @vExecCommand
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
 		IF @piFolio = 0
-		SET @piFolio	= (SELECT ISNULL(MAX(Folio) + 1 ,1) FROM Quotation)
+		SET @piFolio	= (SELECT ISNULL(MAX(Folio) + 1 ,1) FROM GSS_Quotation)
 
-		SET @piVersion	= (SELECT ISNULL(MAX([Version]) + 1 ,1) FROM Quotation WHERE Folio = @piFolio)
-		SET @pvIdQuotationStatus = 'DRAF' 
+		SET @piVersion	= (SELECT ISNULL(MAX([Version]) + 1 ,1) FROM GSS_Quotation WHERE Folio = @piFolio)
+
+/*		
+		SET @pvIdQuotationStatus = 'DRAF'; 
 
 		IF @pvIdLanguageTranslation = '' 			
 			SET @pvIdLanguageTranslation = NULL 
 
 		IF @pvIdPaymentTerm = ''
 			SET @pvIdPaymentTerm = NULL
-  
-		INSERT INTO Quotation(
+		*/
+
+		INSERT INTO GSS_Quotation(
 			Folio,
 			[Version],
 			Id_Customer_Bill_To,
@@ -161,9 +162,6 @@ BEGIN TRY
 			Id_Customer_Final,
 			Id_Customer_Type_Final,
 			Id_Country_Final,
-			Id_Voltage,
-			Id_Language,
-			Id_Plug,
 			Id_Incoterm,
 			Id_Currency,
 			Id_Exchange_Rate,
@@ -171,8 +169,6 @@ BEGIN TRY
 			Id_Price_List,
 			Id_Validity_Price,
 			Id_Quotation_Status,
-			Id_Language_Translation,
-			Id_Payment_Term,
 			Sales_Executive,
 			Creation_Date,
 			SPR_Number,
@@ -180,7 +176,9 @@ BEGIN TRY
 			Comments,
 			Modify_By,
 			Modify_Date,
-			Modify_IP)
+			Modify_IP,
+			TTQ_Quote_Number
+			)
 
 		VALUES(
 			@piFolio,
@@ -191,9 +189,6 @@ BEGIN TRY
 			@pvIdCustomerFinal,
 			@pvIdCustomerTypeFinal,
 			@pvIdCountryFinal,
-			@pvIdVoltage,
-			@pvIdLanguage,
-			@pvIdPlug,
 			@pvIdIncoterm,
 			@pvIdCurrency,
 			@piIdExchangeRate,
@@ -201,8 +196,6 @@ BEGIN TRY
 			@pvIdPriceList,
 			@pvIdValidityPrice,
 			@pvIdQuotationStatus,
-			@pvIdLanguageTranslation,
-			@pvIdPaymentTerm,
 			@pvIdSalesExecutive,
 			GETDATE(),
 			@pvSPRNumber,
@@ -210,7 +203,37 @@ BEGIN TRY
 			@pvComments,			
 			@pvUser,
 			GETDATE(),
-			@pvIP)
+			@pvIP,
+			@pvTTQQuoteNumber
+			)
+
+		IF @pvPDFFileName <> ''
+		BEGIN
+			
+			INSERT INTO Quotation_Files (
+				Folio,
+				[Version],
+				Id_File_Type,
+				File_Path,
+				Comments,
+				Modify_By,
+				Modify_IP,
+				Modify_Date,
+				Id_Business_Line
+			)
+			VALUES (
+				@piFolio,
+				@piVersion,
+				'GSSPDF',
+				@pvPDFFileName,
+				'',
+				@pvUser,
+				@pvIP,
+				GETDATE(),
+				'GSS'
+			)
+
+		END
 
 	END
 	--------------------------------------------------------------------
@@ -218,8 +241,9 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'R'
 	BEGIN
+		PRINT 'Read Records'
 		
-		/* Start change to give access to see and modify quotations to Role 'PSSSPEC' */
+		/* Start change to give access to see and modify quotations to Role 'GSSSPEC' */
 		DECLARE @pvIdRole VARCHAR(10) = (SELECT 
 												Id_Role 
 										 FROM Security_User_Roles 
@@ -229,9 +253,9 @@ BEGIN TRY
 																	Id_Role 
 															FROM Security_Roles 
 															WHERE 
-																	Id_Business_Line = 'PSSLIKO'))
+																	Id_Business_Line = 'GSS'))
 		
-		IF @pvIdRole = 'PSSSPEC'
+		IF @pvIdRole = 'GSSSPEC'
 		BEGIN
 			SET @pvSalesExecutive = ''
 			SET @pvIdSalesExecutive = ''
@@ -254,12 +278,12 @@ BEGIN TRY
 			Customer_Type_Final,
 			Id_Country_Final,
 			Country_Final,
-			Id_Voltage,
-			Voltage_Desc,
-			Id_Language,
-			Language_Desc,
-			Id_Plug,
-			Plug_Desc,
+			--Id_Voltage,
+			--Voltage_Desc,
+			--Id_Language,
+			--Language_Desc,
+			--Id_Plug,
+			--Plug_Desc,
 			Id_Incoterm,
 			Incoterm_Desc,
 			Id_Currency,
@@ -274,8 +298,8 @@ BEGIN TRY
 			Validity_Price_Desc,
 			Id_Quotation_Status,
 			Quotation_Status_Desc,
-			Id_Language_Translation, 
-			Language_Translation_Desc, 
+			--Id_Language_Translation, 
+			--Language_Translation_Desc, 
 			--Id_Payment_Terms, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			--Payment_Terms_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			Id_Sales_Executive,
@@ -284,7 +308,8 @@ BEGIN TRY
 			SPR_Number,
 			Purchase_Order,
 			Comments,
-
+			@pvTTQQuoteNumber,
+/*
 			Next_Approver = (CASE WHEN Id_Quotation_Status = 'DIRE' THEN ''
 			ELSE
 			(ISNULL((	SELECT DISTINCT Role_Desc 
@@ -305,12 +330,12 @@ BEGIN TRY
 																		FROM vwWorkflows 
 																		WHERE  Folio = vwQuotation.Folio AND [Version] = vwQuotation.[Version]  AND Id_Approval_Status = 'REJ' 
 																		)
-									), ''),
+									), ''),*/
 			Modify_By,
 			Modify_Date,
 			Modify_IP
 		
-		FROM [fnQuotation](@pvIdLanguageUser) AS vwQuotation
+		FROM [fnGSSQuotation](@pvIdLanguageUser) AS vwQuotation
 		WHERE	(@piFolio					= 0		OR Folio						= @piFolio) AND 
 				(@piVersion					= 0		OR [Version]					= @piVersion) AND 
 				(@pvIdCustomerBillTo		= 0		OR Id_Customer_Bill_To			= @pvIdCustomerBillTo) AND
@@ -319,19 +344,19 @@ BEGIN TRY
 				(@pvIdCustomerFinal			= 0		OR Id_Customer_Final			= @pvIdCustomerFinal) AND
 				(@pvIdCustomerTypeFinal		= ''	OR Id_Customer_Type_Final		= @pvIdCustomerTypeFinal) AND
 				(@pvIdCountryFinal			= ''	OR Id_Country_Final				= @pvIdCountryFinal) AND 
-				(@pvIdVoltage				= ''	OR Id_Voltage					= @pvIdVoltage) AND   
-				(@pvIdLanguage				= ''	OR Id_Language					= @pvIdLanguage) AND   
-				(@pvIdPlug					= ''	OR Id_Plug						= @pvIdPlug) AND   
-				(@pvIdIncoterm				= ''	OR Id_Incoterm					= @pvIdIncoterm) AND   
+				--(@pvIdVoltage				= ''	OR Id_Voltage					= @pvIdVoltage) AND   
+				--(@pvIdLanguage				= ''	OR Id_Language					= @pvIdLanguage) AND   
+				--(@pvIdPlug					= ''	OR Id_Plug						= @pvIdPlug) AND   
+				--(@pvIdIncoterm				= ''	OR Id_Incoterm					= @pvIdIncoterm) AND   
 				(@pvIdCurrency				= ''	OR Id_Currency					= @pvIdCurrency) AND   
 				(@piIdExchangeRate			= 0		OR Id_Exchange_Rate				= @piIdExchangeRate) AND   
 				(@pvIdSalesType				= ''	OR Id_Sales_Type				= @pvIdSalesType) AND   
 				(@pvIdPriceList				= ''	OR Id_Price_List				= @pvIdPriceList) AND   
 				(@pvIdValidityPrice			= ''	OR Id_Validity_Price			= @pvIdValidityPrice) AND   
 				(@pvIdQuotationStatus		= ''	OR Id_Quotation_Status			= @pvIdQuotationStatus) AND   
-				(@pvIdLanguageTranslation	= ''	OR Id_Language_Translation		= @pvIdLanguageTranslation) AND   
+				--(@pvIdLanguageTranslation	= ''	OR Id_Language_Translation		= @pvIdLanguageTranslation) AND   
 				--(@pvIdPaymentTerm			= ''	OR Id_Payment_Terms				= @pvIdPaymentTerm) AND   --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
-				(@pvIdSalesExecutive		= ''	OR @pvIdSalesExecutive			= 'ADMIN'		OR Id_Sales_Executive			= @pvIdSalesExecutive) AND  
+				(@pvIdSalesExecutive		= ''	OR @pvIdSalesExecutive			= 'GSSADMIN'		OR Id_Sales_Executive			= @pvIdSalesExecutive) AND  
 				(@pvSPRNumber				= '0'	OR SPR_Number					LIKE '%' +  CAST(@pvSPRNumber AS VARCHAR) + '%') AND   
 				(@piPurchaseOrder			= 0		OR Purchase_Order				LIKE '%' +  CAST(@piPurchaseOrder AS VARCHAR) + '%') AND 
 				--Additional search parameters
@@ -341,15 +366,16 @@ BEGIN TRY
 				(@pvCreationDateFin			= ''	OR CONVERT(VARCHAR(8), Creation_Date,112) <= @pvCreationDateFin)  
 
 		ORDER BY  Folio DESC, [Version] 
-
+		
 	END
-
+	
 	--------------------------------------------------------------------
 	--Update Records
 	--------------------------------------------------------------------
 IF @pvOptionCRUD = 'U'
 	BEGIN
-
+	PRINT 'Update Records'
+	/*
 		IF @pvIdQuotationStatus <> ''
 		BEGIN
 			--------------------------------------------------------------------------
@@ -365,80 +391,12 @@ IF @pvOptionCRUD = 'U'
 			END
 			ELSE
 			BEGIN
-				IF @pvIdQuotationStatus = 'DRAF'
-				BEGIN
-
-					IF @pvUpdateMode = 0
-					BEGIN
-						
-						PRINT 'Revert Folio'
-
-						DECLARE @vIdRole AS VARCHAR(10) = (SELECT
-																Id_Role
-														   FROM Security_User_Roles
-														   WHERE 
-																	[User] = @pvUser
-																AND Id_Role IN (SELECT 
-																					Id_Role
-																				FROM Security_Roles
-																				WHERE Id_Business_Line = 'PSSLIKO'));
-
-						IF @vIdRole = 'ADMIN'
-						BEGIN
-
-							PRINT 'Revert Folio';
-						
-							 DELETE Approval_Workflow
-							 WHERE 
-									Folio = @piFolio
-								AND [Version] =  @piVersion;
-
-							UPDATE Quotation SET Id_Quotation_Status = @pvIdQuotationStatus, Modify_By = @pvUser, Modify_Date = GETDATE(), Modify_IP = @pvIP
-							WHERE 
-									Folio =  @piFolio
-								AND [Version] = @piVersion;
-
-						END
-						ELSE
-						BEGIN
-
-							PRINT 'Issue Error';
-
-							SET @bSuccessful	= 0
-							SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
-							SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
-
-						END
-
-					END
-					ELSE IF @pvUpdateMode = 1
-					BEGIN
-
-						PRINT 'Comes from Integration'
-
-						UPDATE Quotation
-						SET Id_Quotation_Status = @pvIdQuotationStatus,
-							Modify_By			= @pvUser,
-							Modify_Date			= GETDATE(),
-							Modify_IP			= @pvIP
-						WHERE Folio = @piFolio AND [Version] = @piVersion
-
-					END
-					
-				END
-				ELSE
-				BEGIN
-
-					PRINT 'Update other Status'
-
-					UPDATE Quotation
-					SET Id_Quotation_Status = @pvIdQuotationStatus,
-						Modify_By			= @pvUser,
-						Modify_Date			= GETDATE(),
-						Modify_IP			= @pvIP
-					WHERE Folio = @piFolio AND [Version] = @piVersion
-				END
-				
+				UPDATE Quotation
+				SET Id_Quotation_Status = @pvIdQuotationStatus,
+					Modify_By			= @pvUser,
+					Modify_Date			= GETDATE(),
+					Modify_IP			= @pvIP
+				WHERE Folio = @piFolio AND [Version] = @piVersion
 			END
 
 			--------------------------------------------------------------------------
@@ -490,17 +448,70 @@ IF @pvOptionCRUD = 'U'
 			WHERE Folio = @piFolio AND [Version] = @piVersion		
 		END	
 		
+	*/	
+
+	IF @pvIdQuotationStatus <> ''
+		BEGIN
+			
+			UPDATE GSS_Quotation
+				SET Id_Quotation_Status = @pvIdQuotationStatus,
+					SPR_Number			= @pvSPRNumber,
+					Modify_By			= @pvUser,
+					Modify_Date			= GETDATE(),
+					Modify_IP			= @pvIP
+				WHERE Folio = @piFolio AND [Version] = @piVersion
+
+		END
+
+	IF @pvIdQuotationStatus = 'SENT'
+		BEGIN
+			
+			UPDATE GSS_Quotation
+				SET Creation_Date = GETDATE()
+				WHERE Folio = @piFolio AND [Version] = @piVersion
+
+		END
+
+	IF @pvPDFFileName <> ''
+		BEGIN
+			
+			INSERT INTO Quotation_Files (
+				Folio,
+				[Version],
+				Id_File_Type,
+				File_Path,
+				Comments,
+				Modify_By,
+				Modify_IP,
+				Modify_Date,
+				Id_Business_Line
+			)
+			VALUES (
+				@piFolio,
+				@piVersion,
+				'GSSPDF',
+				@pvPDFFileName,
+				'',
+				@pvUser,
+				@pvIP,
+				GETDATE(),
+				'GSS'
+			)
+
+		END
 
 	END
-
+	
 	--------------------------------------------------------------------
 	--Delete Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'D' OR @vDescOperationCRUD = 'N/A'
 	BEGIN
+	
 		SET @bSuccessful	= 0
 		SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 		SET @vMessage		= dbo.fnGetTransacMessages('N/A',@pvIdLanguageUser)
+		
 	END
 
 	--------------------------------------------------------------------
@@ -547,4 +558,7 @@ BEGIN CATCH
 		SELECT  Successful = @bSuccessful , MessageType = @vMessageType, Message = @vMessage, IdTransacLog = @nIdTransacLog, Folio = @piFolio, [Version] = @piVersion
 		
 END CATCH
+
+
+
 

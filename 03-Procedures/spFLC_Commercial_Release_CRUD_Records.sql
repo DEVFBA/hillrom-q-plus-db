@@ -46,7 +46,7 @@ Example:
 CREATE PROCEDURE [dbo].spFLC_Commercial_Release_CRUD_Records
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10) = 'ANG',
-@pvIdItem				Varchar(10) = '',
+@pvIdItem				Varchar(50) = '',
 @pvIdCountry			Varchar(10) = '',
 @pvIdLanguage			Varchar(10) = '',
 @pvIdStatusComRelease	Smallint	= 0,

@@ -1,125 +1,139 @@
-USE DBQS
+USE [DBQS]
 GO
+/****** Object:  StoredProcedure [dbo].[spGSS_Commercial_Release_CRUD_Records]    Script Date: 5/31/2026 7:50:39 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
 
-/* ==================================================================================*/
--- spCommercial_Release_CRUD_Records
-/* ==================================================================================*/	
-PRINT 'Crea Procedure: spCommercial_Release_CRUD_Records'
-
-IF OBJECT_ID('[dbo].[spCommercial_Release_CRUD_Records]','P') IS NOT NULL
-       DROP PROCEDURE [dbo].spCommercial_Release_CRUD_Records
-GO
-
 /*
-Autor:		Alejandro Zepeda
-Desc:		Commercial_Release | Create - Read - Upadate - Delete 
-Date:		29/01/2021
+Autor:		Angel Gutierrez
+Desc:		GSS_Commercial_Release | Create - Read - Upadate - Delete 
+Date:		29/11/25
 Example:
 
-			DECLARE  @udtCommercialRelease  UDT_Commercial_Release 
+			DECLARE  @udtGSSCommercialRelease  UDT_Commercial_Release 
 
-			INSERT INTO @udtCommercialRelease
+			INSERT INTO @udtGSSCommercialRelease
 			SELECT	*
-			FROM Commercial_Release  
+			FROM GSS_Commercial_Release  
 			WHERE Id_Item = 'X7' 
 
-			UPDATE @udtCommercialRelease
+			UPDATE @udtGSSCommercialRelease
 			SET Final_Effective_Date = ''
 
-			select * from @udtCommercialRelease
+			select * from @udtGSSCommercialRelease
 
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3', @pudtCommercialRelease = @udtCommercialRelease , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'			
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X7' 
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3', @pvIdCountry = 'GS'
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3', @pudtCommercialRelease = @udtCommercialRelease , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3' 
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'W', @pvIdLanguageUser = 'ANG' 
-			EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG' 
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'C', 
+												       @pvIdLanguageUser = 'ANG', 
+													   @pudtGSSCommercialRelease = @pudtGSSCommercialRelease, 
+													   @pvUser = 'ANGUTIERRE', 
+													   @pvIP ='TEST Create';
+													   
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X7' 
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3', @pvIdCountry = 'GS'
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3', @pudtGSSCommercialRelease = @udtGSSCommercialRelease , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdItem = 'X3' 
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'W', @pvIdLanguageUser = 'ANG' 
+			EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD = 'L', @pvIdLanguageUser = 'ANG' 
  
 */
-CREATE PROCEDURE [dbo].spCommercial_Release_CRUD_Records
+ALTER PROCEDURE [dbo].[spGSS_Commercial_Release_CRUD_Records]
 @pvOptionCRUD					Varchar(1),
 @pvIdLanguageUser				Varchar(10) = '',
 @pvIdItem						Varchar(50) = '',
 @pvIdCountry					Varchar(10) = '',
-@pudtCommercialRelease			UDT_Commercial_Release Readonly,
+@pudtGSSCommercialRelease		UDT_GSS_Commercial_Release READONLY,
 @pvUser							Varchar(50) = '',
-@pvIP							Varchar(20) = '',
-@pvIdItemSubClass				Varchar(10) = ''
+@pvIP							Varchar(20) = ''
 AS
 
 SET NOCOUNT ON
 BEGIN TRY
+	
 	--------------------------------------------------------------------
 	--Work Variables
 	--------------------------------------------------------------------
 	DECLARE @vDescOperationCRUD		Varchar(50) = dbo.fnGetOperationCRUD(@pvOptionCRUD)
-	DECLARE @iNumRegistros			Int			= (SELECT COUNT(*) FROM @pudtCommercialRelease)
+	DECLARE @iNumRegistros			Int			= (SELECT COUNT(*) FROM @pudtGSSCommercialRelease)
 	DECLARE @vStsAvailable			Varchar(50)	= (SELECT Short_Desc FROM Cat_Status_Commercial_Release WHERE Id_Status_Commercial_Release = 1 AND Id_Language = @pvIdLanguageUser)
+	
 	--------------------------------------------------------------------
 	--Variables for log control
 	--------------------------------------------------------------------
 	DECLARE	@nIdTransacLog	Numeric
-	DECLARE @vDescription	Varchar(255)	= 'Commercial_Release - ' + @vDescOperationCRUD 
+	DECLARE @vDescription	Varchar(255)	= 'GSS_Commercial_Release - ' + @vDescOperationCRUD 
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spCommercial_Release_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdItem = '" + ISNULL(@pvIdItem,'NULL') + "', @pudtCommercialRelease = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_Commercial_Release_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdItem = '" + ISNULL(@pvIdItem,'NULL') + "', @pudtGSSCommercialRelease = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	
+	--------------------------------------------------------------------
+	-- Variables for cursor
+	--------------------------------------------------------------------
+	DECLARE @cvIdItem AS VARCHAR(50)
+	DECLARE @cvIdCountry AS VARCHAR(10)
+	DECLARE @cvIdStatusCommercialRelease AS BIT
+	
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'C'
 	BEGIN
-		DELETE Commercial_Release WHERE Id_Item = @pvIdItem
 
-		IF @pvIdItemSubClass = 'PACKD'
+		DELETE GSS_Commercial_Release
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSCommercialRelease);
+
+		DECLARE curGSSCommercialRelease CURSOR FOR
+			SELECT 
+				Id_Item,
+				Id_Country,
+				Id_Status_Commercial_Release
+			FROM @pudtGSSCommercialRelease
+			WHERE
+					Id_Country IN (SELECT
+										Id_Country
+								   FROM Cat_Countries)
+				AND Id_Item IN (SELECT
+									Id_Item
+								FROM GSS_Cat_Item);
+
+		OPEN curGSSCommercialRelease;
+
+		FETCH NEXT FROM curGSSCommercialRelease INTO @cvIdItem, @cvIdCountry, @cvIdStatusCommercialRelease
+
+		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			INSERT INTO Commercial_Release(
+
+			INSERT INTO GSS_Commercial_Release (
 				Id_Item,
 				Id_Country,
 				Id_Status_Commercial_Release,
 				Final_Effective_Date,
 				Modify_By,
 				Modify_Date,
-				Modify_IP)
-			VALUES (
-				@pvIdItem,
-				@pvIdCountry,
-				1,
+				Modify_IP
+			) VALUES (
+				@cvIdItem,
+				@cvIdCountry,
+				@cvIdStatusCommercialRelease,
 				NULL,
 				@pvUser,
 				GETDATE(),
 				@pvIP
 			)
-		END
-		
-		IF @pvIdItemSubClass <> 'PACKD'
-		BEGIN
-			INSERT INTO Commercial_Release(
-				Id_Item,
-				Id_Country,
-				Id_Status_Commercial_Release,
-				Final_Effective_Date,
-				Modify_By,
-				Modify_Date,
-				Modify_IP)
 
-			SELECT 
-				Id_Item,
-				Id_Country,
-				Id_Status_Commercial_Release,
-				Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
-				@pvUser,
-				GETDATE(),
-				@pvIP
-			FROM @pudtCommercialRelease
+			FETCH NEXT FROM curGSSCommercialRelease INTO @cvIdItem, @cvIdCountry, @cvIdStatusCommercialRelease;
+
 		END
+
+		CLOSE curGSSCommercialRelease;
+		DEALLOCATE curGSSCommercialRelease;
 		
 	END
+
 	--------------------------------------------------------------------
 	--Reads Records
 	--------------------------------------------------------------------
@@ -138,7 +152,7 @@ BEGIN TRY
 		
 		FROM Cat_Countries C
 		
-		LEFT OUTER JOIN Commercial_Release CR WITH(NOLOCK) ON
+		LEFT OUTER JOIN GSS_Commercial_Release CR WITH(NOLOCK) ON
 		C.Id_Country = CR.Id_Country AND
 		CR.Id_Item = @pvIdItem 
 
@@ -158,50 +172,51 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'U'
 	BEGIN
-		DELETE Commercial_Release WHERE Id_Item = @pvIdItem
 
-		IF @pvIdItemSubClass = 'PACKD'
-		BEGIN
-			INSERT INTO Commercial_Release(
-				Id_Item,
-				Id_Country,
-				Id_Status_Commercial_Release,
-				Final_Effective_Date,
-				Modify_By,
-				Modify_Date,
-				Modify_IP)
-			VALUES (
-				@pvIdItem,
-				@pvIdCountry,
-				1,
-				NULL,
-				@pvUser,
-				GETDATE(),
-				@pvIP
-			)
-		END
-		
-		IF @pvIdItemSubClass <> 'PACKD'
-		BEGIN
-			INSERT INTO Commercial_Release(
-				Id_Item,
-				Id_Country,
-				Id_Status_Commercial_Release,
-				Final_Effective_Date,
-				Modify_By,
-				Modify_Date,
-				Modify_IP)
+		DELETE GSS_Commercial_Release
+		WHERE Id_Item IN (SELECT
+								Id_Item
+						  FROM @pudtGSSCommercialRelease);
 
-			SELECT 
-				Id_Item,
-				Id_Country,
-				Id_Status_Commercial_Release,
-				Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
-				@pvUser,
-				GETDATE(),
-				@pvIP
-			FROM @pudtCommercialRelease
-		END
+		-- Delete from UDT the countries which do not exist in Cat_Countries and Items which do not exist in GSS_Cat_Item
+		CREATE TABLE #updateCommercialRelease
+		(
+			Id_Item VARCHAR(50),
+			Id_Country VARCHAR(10),
+			Id_Status_Commercial_Release SMALLINT,
+			Final_Effective_Date VARCHAR(8)
+		)
+
+		INSERT INTO #updateCommercialRelease
+		SELECT
+			*
+		FROM @pudtGSSCommercialRelease
+		WHERE
+				Id_Country IN (SELECT
+									Id_Country
+							   FROM Cat_Countries)
+			AND Id_Item IN (SELECT
+								Id_Item
+							FROM GSS_Cat_Item);
+
+		INSERT INTO GSS_Commercial_Release(
+			Id_Item,
+			Id_Country,
+			Id_Status_Commercial_Release,
+			Final_Effective_Date,
+			Modify_By,
+			Modify_Date,
+			Modify_IP)
+		SELECT 
+			Id_Item,
+			Id_Country,
+			Id_Status_Commercial_Release,
+			Final_Effective_Date = (CASE WHEN Final_Effective_Date  = '19000101' OR  Final_Effective_Date  = '' THEN NULL ELSE Final_Effective_Date END ),
+			@pvUser,
+			GETDATE(),
+			@pvIP
+		FROM #updateCommercialRelease
+
 	END
 
 	--------------------------------------------------------------------
@@ -217,7 +232,7 @@ BEGIN TRY
 --------------------------------------------------------------------
 	--Download Records
 	--------------------------------------------------------------------
-	IF @pvOptionCRUD = 'W'
+	/*IF @pvOptionCRUD = 'W'
 	BEGIN
 		SELECT
 		Id_Item							= CR.Id_Item,
@@ -249,12 +264,12 @@ BEGIN TRY
 
 		ORDER BY I.Model, CR.Id_Item, CR.Id_Country
 		RETURN
-	END
+	END*/
 
 --------------------------------------------------------------------
 	--Load Records
 	--------------------------------------------------------------------
-	IF @pvOptionCRUD = 'L'
+	/*IF @pvOptionCRUD = 'L'
 	BEGIN
 
 		UPDATE CR
@@ -269,7 +284,7 @@ BEGIN TRY
 		CR.Id_Item = L.Id_Item AND
 		CR.Id_Country = L.Id_Country
 
-	END
+	END*/
 	--------------------------------------------------------------------
 	--Register Transaction Log
 	--------------------------------------------------------------------
