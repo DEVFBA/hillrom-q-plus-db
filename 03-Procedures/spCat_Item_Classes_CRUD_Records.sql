@@ -20,7 +20,7 @@ Desc:		Cat_Item_Classes | Create - Read - Upadate - Delete
 Date:		09/01/2021
 Example:
 			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvShortDesc = 'Transport Chairs', @pvLongDesc = 'Transport Chairs for Hospitals', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
-			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' 
+			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE', @pvIdBusinessLine = 'PSS'
 			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvShortDesc = 'Transport Chairs "Modify"', @pvLongDesc = 'Transport Chairs for Hospitals', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Item_Classes_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdItemClass = 'ACCE' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -36,7 +36,8 @@ CREATE PROCEDURE [dbo].spCat_Item_Classes_CRUD_Records
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
-@pvIP				Varchar(20) = ''
+@pvIP				Varchar(20) = '',
+@pvIdBusinessLine	Varchar(10)	= ''
 AS
 
 SET NOCOUNT ON
@@ -70,22 +71,26 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'R'
 	BEGIN
 		SELECT 
-		Id_Catalog = Id_Item_Class,
-		Short_Desc,
-		Long_Desc,
-		[Status],
-		TabGenerals,
-		TabConfiguration,
-		TabTemplate,
-		TabExceptions,
-		TabKits,
-		TabOperationCost,
-		TabCommercialRelease,
-		Modify_Date,
-		Modify_By,
-		Modify_IP
-		FROM Cat_Item_Classes 
+		Id_Catalog			= CIC.Id_Item_Class,
+		Business_Line_Id	= CIC.Id_Business_Line,
+		Business_Line		= CBL.Short_Desc,
+		CIC.Short_Desc,
+		CIC.Long_Desc,
+		CIC.[Status],
+		CIC.TabGenerals,
+		CIC.TabConfiguration,
+		CIC.TabTemplate,
+		CIC.TabExceptions,
+		CIC.TabKits,
+		CIC.TabOperationCost,
+		CIC.TabCommercialRelease,
+		CIC.Modify_Date,
+		CIC.Modify_By,
+		CIC.Modify_IP
+		FROM Cat_Item_Classes AS CIC INNER JOIN Cat_Business_Line AS CBL ON
+									CIC.Id_Business_Line = CBL.Id_Business_Line
 		WHERE  (@pvIdItemClass = ''  OR Id_Item_Class = @pvIdItemClass) AND Id_Item_Class <> 'KIT'
+			AND (@pvIdBusinessLine = '' OR CIC.Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY  Id_Catalog
 
 	END

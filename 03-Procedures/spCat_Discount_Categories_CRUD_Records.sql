@@ -18,9 +18,10 @@ Autor:		Alejandro Zepeda
 Desc:		Cat_Discount_Categories | Create - Read - Upadate - Delete 
 Date:		20/02/2021
 Example:
-			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' , @pvShortDesc = 'DiscountCategory Record 1', @pvLongDesc = 'DiscountCategory Record 1 Long Desd', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
+			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'C', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' , @pvShortDesc = 'DiscountCategory Record 1', @pvLongDesc = 'DiscountCategory Record 1 Long Desd', @pbStatus = 1, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254', @pvIdBusinessLine = 'PSSLIKO'
 			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'R'
 			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' 
+			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory', @pvIdBusinessLine = 'PSSLIKO'
 			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'U', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' , @pvShortDesc = 'DiscountCategory Record 1', @pvLongDesc = 'DiscountCategory Record 1 Long Desc', @pbStatus = 0, @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'D', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
 			spCat_Discount_Categories_CRUD_Records @pvOptionCRUD = 'X', @pvIdLanguageUser = 'ANG', @pvIdDiscountCategory = 'DiscountCategory' , @pvUser = 'AZEPEDA', @pvIP ='192.168.1.254'
@@ -33,7 +34,8 @@ CREATE PROCEDURE [dbo].spCat_Discount_Categories_CRUD_Records
 @pvLongDesc				Varchar(255)= '',
 @pbStatus				Bit			= '',
 @pvUser					Varchar(50) = '',
-@pvIP					Varchar(20) = ''
+@pvIP					Varchar(20) = '',
+@pvIdBusinessLine		Varchar(10) = ''
 AS
 SET NOCOUNT ON
 BEGIN TRY
@@ -63,7 +65,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO Cat_Discount_Categories(
 				Id_Discount_Category,
@@ -72,7 +74,8 @@ BEGIN TRY
 				[Status],
 				Modify_Date,
 				Modify_By,
-				Modify_IP)
+				Modify_IP,
+				Id_Business_Line)
 			VALUES (
 				@pvIdDiscountCategory,
 				@pvShortDesc,
@@ -80,7 +83,8 @@ BEGIN TRY
 				@pbStatus,
 				GETDATE(),
 				@pvUser,
-				@pvIP)
+				@pvIP,
+				@pvIdBusinessLine)
 		END
 	END
 	--------------------------------------------------------------------
@@ -89,15 +93,19 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'R'
 	BEGIN
 		SELECT 
-		Id_Catalog = Id_Discount_Category,
-		Short_Desc,
-		Long_Desc,
-		[Status],
-		Modify_Date,
-		Modify_By,
-		Modify_IP
-		FROM Cat_Discount_Categories 
-		WHERE @pvIdDiscountCategory = '' OR Id_Discount_Category = @pvIdDiscountCategory
+		Id_Catalog				= CDC.Id_Discount_Category,
+		CDC.Short_Desc,
+		CDC.Long_Desc,
+		Business_Line_Id		= CDC.Id_Business_Line,
+		Business_Line_Desc		= CBL.Short_Desc,
+		CDC.[Status],
+		CDC.Modify_Date,
+		CDC.Modify_By,
+		CDC.Modify_IP
+		FROM Cat_Discount_Categories AS CDC INNER JOIN Cat_Business_Line AS CBL ON
+											CDC.Id_Business_Line = CBL.Id_Business_Line
+		WHERE (@pvIdDiscountCategory = '' OR CDC.Id_Discount_Category = @pvIdDiscountCategory) AND
+			  (@pvIdBusinessLine = '' OR CDC.Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY Id_Catalog
 	END
 
@@ -107,12 +115,13 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'U'
 	BEGIN
 		UPDATE Cat_Discount_Categories 
-		SET Short_Desc	= @pvShortDesc,
-			Long_Desc	= @pvLongDesc,
-			[Status]	= @pbStatus,
-			Modify_Date	= GETDATE(),
-			Modify_By	= @pvUser,
-			Modify_IP	= @pvIP
+		SET Short_Desc			= @pvShortDesc,
+			Long_Desc			= @pvLongDesc,
+			[Status]			= @pbStatus,
+			Modify_Date			= GETDATE(),
+			Modify_By			= @pvUser,
+			Modify_IP			= @pvIP,
+			Id_Business_Line	= @pvIdBusinessLine
 		WHERE Id_Discount_Category = @pvIdDiscountCategory
 	END
 
