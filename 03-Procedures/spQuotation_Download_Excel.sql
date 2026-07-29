@@ -43,7 +43,8 @@ BEGIN
 						END),
 			[Description] = CI.Short_Desc,
 			SubClass_Id = CI.Id_Item_SubClass,
-			Price_List = ROUND((IT.Price * CER.Exchange_Rate),2),
+			--Price_List = ROUND((IT.Price * CER.Exchange_Rate),2),
+			Price_List = ROUND((QH.Final_Price * CER.Exchange_Rate),2),
 			Cost = (CASE @vbViewCosts
 						WHEN 0 THEN NULL
 						ELSE (SELECT
@@ -95,7 +96,8 @@ BEGIN
 						END),
 			[Description] = CI.Short_Desc,
 			QD.Quantity,
-			Price = ROUND(QD.Price, 2),
+			--Price = ROUND(QD.Price, 2),
+			Price = ROUND((QD.Price * (1- (QH.Discount/100))),2),
 			Cost = (CASE @vbViewCosts
 							WHEN 0 THEN NULL
 							ELSE ROUND(QD.Standard_Cost, 2)
