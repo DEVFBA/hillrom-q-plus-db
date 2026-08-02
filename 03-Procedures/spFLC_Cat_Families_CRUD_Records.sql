@@ -97,7 +97,8 @@ BEGIN TRY
 		[Status],
 		Modify_Date,
 		Modify_By,
-		Modify_IP
+		Modify_IP,
+		[Order]
 		FROM FLC_Cat_Families 
 		WHERE @pvIdFLCFamily = '' OR Id_FLC_Family = @pvIdFLCFamily
 		ORDER BY Id_Catalog
