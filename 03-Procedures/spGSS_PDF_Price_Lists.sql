@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spGSS_PDF_Price_Lists]    Script Date: 7/30/2026 6:56:13 AM ******/
+/****** Object:  StoredProcedure [dbo].[spGSS_PDF_Price_Lists]    Script Date: 8/29/2026 4:52:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -12,32 +12,18 @@ Desc:		PDF_Price_Lists | Create - Read - Upadate - Delete ||
 Date:		12/28/25
 Example:
 			
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = 'HELUXPRO25', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 2, @pvFamilyId = '', @pvIdCountry = 'MX';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = '', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 1, @pvFamilyId= 'ORLIGHTS', @pvIdCountry = 'MX';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = '', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 1, @pvFamilyId= 'ORLIGHTS', @pvIdCountry = 'MX';
+
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 2, @pvFamilyId= '', @pvIdCountry = 'MX';
 
 
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = '', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 1, @pvFamilyId = 'ORLIGHTS', 
-			@pvIdCountry = 'MX'; 
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
 
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 1, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX';
+			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', @pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @pvIdCountry = 'MX';
 
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = 'HELUXPRO25', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 2, @pvFamilyId = '', @pvIdCountry = 'MX';
-
-
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 2, @pvLineId = '', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 1, @pvFamilyId = 'ORLIGHTS', 
-			@pvIdCountry = 'MX';
-
-
-
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = 'HELUXPRO25', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 2, @pvFamilyId = '', @pvIdCountry = 'MX';
-
-
-			EXEC spGSS_PDF_Price_Lists @pvOptionCRUD = 'R', @piMode = 3, @pvLineId = '', 
-			@pvUser = 'ANGUTIERRE', @pvIP = '0.0.0.0', @pvIdLanguageUser = 'ANG', @piLevel = 1, @pvFamilyId = 'ORLIGHTS', 
-			@pvIdCountry = 'MX';
 */
 CREATE PROCEDURE [dbo].[spGSS_PDF_Price_Lists]
 @pvOptionCRUD		Varchar(1),
@@ -230,6 +216,7 @@ BEGIN TRY
 													HWI.Id_Category = GCC.Id_Category
 													INNER JOIN GSS_Cat_Categories AS GCCPDF ON
 													HWI.Parent_Level_2 = GCCPDF.Id_Category
+													AND GCCPDF.[Status] = 1 --- Modification to get only Active Categories
 
 					WHERE 
 							HWI.[Status] = 1
@@ -366,6 +353,7 @@ BEGIN TRY
 													HWI.Id_Category = GCC.Id_Category
 													INNER JOIN GSS_Cat_Categories AS GCCPDF ON
 													HWI.Parent_Level_2 = GCCPDF.Id_Category
+													AND GCCPDF.[Status] = 1 --- Modification to get only Active Categories
 
 					WHERE 
 							HWI.[Status] = 1

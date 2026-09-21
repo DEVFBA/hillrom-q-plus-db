@@ -41,6 +41,7 @@ BEGIN
 								WHEN 'J'	THEN 'Job Execution'
 								WHEN 'V'	THEN 'Validate Existence'
 								WHEN 'E'	THEN 'Execute'
+								WHEN 'A'	THEN 'Get Records to Add'
 								ELSE 'N/A'
 							 END
 	
