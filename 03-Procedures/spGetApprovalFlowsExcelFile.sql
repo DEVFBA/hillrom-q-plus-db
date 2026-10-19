@@ -164,6 +164,10 @@ BEGIN TRY
 		
 		IF @piMode = 3 -- Get the columns of each role
 		BEGIN
+
+			DECLARE @maxApprover AS BIT;
+
+			SET @maxApprover = dbo.fnIsMaxPSSApprover(@pvIdLanguageUser, @pvSalesType, @pvIdCountry, @piMaxSeq);
 			
 			WITH cteSalesTypeCountryApprovalFlows AS (SELECT
 												*
@@ -185,11 +189,20 @@ BEGIN TRY
 												MaxSeq = @piMaxSeq)
 			SELECT
 				Id_Approval_Flow,
+				Id_Discount_Category,
 				Discount_Category_Desc,
 				Approval_Flow_Sequence,
 				Id_Role,
 				CAST(Bottom_Limit AS VARCHAR(MAX)) + '%' AS [Low],
-				CAST(Upper_Limit AS VARCHAR(MAX)) + '%' AS [High]
+				--CAST(Upper_Limit AS VARCHAR(MAX)) + '%' AS [High]
+				(CASE @maxApprover
+					WHEN 0 THEN CAST(Upper_Limit AS VARCHAR(MAX)) + '%'
+					ELSE (SELECT
+								CAST(Max_Allowed_Discount AS VARCHAR(MAX)) + '%'
+						  FROM Max_Allowed_Discounts AS MAD
+						  WHERE
+						  		MAD.Id_Discount_Category = cteSalesTypeCountryApprovalFlows.Id_Discount_Category)
+				END) AS [High]
 			FROM cteSalesTypeCountryApprovalFlows
 			WHERE
 					Id_Role <> 'SPAPP'
@@ -199,6 +212,7 @@ BEGIN TRY
 				AND Approval_Flow_Sequence = @piMaxSeq
 			GROUP BY
 				Id_Approval_Flow,
+				Id_Discount_Category,
 				Discount_Category_Desc,
 				Approval_Flow_Sequence,
 				Id_Role,
