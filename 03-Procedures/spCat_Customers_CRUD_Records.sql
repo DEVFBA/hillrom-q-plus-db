@@ -241,6 +241,9 @@ BEGIN TRY
 		IF @pvName <> ''
 		SET @vSQL += "AND CU.[Name] LIKE '%" + @pvName + "%' "
 
+		IF @pbStatus <> ''
+		SET @vSQL += "AND CU.[Status] = " + CAST(@pbStatus AS VARCHAR(1)) + " "
+
 		SET @vSQL += "ORDER BY  CU.Id_Country,CU.Id_Customer_Type, CU.[Name] "
 		
 		PRINT(@vSQL)
