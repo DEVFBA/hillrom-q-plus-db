@@ -65,8 +65,10 @@ FROM Approved_Discounts AS AD INNER JOIN Cat_Zones AS CZ ON
 									[AT].Id_Role = SR.Id_Role 
 							  INNER JOIN Cat_Zones_Countries AS CZC ON
 									AD.Id_Zone = CZC.Id_Zone
+								AND CZC.[Status] = 1 -- HA027 - Excel Venezuela Incorrecto
 							  INNER JOIN Cat_Zones_Countries AS ACZC ON
 									CZC.Id_Country = ACZC.Id_Country
+								AND ACZC.[Status] = 1 -- HA027 - Excel Venezuela Incorrecto
 							  INNER JOIN Cat_Zones AS ACZ ON
 									ACZC.Id_Zone = ACZ.Id_Zone
 								AND ACZ.Id_Zone_Type = 'APPR'
