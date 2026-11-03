@@ -63,7 +63,15 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pnIdMailNotification = '" + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') + "', @piFolio = '" + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') + "', @piVersion = '" + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') + "', @piIdNotification = '" + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spNotification_Quotation_Status_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
+																	+ "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') 
+																	+ "', @pnIdMailNotification = '" + ISNULL(CAST(@pnIdMailNotification AS VARCHAR),'NULL') 
+																	+ "', @piFolio = '" + ISNULL(CAST(@piFolio AS VARCHAR),'NULL') 
+																	+ "', @piVersion = '" + ISNULL(CAST(@piVersion AS VARCHAR),'NULL') 
+																	+ "', @piIdNotification = '" + ISNULL(CAST(@piIdNotification AS VARCHAR),'NULL') 
+																	+ "', @pvZone = '" + ISNULL(@pvZone,'NULL') 
+																	+ "', @pvUser = '" + ISNULL(@pvUser,'NULL') 
+																	+ "'";
 	
 	--------------------------------------------------------------------
 	--Create Records
@@ -88,11 +96,34 @@ BEGIN TRY
 		INNER JOIN Security_Users U ON 
 		Q.Id_Sales_Executive = U.[User]
 
+		INNER JOIN Cat_Zones_Countries CZC ON
+		Q.Id_Country_Bill_To = CZC.Id_Country
+
+		/*** Inicia FIX SO051 - No se registra la notificación de Aporbación Completada ***/
+
+		INNER JOIN Cat_Zones CZ ON
+		CZ.Id_Zone = CZC.Id_Zone
+		AND CZ.Id_Zone_Type = 'SALE'
+
+		INNER JOIN Cat_Region_Zones RZ ON
+		RZ.Id_Zone = CZ.Id_Zone
+
+		INNER JOIN Cat_Regions RE ON
+		RE.Id_Region = RZ.Id_Region
+
+		INNER JOIN Security_User_Roles SUR ON
+		SUR.Id_Zone = CZ.Id_Zone
+		AND SUR.[User] = Id_Sales_Executive
+
+		/*
 		INNER JOIN Cat_Region_Zones RZ ON  
-		(@pvZone = '' OR @pvZone = RZ.Id_Zone)
-	
+		('AALLZNOBR' = '' OR RZ.Id_Zone = 'AALLZNOBR')
+
 		INNER JOIN Cat_Regions RE ON
 		RZ.Id_Region =  RE.Id_Region
+		*/
+
+		/*** Termina FIX SO051 - No se registra la notificación de Aporbación Completada ***/
 
 		WHERE Folio = @piFolio AND [Version] = @piVersion
 		
