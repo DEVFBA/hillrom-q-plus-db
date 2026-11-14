@@ -23,6 +23,16 @@ ALTER PROCEDURE [dbo].[spRptQuotation_Get_Detail]
 @piVersion					Int
 AS
 
+	--------------------------------------------------------------------
+	--Work Variables
+	--------------------------------------------------------------------
+	
+	DECLARE @vQuotationCountry AS VARCHAR(10) = (SELECT Id_Country_Bill_To FROM Quotation WHERE Folio = @piFolio AND [Version] = @piVersion); -- HA028 - Add Symbol to BR Commercial PDF
+
+	--------------------------------------------------------------------
+	--------------------------------------------------------------------
+
+
 	SELECT
 			--Quotation_Payment_Terms		= Q.Payment_Terms_Desc, --- AEGH || Modify since Payment Terms will not be used anymore Ticket Q+CO020 (001203 IT Global)
 			Header_Model				= IH.Model,
@@ -42,6 +52,10 @@ AS
 													CE.Id_Line = IC.Id_Line AND
 													IC.Id_Item = QH.Item_Template
 													WHERE Id_Year_Warranty =  QH.Id_Year_Warranty ),''), --Validar
+			Symbol						= ISNULL((CASE @vQuotationCountry 
+															WHEN 'BR' THEN CC.Symbol
+															ELSE ''
+												  END),''), -- HA028 - Add Symbol to BR Commercial PDF
 			Header_Taxes_Total			= QH.General_Taxes_Total,
 			Header_General_Taxes_Warranty= QH.General_Taxes_Warranty,
 			Header_Total				= QH.Total, -- AEGH 23/06/24 Q+SO021 Adición de este dato para el PDF
@@ -85,8 +99,14 @@ AS
 	INNER JOIN Cat_Countries C ON
 	IH.Id_Country = C.Id_Country
 
+	/** START - HA028 - Add Symbol to BR Commercial PDF **/
+	
+	INNER JOIN Cat_Currencies AS CC ON
+	CC.Id_Currency = Q.Id_Currency 
+	AND CC.Id_Language = @pvIdLanguageUser
+	
+	/** END - HA028 - Add Symbol to BR Commercial PDF **/
+
 	WHERE Q.Folio = @piFolio AND  Q.[Version] = @piVersion
 	order by QD.Id_Header, QD.Item_Template ASC, ID.Id_Item_Class DESC, ID.Short_Desc ASC
 
-
-	
