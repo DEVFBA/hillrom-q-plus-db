@@ -89,7 +89,8 @@ BEGIN TRY
 		CIC.Modify_IP
 		FROM Cat_Item_Classes AS CIC INNER JOIN Cat_Business_Line AS CBL ON
 									CIC.Id_Business_Line = CBL.Id_Business_Line
-		WHERE  (@pvIdItemClass = ''  OR Id_Item_Class = @pvIdItemClass) AND Id_Item_Class <> 'KIT'
+		--WHERE  (@pvIdItemClass = ''  OR Id_Item_Class = @pvIdItemClass) AND Id_Item_Class <> 'KIT'
+		WHERE  (@pvIdItemClass = ''  OR Id_Item_Class = @pvIdItemClass) AND Id_Item_Class NOT IN ('PDFI', 'KIT') -- SO053 || Quitar PDF Item de la Selección de Clase Quote
 			AND (@pvIdBusinessLine = '' OR CIC.Id_Business_Line = @pvIdBusinessLine)
 		ORDER BY  Id_Catalog
 
