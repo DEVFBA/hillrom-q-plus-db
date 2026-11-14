@@ -47,6 +47,15 @@ AS
 
 	INNER JOIN Security_User_Roles UR ON 
 	Q.Id_Sales_Executive = UR.[User]
+	AND UR.Id_Zone IN (SELECT
+							Id_Zone
+					   FROM Cat_Region_Zones
+					   WHERE
+								Id_Region IN (SELECT
+													Id_Region
+											  FROM Cat_Regions
+											  WHERE
+													Id_Business_Line = 'PSSLIKO'))
 
 	INNER JOIN Security_Users U ON 
 	UR.[User] = U.[User]
@@ -66,4 +75,3 @@ AS
 	
 	 
 
-	 

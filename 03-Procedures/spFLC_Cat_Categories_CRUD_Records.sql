@@ -33,7 +33,8 @@ CREATE PROCEDURE [dbo].spFLC_Cat_Categories_CRUD_Records
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
-@pvIP				Varchar(20) = ''
+@pvIP				Varchar(20) = '',
+@piOrder 			INT = 0	
 AS
 SET NOCOUNT ON
 BEGIN TRY
@@ -63,7 +64,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- Donï¿½t Exists
 		BEGIN
 			INSERT INTO FLC_Cat_Categories(
 				Id_FLC_Category,
@@ -98,7 +99,8 @@ BEGIN TRY
 		[Status],
 		Modify_Date,
 		Modify_By,
-		Modify_IP
+		Modify_IP,
+		[Order]
 		FROM FLC_Cat_Categories 
 		WHERE @pvIdFLCCategory = '' OR Id_FLC_Category = @pvIdFLCCategory
 		ORDER BY Id_Catalog

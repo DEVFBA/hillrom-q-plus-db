@@ -32,7 +32,8 @@ CREATE PROCEDURE [dbo].spFLC_Cat_Groups_CRUD_Records
 @pvLongDesc			Varchar(255)= '',
 @pbStatus			Bit			= '',
 @pvUser				Varchar(50) = '',
-@pvIP				Varchar(20) = ''
+@pvIP				Varchar(20) = '',
+@piOrder			Int			= 0
 AS
 SET NOCOUNT ON
 BEGIN TRY
@@ -62,7 +63,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO FLC_Cat_Groups(
 				Id_FLC_Group,
@@ -71,7 +72,8 @@ BEGIN TRY
 				[Status],
 				Modify_Date,
 				Modify_By,
-				Modify_IP)
+				Modify_IP,
+				[Order])
 			VALUES (
 				@pvIdFLCGroup,
 				@pvShortDesc,
@@ -79,7 +81,8 @@ BEGIN TRY
 				@pbStatus,
 				GETDATE(),
 				@pvUser,
-				@pvIP)
+				@pvIP, 
+				@piOrder)
 		END
 	END
 	--------------------------------------------------------------------
@@ -94,7 +97,8 @@ BEGIN TRY
 		[Status],
 		Modify_Date,
 		Modify_By,
-		Modify_IP
+		Modify_IP,
+		[Order]
 		FROM FLC_Cat_Groups 
 		WHERE @pvIdFLCGroup = '' OR Id_FLC_Group = @pvIdFLCGroup
 		ORDER BY Id_Catalog
@@ -111,7 +115,8 @@ BEGIN TRY
 			[Status]	= @pbStatus,
 			Modify_Date	= GETDATE(),
 			Modify_By	= @pvUser,
-			Modify_IP	= @pvIP
+			Modify_IP	= @pvIP,
+			[Order]		= @piOrder
 		WHERE Id_FLC_Group = @pvIdFLCGroup
 
 		--Disable in Master Table

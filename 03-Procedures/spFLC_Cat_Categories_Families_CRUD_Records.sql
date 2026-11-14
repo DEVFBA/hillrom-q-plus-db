@@ -62,7 +62,7 @@ BEGIN TRY
 			SET @vMessageType	= dbo.fnGetTransacMessages('WAR',@pvIdLanguageUser)	--Warning
 			SET @vMessage		= dbo.fnGetTransacMessages('Duplicate Record',@pvIdLanguageUser)
 		END
-		ELSE -- Don´t Exists
+		ELSE -- DonÂ´t Exists
 		BEGIN
 			INSERT INTO FLC_Cat_Categories_Families(
 				Id_FLC_Category,
@@ -88,10 +88,13 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'R'
 	BEGIN
 		SELECT 
+			C.[Order] AS Category_Order,
 			CFG.Id_FLC_Category,
 			FLC_Category = C.Short_Desc,
+			F.[Order] AS Family_Order,
 			CFG.Id_FLC_Family,
 			FLC_Family = F.Short_Desc,
+			G.[Order] AS Group_Order,
 			CFG.Id_FLC_Group,
 			FLC_Group = G.Short_Desc, 
 			CFG.[Status],
@@ -115,7 +118,11 @@ BEGIN TRY
 		WHERE (@pvIdFLCCategory = '' OR CFG.Id_FLC_Category = @pvIdFLCCategory)
 		AND (@pvIdFLCFamily = '' OR CFG.Id_FLC_Family = @pvIdFLCFamily )
 		AND (@pvIdFLCGroup = '' OR CFG.Id_FLC_Group = @pvIdFLCGroup )
-		ORDER BY Id_FLC_Category,Id_FLC_Family,Id_FLC_Group 
+		ORDER BY 
+				--Id_FLC_Category,Id_FLC_Family,Id_FLC_Group 
+				Category_Order,
+				Family_Order,
+				Group_Order;
 	END
 
 	--------------------------------------------------------------------

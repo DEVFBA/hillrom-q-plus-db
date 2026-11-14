@@ -1,6 +1,6 @@
 USE [DBQS]
 GO
-/****** Object:  StoredProcedure [dbo].[spItems_Templates_CRUD_Records]    Script Date: 23/04/2024 09:01:28 p. m. ******/
+/****** Object:  StoredProcedure [dbo].[spItems_Templates_CRUD_Records]    Script Date: 9/16/2026 9:15:01 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -33,7 +33,6 @@ Example:
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvIdLanguageUser = 'ANG', @pbDynamicFieldIsDynamic = 1
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate ='ACCELA',@pvIdCurrency ='USD', @pvIdCountryComercialRealease='BR'
-<<<<<<< HEAD
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 			
@@ -47,20 +46,11 @@ Example:
 
 			EXEC spItems_Templates_CRUD_Records @pvoptioncrud = 'T', @pvidlanguageuser = 'ANG', @pvitemtemplate = 'BR_ACCELLA_STD1', @pvidcurrency = 'USD'
 
-=======
-
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
-			
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'RC', @pvItemTemplate = 'CENTURISX3', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'MX', 
-			@piFolioOrig = 688, @piVersionOrig = 1, @piFolioClon = 689, @piVersionClon = 1
-
-			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'T', @pvItemTemplate = 'ACCELLA', @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
->>>>>>> d593e1c92917e85ce2c99ba4c328b374fcc2ee65
 
 			EXEC spItems_Templates_CRUD_Records @pvOptionCRUD = 'R', @pvItemTemplate = '21113001', @pvIdFamily = 'STR',  @pvIdCurrency = 'USD', @pvIdCountryComercialRealease = 'AG'
 
 */
-ALTER PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
+CREATE PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
 @pvOptionCRUD					Varchar(2),
 @pvIdLanguageUser				Varchar(10) = 'ANG',
 @pvItemTemplate					Varchar(50) = '',
@@ -75,7 +65,8 @@ ALTER PROCEDURE [dbo].[spItems_Templates_CRUD_Records]
 @piFolioClon					Int			= 0,
 @piVersionClon					Int			= 0,
 @pbDynamicFieldIsDynamic		Bit			= 0,
-@pvIdItem						Varchar(50) = ''								
+@pvIdItem						Varchar(50) = '',
+@pvIdIncoterm					Varchar(10) = ''								
 
 AS
 
@@ -97,7 +88,17 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spItems_Templates_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvItemTemplate = '" + ISNULL(@pvItemTemplate,'NULL') + "', @pudtItemsTemplates = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') + " rows affected',  @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL') + "',  @pvIdFamily = '" + ISNULL(@pvIdFamily,'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "', @pbDynamicFieldIsDynamic = '" + ISNULL(CAST(@pbDynamicFieldIsDynamic AS VARCHAR),'NULL') + ""
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spItems_Templates_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
+													+ "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') 
+													+ "', @pvItemTemplate = '" + ISNULL(@pvItemTemplate,'NULL') 
+													+ "', @pudtItemsTemplates = '" + ISNULL(CAST(@iNumRegistros AS VARCHAR),'NULL') 
+													+ " rows affected',  @pvIdCurrency = '" + ISNULL(@pvIdCurrency,'NULL') 
+													+ "',  @pvIdFamily = '" + ISNULL(@pvIdFamily,'NULL') 
+													+ "', @pvIdIncoterm = '" + ISNULL(@pvIdIncoterm,'NULL')
+													+ "', @pvUser = '" + ISNULL(@pvUser,'NULL') 
+													+ "', @pvIP = '" + ISNULL(@pvIP,'NULL') 
+													+ "', @pbDynamicFieldIsDynamic = '" + ISNULL(CAST(@pbDynamicFieldIsDynamic AS VARCHAR),'NULL') 
+													+ ""
 	
 	--------------------------------------------------------------------
 	--Create Records
@@ -400,6 +401,7 @@ BEGIN TRY
 	--------------------------------------------------------------------
 	IF @pvOptionCRUD = 'T'
 	BEGIN
+
 		SELECT DISTINCT
 		T.Item_Template,
 		Item_Desc =I.Short_Desc,
@@ -417,8 +419,10 @@ BEGIN TRY
 		I.Image_Path,
 		[Required],
 		[Default],
-		Price =	Price * @fExchange_Rate,
-		Standard_Cost = Standard_Cost *@fExchange_Rate,
+		--Price =	Price * @fExchange_Rate,
+		Price = dbo.fnGetPSSItemPrice(T.Id_Item, @pvIdCountryComercialRealease, @pvIdIncoterm, T.Price, @pvIdCurrency), -- EFBRA003 - Funcionalidad PSS Quotation Brasil 
+		--Standard_Cost = Standard_Cost *@fExchange_Rate,
+		Standard_Cost = dbo.fnGetPSSItemCost(@pvIdCurrency, @pvIdIncoterm, T.Id_Item, T.Item_Template), -- EFBRA003 - Funcionalidad PSS Quotation Brasil 
 		T.Quantity,
 		FCL.Modify_By,
 		FCL.Modify_Date,

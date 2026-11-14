@@ -740,6 +740,10 @@ BEGIN TRY
 		PRINT 'READ for Quotation Detail' 
 
 		SELECT
+			GQD.Id_Detail,
+			GQD.Position_Sort,
+			GQD.Id_Parent,
+			GQD.Notes,
 			GQD.Folio,
 			GQD.[Version],
 			GQD.Position_Display,
@@ -747,6 +751,10 @@ BEGIN TRY
 			GQD.Quantity,
 			GQD.Id_Item,
 			GQD.[Description],
+			GQD.Item_Short_Desc,
+			GQD.Item_Standard_Cost,
+			GQD.Generic_Item,
+			GQD.On_Request,
 			GQD.Unit_Price,
 			GQD.Discount,
 			GQD.Net_Price,
