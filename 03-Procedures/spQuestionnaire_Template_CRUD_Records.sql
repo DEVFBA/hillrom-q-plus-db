@@ -52,7 +52,7 @@ Example:
 
 CREATE PROCEDURE [dbo].spQuestionnaire_Template_CRUD_Records
 @pvOptionCRUD			Varchar(1),
-@pvIdLanguageUser		Varchar(10) = '',
+@pvIdLanguageUser		Varchar(10)		= 'ANG',
 @piIdQuestion			Int				= 0,
 @pvQuestion				varchar(100)	= '',
 @pvObjectType			varchar(50)		= '',
@@ -118,21 +118,34 @@ BEGIN TRY
 	IF @pvOptionCRUD = 'R'
 	BEGIN
 		SELECT 
-		Id_Question,
-		Question,
-		Object_Type,
-		Data_Type,
-		Data_JSON,
-		Data_Len,
-		Regular_Expression,
-		[Order],
-		[Required],
-		Modify_By,
-		Modify_Date,
-		Modify_IP
-		FROM Questionnaire_Template 
-		WHERE 0 = @piIdQuestion OR Id_Question = @piIdQuestion
-		ORDER BY [Order]
+			QT.Id_Question,
+			(CASE
+					WHEN QT.Question IS NULL THEN QT.Question
+					ELSE QTT.Question
+			 END) AS Question,
+			QTT.Question AS Translated_Question,
+			QT.Object_Type,
+			QT.Data_Type,
+			(CASE 
+					WHEN QT.Data_JSON IS NULL THEN QT.Data_JSON
+					ELSE QTT.Data_JSON
+			 END) AS Data_JSON,
+			QTT.Data_JSON AS Translated_Data_JSON,
+			QT.Data_Len,
+			QT.Regular_Expression,
+			QT.[Order],
+			QT.[Required],
+			QT.Modify_By,
+			QT.Modify_Date,
+			QT.Modify_IP
+		FROM Questionnaire_Template AS QT LEFT OUTER JOIN Questionnaire_Template_Translations AS QTT ON
+														QT.Id_Question = QTT.Id_Question
+													AND QTT.Id_Language = @pvIdLanguageUser
+													AND QTT.Id_Language_Translation = 'ANG'
+		WHERE 
+				(0 = @piIdQuestion OR QT.Id_Question = @piIdQuestion)
+		ORDER BY 
+				QT.[Order]
 		RETURN
 	END
 
