@@ -55,13 +55,13 @@ BEGIN TRY
 	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spGSS_PDF_Price_Lists @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
 														+ "', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') 
 														+ "', @piMode = " + ISNULL(CAST(@piMode AS VARCHAR(1)),'NULL') 
-														+ "', @pvIP = '" + ISNULL(@pvIP,'NULL') 
+														+ ", @pvIP = '" + ISNULL(@pvIP,'NULL') 
 														+ "', @pvIdCountry = '" + ISNULL(@pvIdCountry,'NULL')
 														+ "', @pvLineId = '" + ISNULL(@pvLineId,'NULL')
 														+ "', @pvFamilyId = '" + ISNULL(@pvFamilyId,'NULL')
 														+ "', @pvUser = '" + ISNULL(@pvUser,'NULL') 
 														+ "', @piLevel = " + ISNULL(CAST(@piLevel AS VARCHAR(1)),'NULL') 
-														+ "'"
+														+ ""
 	PRINT 'Exec_Command: ' + @vExecCommand;
     --------------------------------------------------------------------
 	--Create Records
