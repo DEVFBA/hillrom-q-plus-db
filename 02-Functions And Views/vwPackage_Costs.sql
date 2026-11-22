@@ -39,6 +39,9 @@ SELECT
 	,IT.Standard_Cost [Package_Cost]
 	,ITPR.Standard_Cost [Product_Cost]
 	,ITCA.Standard_Cost [Acc_Comp_Cost]
+	,IT.Price [Package_Price]
+	,ITPR.Price [Product_Price]
+	,ITCA.Price [Acc_Comp_Price]
 FROM Items_Templates AS IT INNER JOIN Cat_Item AS CI ON
 									IT.Item_Template = CI.Id_Item
 								AND CI.Id_Item_Class IN ('PACK', 'PACKD')
@@ -62,6 +65,9 @@ SELECT
 	,IT.Standard_Cost [Package_Cost]
 	,ITPR.Standard_Cost [Product_Cost]
 	,ITCA.Standard_Cost [Acc_Comp_Cost]
+	,IT.Price [Package_Price]
+	,ITPR.Price [Product_Price]
+	,ITCA.Price [Acc_Comp_Price]
 FROM Items_Templates AS IT INNER JOIN Cat_Item AS CI ON
 									IT.Item_Template = CI.Id_Item
 								AND CI.Id_Item_Class IN ('PACK', 'PACKD')

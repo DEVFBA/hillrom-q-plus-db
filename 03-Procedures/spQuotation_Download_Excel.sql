@@ -16,6 +16,11 @@ Example:
 			EXEC spQuotation_Download_Excel @piFolio = 3375, @piVersion = 1, @pvIdRole = 'SALES';
 			EXEC spQuotation_Download_Excel @piFolio = 3375, @piVersion = 1, @pvIdRole = 'GSSSALES';
 */
+
+IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[spQuotation_Download_Excel]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[spQuotation_Download_Excel]
+GO
+
 CREATE PROCEDURE [dbo].[spQuotation_Download_Excel]
 @piFolio			Int = 0,
 @piVersion          Int = 0,
@@ -97,7 +102,13 @@ BEGIN
 			[Description] = CI.Short_Desc,
 			QD.Quantity,
 			--Price = ROUND(QD.Price, 2),
-			Price = ROUND((QD.Price * (1- (QH.Discount/100))),2),
+			--Price = ROUND((QD.Price * (1- (QH.Discount/100))),2),
+			/** Start SO054 - Detailed Prices for Packages (PACKD) **/
+			(CASE CIQH.Id_Item_Class
+					WHEN 'PACKD' THEN ROUND(IT.Price * (1 - (QH.Discount)),2)
+					ELSE ROUND((QD.Price * (1- (QH.Discount/100))),2)
+			 END) AS Price,
+			/** Finish SO054 - Detailed Prices for Packages (PACKD) **/
 			Cost = (CASE @vbViewCosts
 							WHEN 0 THEN NULL
 							ELSE ROUND(QD.Standard_Cost, 2)
@@ -105,7 +116,11 @@ BEGIN
 			Quantity_Total = (CASE
 									WHEN CI.Id_Item_Class = 'ACCE' THEN (QD.Quantity * QH.Quantity)
 									ELSE NULL
-							  END)
+							  END),
+			/** Start only for control debug SO054 - Detailed Prices for Packages (PACKD) **/
+			CIQH.Id_Item_Class,
+			IT.Price
+			/**Finish only for control debug SO054 - Detailed Prices for Packages (PACKD) **/
 		FROM Quotation_Detail AS QD INNER JOIN Cat_Item AS CI ON
 										QD.Id_Item = CI.Id_Item
 									INNER JOIN Cat_Item_SubClasses AS CISC ON
@@ -117,6 +132,13 @@ BEGIN
 										QD.Folio = QH.Folio AND
 										QD.[Version] = QH.[Version] AND
 										QD.Id_Header = QH.Id_Header
+									/** Start SO054 - Detailed Prices for Packages (PACKD) **/
+									INNER JOIN Cat_Item AS CIQH ON
+										QH.Item_Template = CIQH.Id_Item
+									LEFT OUTER JOIN Items_Templates AS IT ON
+										CIQH.Id_Item_Related = IT.Item_Template
+									AND QD.Id_Item = IT.Id_Item
+									/** Finish SO054 - Detailed Prices for Packages (PACKD) **/
 		WHERE
 					QD.Folio = @piFolio
 				AND QD.[Version] = @piVersion
