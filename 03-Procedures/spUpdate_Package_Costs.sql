@@ -18,6 +18,10 @@ Example:
 			@pvPackageId = 'PACK-0001';	
 */
 
+IF EXISTS (SELECT 1 FROM sys.procedures WHERE name = 'spUpdate_Package_Costs' AND schema_id = SCHEMA_ID('dbo'))
+	DROP PROCEDURE [dbo].[spUpdate_Package_Costs]
+GO
+
 CREATE PROCEDURE [dbo].[spUpdate_Package_Costs]
 @pvOptionCRUD			Varchar(1),
 @pvIdLanguageUser		Varchar(10)		= '',
@@ -38,6 +42,9 @@ BEGIN TRY
 	DECLARE @pfPackageCost				Float
 	DECLARE @pfProductCost				Float
 	DECLARE @pfAccCompCost				Float
+	DECLARE @pfPackagePrice				Float
+	DECLARE @pfProductPrice				Float
+	DECLARE @pfAccCompPrice				Float
 
 	--------------------------------------------------------------------
 	--Variables for log control
@@ -48,7 +55,8 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-    DECLARE @vExecCommand	Varchar(Max)	= "EXEC spUpdate_Package_Costs @pvOptionCRUD =  'E', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL')
+    DECLARE @vExecCommand	Varchar(Max)	= "EXEC spUpdate_Package_Costs @pvOptionCRUD =  'E', @pvIdLanguageUser = '" + ISNULL(@pvIdLanguageUser,'NULL') 
+													+ "', @pvUser = '" + ISNULL(@pvUser,'NULL')
 	--------------------------------------------------------------------
 	--Update Package Costs
 	--------------------------------------------------------------------
@@ -70,12 +78,20 @@ BEGIN TRY
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
+		-- Costs
 		DECLARE @pfPackageTotalCost			Float
 		DECLARE @pfComponentsTotalCost		Float
 		DECLARE @pfAccessoriesTotalCost		Float
 		DECLARE @pfProductRelatedTotalCost	Float
 
+		-- Prices
+		DECLARE @pfPackageTotalPrice		Float
+		DECLARE @pfComponentsTotalPrice		Float
+		DECLARE @pfAccessoriesTotalPrice	Float
+		DECLARE @pfProductRelatedTotalPrice	Float
+
 		SET @pfAccessoriesTotalCost = 0
+		SET @pfAccessoriesTotalPrice = 0
 
 		PRINT 'Package ' + @vPackageId
 
@@ -86,7 +102,15 @@ BEGIN TRY
 													Package_ID = @vPackageId
 												AND Item_Class = 'COMP'),0)
 
+		SET @pfComponentsTotalPrice = ISNULL((SELECT
+													SUM(Acc_Comp_Price)
+											 FROM vwPackage_Costs 
+											 WHERE 
+													Package_ID = @vPackageId
+												AND Item_Class = 'COMP'),0)
+
 		PRINT 'Components Cost ' + CAST(@pfComponentsTotalCost AS VARCHAR(50))
+		PRINT 'Components Price ' + CAST(@pfComponentsTotalPrice AS VARCHAR(50))
 
 		SET @pfProductCost = ISNULL((SELECT
 											SUM(Product_Cost)
@@ -95,12 +119,21 @@ BEGIN TRY
 												Package_ID = @vPackageId
 											AND Item_Class IN ('PACK', 'PACKD')),0)
 
+		SET @pfProductPrice = ISNULL((SELECT
+											SUM(Product_Price)
+									 FROM vwPackage_Costs 
+									 WHERE 
+												Package_ID = @vPackageId
+											AND Item_Class IN ('PACK', 'PACKD')),0)
+
 		PRINT 'Product Cost ' + CAST(@pfProductCost AS VARCHAR(50))
+		PRINT 'Product Price ' + CAST(@pfProductPrice AS VARCHAR(50))
 
 		DECLARE curPackageAccessories CURSOR FOR
 		SELECT
 			Qty,
-			Acc_Comp_Cost
+			Acc_Comp_Cost,
+			Acc_Comp_Price
 		FROM vwPackage_Costs
 		WHERE
 				Package_ID = @vPackageId
@@ -111,21 +144,26 @@ BEGIN TRY
 		FETCH NEXT FROM curPackageAccessories
 		INTO
 			@piQty,
-			@pfAccCompCost
+			@pfAccCompCost,
+			@pfAccCompPrice
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 		
 			PRINT 'Accessories Cost Begin ' + CAST(@pfAccessoriesTotalCost AS VARCHAR(50))
+			PRINT 'Accessories Price Begin ' + CAST(@pfAccessoriesTotalPrice AS VARCHAR(50))
 			
 			SET @pfAccessoriesTotalCost = (@pfAccessoriesTotalCost + (@piQty * @pfAccCompCost))
+			SET @pfAccessoriesTotalPrice = (@pfAccessoriesTotalPrice + (@piQty * @pfAccCompPrice))
 
 			PRINT 'Accessories Cost After ' + CAST(@pfAccessoriesTotalCost AS VARCHAR(50))
+			PRINT 'Accessories Price After ' + CAST(@pfAccessoriesTotalPrice AS VARCHAR(50))
 
 			FETCH NEXT FROM curPackageAccessories
 			INTO
 				@piQty,
-				@pfAccCompCost
+				@pfAccCompCost,
+				@pfAccCompPrice
 
 		END
 
@@ -133,17 +171,29 @@ BEGIN TRY
 		DEALLOCATE curPackageAccessories;
 
 		PRINT 'Accessories Cost Total ' + CAST(@pfAccessoriesTotalCost AS VARCHAR(50))
+		PRINT 'Accessories Price Total ' + CAST(@pfAccessoriesTotalPrice AS VARCHAR(50))
 
 		SET @pfPackageTotalCost = (@pfAccessoriesTotalCost + @pfComponentsTotalCost + @pfProductCost)
+		SET @pfPackageTotalPrice = (@pfAccessoriesTotalPrice + @pfComponentsTotalPrice + @pfProductPrice)
 
 		PRINT 'Total Cost ' + CAST(@pfPackageTotalCost AS VARCHAR(50))
+		PRINT 'Total Price ' + CAST(@pfPackageTotalPrice AS VARCHAR(50))
 
-		UPDATE Items_Templates SET Standard_Cost = @pfPackageTotalCost 
+		UPDATE Items_Templates SET Standard_Cost = @pfPackageTotalCost, Modify_By = @pvUser, Modify_IP = 'Upd Mass Cost/Price', Modify_Date = GETDATE()
 		WHERE
-				Item_Template = @vPackageId
-			AND Id_Item = @vPackageId
+				Id_Item = @vPackageId
+
+		UPDATE Items_Templates SET Price = @pfPackageTotalPrice, Modify_By = @pvUser, Modify_IP = 'Upd Mass Cost/Price', Modify_Date = GETDATE()
+		WHERE
+				Id_Item = @vPackageId
+			AND Item_Template IN (SELECT
+										Id_Item
+								 FROM Cat_Item
+								 WHERE
+								 		Id_Item_Class = 'PACKD')
 
 		SET @pfAccessoriesTotalCost = 0
+		SET @pfAccessoriesTotalPrice = 0
 		
 		FETCH NEXT FROM curPackageCosts
 		INTO
