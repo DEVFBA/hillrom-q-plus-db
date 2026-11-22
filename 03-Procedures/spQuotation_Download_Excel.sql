@@ -116,10 +116,10 @@ BEGIN
 			Quantity_Total = (CASE
 									WHEN CI.Id_Item_Class = 'ACCE' THEN (QD.Quantity * QH.Quantity)
 									ELSE NULL
-							  END),
+							  END)
 			/** Start only for control debug SO054 - Detailed Prices for Packages (PACKD) **/
-			CIQH.Id_Item_Class,
-			IT.Price
+			--CIQH.Id_Item_Class,
+			--IT.Price
 			/**Finish only for control debug SO054 - Detailed Prices for Packages (PACKD) **/
 		FROM Quotation_Detail AS QD INNER JOIN Cat_Item AS CI ON
 										QD.Id_Item = CI.Id_Item
