@@ -51,7 +51,17 @@ BEGIN TRY
 	DECLARE @bSuccessful	Bit				= 1	
 	DECLARE @vMessageType	Varchar(30)		= dbo.fnGetTransacMessages('OK',@pvIdLanguageUser)	--success
 	DECLARE @vMessage		Varchar(Max)	= dbo.fnGetTransacMessages(@vDescOperationCRUD,@pvIdLanguageUser)
-	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spFLC_Cat_Categories_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') + "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') + "', @pvIdFLCCategory = '" + ISNULL(@pvIdFLCCategory,'NULL') + "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') + "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') + "', @pvMasterDiscount = '" + ISNULL(@pvMasterDiscount,'NULL') + "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') + "', @pvUser = '" + ISNULL(@pvUser,'NULL') + "', @pvIP = '" + ISNULL(@pvIP,'NULL') + "'"
+	DECLARE @vExecCommand	Varchar(Max)	= "EXEC spFLC_Cat_Categories_CRUD_Records @pvOptionCRUD =  '" + ISNULL(@pvOptionCRUD,'NULL') 
+																+ "', @pvIdLanguageUser =  '" + ISNULL(@pvIdLanguageUser,'NULL') 
+																+ "', @pvIdFLCCategory = '" + ISNULL(@pvIdFLCCategory,'NULL') 
+																+ "', @pvShortDesc = '" + ISNULL(@pvShortDesc,'NULL') 
+																+ "', @pvLongDesc = '" + ISNULL(@pvLongDesc,'NULL') 
+																+ "', @pvMasterDiscount = '" + ISNULL(@pvMasterDiscount,'NULL') 
+																+ "', @pbStatus = '" + ISNULL(CAST(@pbStatus AS VARCHAR),'NULL') 
+																+ "', @pvUser = '" + ISNULL(@pvUser,'NULL') 
+																+ "', @pvIP = '" + ISNULL(@pvIP,'NULL') 
+																+ "', @piOrder = '" + ISNULL(CAST(@piOrder AS VARCHAR),'NULL') 
+																+ "'"
 	--------------------------------------------------------------------
 	--Create Records
 	--------------------------------------------------------------------
@@ -74,7 +84,8 @@ BEGIN TRY
 				[Status],
 				Modify_Date,
 				Modify_By,
-				Modify_IP)
+				Modify_IP,
+				[Order])
 			VALUES (
 				@pvIdFLCCategory,
 				@pvShortDesc,
@@ -83,7 +94,8 @@ BEGIN TRY
 				@pbStatus,
 				GETDATE(),
 				@pvUser,
-				@pvIP)
+				@pvIP,
+				@piOrder)
 		END
 	END
 	--------------------------------------------------------------------
@@ -118,7 +130,8 @@ BEGIN TRY
 			[Status]		= @pbStatus,
 			Modify_Date		= GETDATE(),
 			Modify_By		= @pvUser,
-			Modify_IP		= @pvIP
+			Modify_IP		= @pvIP,
+			[Order]			= @piOrder
 		WHERE Id_FLC_Category = @pvIdFLCCategory
 
 		--Disable in Master Table
